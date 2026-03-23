@@ -27,10 +27,13 @@ jobs:
           cache: npm
 
       - uses: actions/configure-pages@v5
+        id: pages
 
       - run: npm ci --legacy-peer-deps
       - run: npm run sources
       - run: npm run build
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
