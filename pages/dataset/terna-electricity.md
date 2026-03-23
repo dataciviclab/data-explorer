@@ -3,7 +3,9 @@ title: Mix elettrico per regione
 description: Lettura pubblica dei dati Terna sul mix elettrico regionale e sul peso delle fonti nel sistema nazionale.
 ---
 
-Dati Terna sulla produzione elettrica per fonte e regione. In questa pagina la domanda guida è: quali fonti pesano di più nel mix nazionale e quali regioni concentrano la produzione.
+Questo dataset raccoglie i dati Terna sulla produzione elettrica per fonte e regione.
+
+Domanda guida: quali fonti pesano di più nel mix nazionale e quali regioni concentrano la produzione.
 
 ```sql anni
 SELECT DISTINCT anno FROM terna.energia ORDER BY anno DESC
@@ -51,11 +53,13 @@ ORDER BY produzione_gwh DESC
 
 ## Fonti più pesanti a livello nazionale
 
-Questa vista aiuta a capire quali fonti dominano il mix complessivo prima di scendere nel dettaglio delle singole regioni.
+Questa vista è il blocco principale della pagina: aiuta a capire quali fonti dominano il mix complessivo prima di scendere nel dettaglio delle singole regioni.
 
 <BarChart data={fonti_nazionali} x=fonte y=produzione_gwh yAxisTitle="Produzione GWh" />
 
 ## Mix regionale per fonte
+
+La tabella serve come secondo livello di lettura: dopo il quadro nazionale, permette di vedere dove ogni fonte pesa di più.
 
 <DataTable data={fonti_regionali} rows=30 search=true downloadable=true />
 

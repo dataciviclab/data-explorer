@@ -3,7 +3,9 @@ title: Rifiuti urbani nei comuni
 description: Lettura pubblica dei dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per territorio.
 ---
 
-Dati ISPRA sui rifiuti urbani dei comuni italiani. In questa pagina la domanda guida è semplice: dove la raccolta differenziata pesa di più e quali territori concentrano i volumi maggiori.
+Questo dataset raccoglie i dati ISPRA sui rifiuti urbani dei comuni italiani.
+
+Domanda guida: dove la raccolta differenziata pesa di più e quali territori concentrano i volumi maggiori.
 
 ```sql anni
 SELECT DISTINCT anno FROM ispra_ru.rifiuti ORDER BY anno DESC
