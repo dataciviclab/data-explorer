@@ -29,11 +29,14 @@ jobs:
       - uses: actions/configure-pages@v5
         id: pages
 
+      - run: |
+          printf '\ndeployment:\n  basePath: "%s"\n' "$BASE_PATH" >> evidence.config.yaml
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
       - run: npm ci --legacy-peer-deps
       - run: npm run sources
       - run: npm run build
-        env:
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
