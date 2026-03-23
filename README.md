@@ -158,3 +158,4 @@ Il principio è:
 - prima di GitHub Pages dovrà essere reso pubblico
 - i dati letti dalle pagine arrivano dal bucket pubblico `dataciviclab-clean`
 - la checklist di readiness sta in `docs/explorer-ready-checklist.md`
+- lo standard minimo delle pagine dataset sta in `docs/dataset-page-standard.md`
