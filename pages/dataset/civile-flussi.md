@@ -2,7 +2,7 @@
 title: Flussi della giustizia civile
 ---
 
-Dati del Ministero della Giustizia sui flussi civili. Nel v0 il focus è sugli anni disponibili nel clean pubblico e sui principali aggregati per distretto e materia.
+Dati del Ministero della Giustizia sui flussi civili. In questa pagina la domanda guida è: dove il carico resta più alto e dove i procedimenti definiti tengono il passo dei nuovi arrivi.
 
 ```sql anni
 SELECT DISTINCT anno FROM civile_flussi.flussi ORDER BY anno DESC
@@ -27,7 +27,8 @@ SELECT
   distretto,
   SUM(sopravvenuti) AS sopravvenuti,
   SUM(definiti_totale) AS definiti_totale,
-  SUM(pendenti_finali) AS pendenti_finali
+  SUM(pendenti_finali) AS pendenti_finali,
+  ROUND(SUM(definiti_totale) / NULLIF(SUM(sopravvenuti), 0), 2) AS rapporto_definiti_sopravvenuti
 FROM civile_flussi.flussi
 WHERE anno = '${inputs.anno_sel.value}'
 GROUP BY distretto
@@ -46,11 +47,30 @@ ORDER BY sopravvenuti DESC
 LIMIT 15
 ```
 
+```sql distretti_tenuta
+SELECT
+  distretto,
+  SUM(sopravvenuti) AS sopravvenuti,
+  SUM(definiti_totale) AS definiti_totale,
+  ROUND(SUM(definiti_totale) / NULLIF(SUM(sopravvenuti), 0), 2) AS rapporto_definiti_sopravvenuti
+FROM civile_flussi.flussi
+WHERE anno = '${inputs.anno_sel.value}'
+GROUP BY distretto
+ORDER BY rapporto_definiti_sopravvenuti ASC, sopravvenuti DESC
+LIMIT 15
+```
+
 ## Pendenti finali per distretto
 
 <BarChart data={distretti} x=distretto y=pendenti_finali yAxisTitle="Pendenti finali" />
 
-## Macromaterie
+## Distretti dove i definiti tengono meno
+
+Un rapporto vicino a `1` indica che i procedimenti definiti sono simili ai sopravvenuti dell'anno. Valori più bassi suggeriscono maggiore difficoltà a riassorbire il flusso in entrata.
+
+<DataTable data={distretti_tenuta} rows=15 search=true downloadable=true />
+
+## Macromaterie più pesanti
 
 <DataTable data={materie} rows=15 search=true downloadable=true />
 

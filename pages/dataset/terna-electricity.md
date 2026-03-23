@@ -2,7 +2,7 @@
 title: Mix elettrico per regione
 ---
 
-Dati Terna sulla produzione elettrica per fonte e regione. Il v0 permette di confrontare il mix regionale 2023-2024.
+Dati Terna sulla produzione elettrica per fonte e regione. In questa pagina la domanda guida è: quali fonti pesano di più nel mix nazionale e quali regioni concentrano la produzione.
 
 ```sql anni
 SELECT DISTINCT anno FROM terna.energia ORDER BY anno DESC
@@ -13,7 +13,17 @@ SELECT DISTINCT anno FROM terna.energia ORDER BY anno DESC
   <DropdownOption value="2023" valueLabel="2023" />
 </Dropdown>
 
-```sql fonti
+```sql fonti_nazionali
+SELECT
+  fonte,
+  SUM(produzione_gwh) AS produzione_gwh
+FROM terna.energia
+WHERE anno = '${inputs.anno_sel.value}'
+GROUP BY fonte
+ORDER BY produzione_gwh DESC
+```
+
+```sql fonti_regionali
 SELECT
   regione,
   fonte,
@@ -38,8 +48,14 @@ ORDER BY produzione_gwh DESC
 
 <BarChart data={regioni_totale} x=regione y=produzione_gwh yAxisTitle="Produzione GWh" />
 
-## Mix per fonte
+## Fonti più pesanti a livello nazionale
 
-<DataTable data={fonti} rows=30 search=true downloadable=true />
+Questa vista aiuta a capire quali fonti dominano il mix complessivo prima di scendere nel dettaglio delle singole regioni.
+
+<BarChart data={fonti_nazionali} x=fonte y=produzione_gwh yAxisTitle="Produzione GWh" />
+
+## Mix regionale per fonte
+
+<DataTable data={fonti_regionali} rows=30 search=true downloadable=true />
 
 [Scarica il clean parquet 2024](https://storage.googleapis.com/dataciviclab-clean/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet)
