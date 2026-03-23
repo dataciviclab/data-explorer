@@ -1,3 +1,7 @@
+---
+title: Flussi della giustizia civile
+---
+
 # Flussi della giustizia civile
 
 Dati del Ministero della Giustizia sui flussi civili. Nel v0 il focus è sul 2024 e sui principali aggregati per distretto e materia.

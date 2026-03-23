@@ -1,3 +1,7 @@
+---
+title: Rifiuti urbani nei comuni
+---
+
 # Rifiuti urbani nei comuni
 
 Dati ISPRA sui rifiuti urbani dei comuni italiani. Il v0 permette di leggere rapidamente raccolta differenziata e volumi totali sul periodo 2020-2024.
