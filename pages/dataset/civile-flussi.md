@@ -1,5 +1,6 @@
 ---
 title: Flussi della giustizia civile
+description: Lettura pubblica dei flussi civili del Ministero della Giustizia, con focus su carico, pendenti e materie.
 ---
 
 Dati del Ministero della Giustizia sui flussi civili. In questa pagina la domanda guida è: dove il carico resta più alto e dove i procedimenti definiti tengono il passo dei nuovi arrivi.

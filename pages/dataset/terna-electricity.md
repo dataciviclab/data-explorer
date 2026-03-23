@@ -1,5 +1,6 @@
 ---
 title: Mix elettrico per regione
+description: Lettura pubblica dei dati Terna sul mix elettrico regionale e sul peso delle fonti nel sistema nazionale.
 ---
 
 Dati Terna sulla produzione elettrica per fonte e regione. In questa pagina la domanda guida è: quali fonti pesano di più nel mix nazionale e quali regioni concentrano la produzione.

@@ -1,5 +1,6 @@
 ---
 title: Giustizia
+description: Dataset e domande civiche sulla giustizia nel Data Explorer del Lab.
 ---
 
 Questo tema raccoglie dataset che aiutano a leggere tempi, carico e andamenti della giustizia con un taglio pubblico.

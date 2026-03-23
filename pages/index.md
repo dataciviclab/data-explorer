@@ -1,5 +1,6 @@
 ---
 title: DataCivicLab Explorer
+description: Frontend pubblico leggero sui dataset civici del Lab, con temi, query curate e link ai clean parquet pubblici.
 ---
 
 DataCivicLab Explorer è un frontend pubblico leggero sui dataset civici del Lab.

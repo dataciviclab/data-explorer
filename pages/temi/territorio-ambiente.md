@@ -1,5 +1,6 @@
 ---
 title: Territorio e ambiente
+description: Dataset e domande civiche su ambiente, rifiuti ed energia nel Data Explorer del Lab.
 ---
 
 Questo tema raccoglie dataset che aiutano a leggere trasformazioni territoriali, ambiente ed energia con un taglio civico.
