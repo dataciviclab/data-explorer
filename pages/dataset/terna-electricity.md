@@ -2,8 +2,6 @@
 title: Mix elettrico per regione
 ---
 
-# Mix elettrico per regione
-
 Dati Terna sulla produzione elettrica per fonte e regione. Il v0 permette di confrontare il mix regionale 2023-2024.
 
 ```sql anni

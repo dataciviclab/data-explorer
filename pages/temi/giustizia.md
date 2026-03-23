@@ -2,8 +2,6 @@
 title: Giustizia
 ---
 
-# Giustizia
-
 Questo tema raccoglie dataset che aiutano a leggere tempi, carico e andamenti della giustizia con un taglio pubblico.
 
 ## Domande chiave

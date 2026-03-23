@@ -2,8 +2,6 @@
 title: Flussi della giustizia civile
 ---
 
-# Flussi della giustizia civile
-
 Dati del Ministero della Giustizia sui flussi civili. Nel v0 il focus è sugli anni disponibili nel clean pubblico e sui principali aggregati per distretto e materia.
 
 ```sql anni

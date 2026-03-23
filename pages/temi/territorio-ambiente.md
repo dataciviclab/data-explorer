@@ -2,8 +2,6 @@
 title: Territorio e ambiente
 ---
 
-# Territorio e ambiente
-
 Questo tema raccoglie dataset che aiutano a leggere trasformazioni territoriali, ambiente ed energia con un taglio civico.
 
 ## Domande chiave
