@@ -1,6 +1,8 @@
 ---
 title: Rifiuti urbani nei comuni
 description: Lettura pubblica dei dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per territorio.
+source: ISPRA
+last_modified: 2026-03-23
 ---
 
 Questo dataset raccoglie i dati ISPRA sui rifiuti urbani dei comuni italiani.

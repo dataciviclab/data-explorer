@@ -1,6 +1,8 @@
 ---
 title: Flussi della giustizia civile
 description: Lettura pubblica dei flussi civili del Ministero della Giustizia, con focus su carico, pendenti e materie.
+source: Ministero della Giustizia
+last_modified: 2026-03-23
 ---
 
 Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili.

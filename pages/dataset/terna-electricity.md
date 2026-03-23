@@ -1,6 +1,8 @@
 ---
 title: Mix elettrico per regione
 description: Lettura pubblica dei dati Terna sul mix elettrico regionale e sul peso delle fonti nel sistema nazionale.
+source: Terna
+last_modified: 2026-03-23
 ---
 
 Questo dataset raccoglie i dati Terna sulla produzione elettrica per fonte e regione.
