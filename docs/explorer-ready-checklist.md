@@ -76,6 +76,7 @@ Ogni pagina dataset dovrebbe avere almeno:
 - una frase iniziale che spiega cosa contiene il dataset
 - una frase che esplicita la domanda guida della pagina
 - una breve nota interpretativa sul blocco più importante
+- `source` e `last_modified` nel frontmatter
 - un link al clean parquet pubblico
 
 ## Principio guida

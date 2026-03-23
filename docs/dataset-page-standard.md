@@ -10,7 +10,7 @@ Una pagina dataset deve sembrare una pagina civica leggibile con dati vivi, non 
 
 Ogni pagina dataset dovrebbe avere questi blocchi, nello stesso ordine:
 
-1. `title` e `description` nel frontmatter
+1. `title`, `description`, `source` e `last_modified` nel frontmatter
 2. una frase iniziale che spiega cosa contiene il dataset
 3. una frase che esplicita la domanda guida della pagina
 4. un filtro minimo, quasi sempre l'anno
@@ -55,8 +55,19 @@ Ogni pagina dovrebbe contenere:
 - cosa c'è dentro
 - perché conta
 - come leggere il blocco principale
+- fonte esplicita e data di ultimo aggiornamento nel frontmatter
 
 Il copy deve restare corto. La metodologia lunga non è il focus del v0.
+
+## Filtri
+
+Nel v0 il filtro standard è il filtro anno.
+
+Regole:
+
+- usare un solo filtro quando basta
+- preferire filtri stabili e prevedibili
+- evitare componenti più complesse se il guadagno di lettura è basso
 
 ## Cosa evitare
 
