@@ -59,6 +59,7 @@ npm run preview
 ## Struttura
 
 - `catalog/` = catalogo dataset e temi
+- `docs/` = convenzioni editoriali e checklist operative del sito
 - `sources/` = query SQL Evidence per i parquet pubblici
 - `pages/` = homepage, temi e pagine dataset
 
@@ -156,3 +157,4 @@ Il principio è:
 - il repo può partire privato per il bootstrap
 - prima di GitHub Pages dovrà essere reso pubblico
 - i dati letti dalle pagine arrivano dal bucket pubblico `dataciviclab-clean`
+- la checklist di readiness sta in `docs/explorer-ready-checklist.md`
