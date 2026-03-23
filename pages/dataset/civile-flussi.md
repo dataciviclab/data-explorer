@@ -3,7 +3,9 @@ title: Flussi della giustizia civile
 description: Lettura pubblica dei flussi civili del Ministero della Giustizia, con focus su carico, pendenti e materie.
 ---
 
-Dati del Ministero della Giustizia sui flussi civili. In questa pagina la domanda guida è: dove il carico resta più alto e dove i procedimenti definiti tengono il passo dei nuovi arrivi.
+Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili.
+
+Domanda guida: dove il carico resta più alto e dove i procedimenti definiti tengono il passo dei nuovi arrivi.
 
 ```sql anni
 SELECT DISTINCT anno FROM civile_flussi.flussi ORDER BY anno DESC
@@ -63,6 +65,8 @@ LIMIT 15
 
 ## Pendenti finali per distretto
 
+Questo è il blocco principale della pagina: mostra dove il carico finale resta più pesante nell'anno selezionato.
+
 <BarChart data={distretti} x=distretto y=pendenti_finali yAxisTitle="Pendenti finali" />
 
 ## Distretti dove i definiti tengono meno
@@ -72,6 +76,8 @@ Un rapporto vicino a `1` indica che i procedimenti definiti sono simili ai sopra
 <DataTable data={distretti_tenuta} rows=15 search=true downloadable=true />
 
 ## Macromaterie più pesanti
+
+La tabella finale serve come terzo livello di lettura: aiuta a capire quali aree del contenzioso pesano di più nei flussi recenti.
 
 <DataTable data={materie} rows=15 search=true downloadable=true />
 
