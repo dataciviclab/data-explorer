@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "ispra-ru-base",
+    "technical_slug": "ispra_ru_base",
+    "name": "Rifiuti urbani nei comuni",
+    "theme": "territorio-ambiente",
+    "status": "A",
+    "years": [2020, 2021, 2022, 2023, 2024],
+    "source": "ISPRA"
+  },
+  {
+    "slug": "civile-flussi",
+    "technical_slug": "civile_flussi_2014_2024",
+    "name": "Flussi della giustizia civile",
+    "theme": "giustizia",
+    "status": "A",
+    "years": [2024],
+    "source": "Ministero della Giustizia"
+  },
+  {
+    "slug": "terna-electricity",
+    "technical_slug": "terna_electricity_by_source",
+    "name": "Mix elettrico per regione",
+    "theme": "territorio-ambiente",
+    "status": "A",
+    "years": [2023, 2024],
+    "source": "Terna"
+  }
+]

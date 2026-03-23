@@ -1,0 +1,4 @@
+name: ispra_ru
+type: duckdb
+options:
+  filename: ':memory:'

@@ -1,0 +1,4 @@
+name: terna
+type: duckdb
+options:
+  filename: ':memory:'

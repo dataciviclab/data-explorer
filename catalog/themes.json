@@ -1,0 +1,27 @@
+[
+  {
+    "slug": "territorio-ambiente",
+    "name": "Territorio e ambiente",
+    "datasets": ["ispra-ru-base", "terna-electricity"]
+  },
+  {
+    "slug": "finanza-pubblica",
+    "name": "Finanza pubblica",
+    "datasets": []
+  },
+  {
+    "slug": "sanita",
+    "name": "Sanità",
+    "datasets": []
+  },
+  {
+    "slug": "welfare-lavoro",
+    "name": "Welfare e lavoro",
+    "datasets": []
+  },
+  {
+    "slug": "giustizia",
+    "name": "Giustizia",
+    "datasets": ["civile-flussi"]
+  }
+]
