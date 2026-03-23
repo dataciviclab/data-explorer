@@ -38,6 +38,12 @@ Verifica sources:
 npm run sources
 ```
 
+Validazione catalogo:
+
+```powershell
+npm run validate:catalog
+```
+
 Build:
 
 ```powershell

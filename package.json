@@ -6,10 +6,11 @@
     "build": "evidence build",
     "build:strict": "evidence build:strict",
     "dev": "evidence dev --open /",
-    "test": "evidence build",
+    "test": "npm run validate:catalog && evidence build",
     "sources": "evidence sources",
     "sources:strict": "evidence sources --strict",
-    "preview": "evidence preview"
+    "preview": "evidence preview",
+    "validate:catalog": "node scripts/validate_catalog.mjs"
   },
   "engines": {
     "npm": ">=7.0.0",

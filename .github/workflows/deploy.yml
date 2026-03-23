@@ -35,6 +35,7 @@ jobs:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
 
       - run: npm ci --legacy-peer-deps
+      - run: npm run validate:catalog
       - run: npm run sources
       - run: npm run build
 
