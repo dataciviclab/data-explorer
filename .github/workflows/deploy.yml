@@ -36,7 +36,9 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
       - run: npm run sources
-      - run: npm run build
+      - run: npm run build -- --debug
+
+      - run: echo "=== Assets ===" && ls build/_app/immutable/assets/ || true
 
       - uses: actions/upload-pages-artifact@v3
         with:
