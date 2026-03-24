@@ -86,14 +86,14 @@ WITH distretti_scelti AS (
 SELECT
   CAST(anno AS INTEGER) AS anno,
   'Nazionale' AS serie,
-  SUM(pendenti_finali) AS pendenti_finali
+  ROUND(SUM(definiti_totale) / NULLIF(SUM(sopravvenuti), 0), 3) AS rapporto_definiti_sopravvenuti
 FROM civile_flussi.flussi
 GROUP BY 1, 2
 UNION ALL
 SELECT
   CAST(f.anno AS INTEGER) AS anno,
   d.distretto AS serie,
-  SUM(f.pendenti_finali) AS pendenti_finali
+  ROUND(SUM(f.definiti_totale) / NULLIF(SUM(f.sopravvenuti), 0), 3) AS rapporto_definiti_sopravvenuti
 FROM civile_flussi.flussi f
 JOIN distretti_scelti d
   ON f.distretto = d.distretto
@@ -102,11 +102,11 @@ GROUP BY 1, 2
 ORDER BY anno, serie
 ```
 
-## Pendenti nel tempo
+## Definiti vs sopravvenuti nel tempo
 
-La linea mette a confronto il totale nazionale con il distretto selezionato. Serve a capire se il carico finale si sta alleggerendo nel tempo o se il distretto resta sopra la media.
+La linea mette a confronto il distretto selezionato con il totale nazionale usando il rapporto tra procedimenti definiti e sopravvenuti. Valori più vicini a `1` indicano una maggiore capacità di tenere il passo dei nuovi arrivi.
 
-<LineChart data={pendenti_trend} x=anno y=pendenti_finali series=serie xAxisTitle="Anno" yAxisTitle="Pendenti finali" />
+<LineChart data={pendenti_trend} x=anno y=rapporto_definiti_sopravvenuti series=serie xAxisTitle="Anno" yAxisTitle="Rapporto definiti / sopravvenuti" />
 
 ## Distretti dove i definiti tengono meno
 
