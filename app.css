@@ -9,8 +9,7 @@
   }
 
   body {
-    @apply select-none;
-    color: #10243f;
+    @apply text-base-content;
   }
 
   p,
