@@ -7,18 +7,13 @@ last_modified: 2026-03-24
 
 Questo dataset raccoglie i dati ISPRA sui rifiuti urbani dei comuni italiani.
 
-*Domanda guida: dove la raccolta differenziata pesa di più e quali territori concentrano i volumi maggiori.*
+<div class="guide-question">Il mio comune raccoglie bene i rifiuti?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM ispra_ru.rifiuti ORDER BY anno DESC
 ```
 
 <Dropdown name=anno_sel data={anni} value=anno>
-  <DropdownOption value="2024" valueLabel="2024" />
-  <DropdownOption value="2023" valueLabel="2023" />
-  <DropdownOption value="2022" valueLabel="2022" />
-  <DropdownOption value="2021" valueLabel="2021" />
-  <DropdownOption value="2020" valueLabel="2020" />
 </Dropdown>
 
 ```sql sintesi_regioni
@@ -51,7 +46,64 @@ LIMIT 20
 
 La classifica per regione usa una quota calcolata sui volumi complessivi, non una semplice media dei comuni. Questo rende il confronto più leggibile quando i comuni hanno dimensioni molto diverse.
 
-<BarChart data={sintesi_regioni} x=regione y=quota_rd yAxisTitle="% raccolta differenziata" />
+<BarChart data={sintesi_regioni} x=regione y=quota_rd yAxisTitle="% raccolta differenziata" swapXY=true />
+
+```sql regioni_select
+SELECT 0 AS regione_id, 'Tutte le regioni' AS regione
+UNION ALL
+SELECT ROW_NUMBER() OVER (ORDER BY regione) AS regione_id, regione
+FROM (
+  SELECT DISTINCT regione
+  FROM ispra_ru.rifiuti
+) t
+ORDER BY regione_id
+```
+
+<Dropdown name=regione_sel data={regioni_select} value=regione_id label=regione defaultValue={0} />
+
+```sql comuni_scatter
+WITH regioni_scelta AS (
+  SELECT 0 AS regione_id, 'Tutte le regioni' AS regione
+  UNION ALL
+  SELECT ROW_NUMBER() OVER (ORDER BY regione) AS regione_id, regione
+  FROM (
+    SELECT DISTINCT regione
+    FROM ispra_ru.rifiuti
+  ) t
+),
+regione_scelta AS (
+  SELECT regione
+  FROM regioni_scelta
+  WHERE regione_id = ${inputs.regione_sel.value}
+),
+base AS (
+  SELECT
+    regione,
+    comune,
+    popolazione,
+    ROUND(percentuale_rd, 1) AS percentuale_rd,
+    ROUND(CAST(totale_ru_tonnellate AS DOUBLE) * 1000.0 / NULLIF(popolazione, 0), 1) AS kg_per_abitante,
+    ROUND(totale_ru_tonnellate, 0) AS totale_ru_tonnellate
+  FROM ispra_ru.rifiuti
+  WHERE ${inputs.regione_sel.value} = 0
+     OR regione = (SELECT regione FROM regione_scelta)
+)
+SELECT *
+FROM base
+ORDER BY percentuale_rd DESC, kg_per_abitante DESC
+```
+
+## Scatter %RD vs kg/ab
+
+La dispersione aiuta a leggere insieme qualità della raccolta e quantità prodotta per abitante. Il filtro regione controlla sia lo scatter sia la tabella di dettaglio.
+
+<ScatterPlot data={comuni_scatter} x=kg_per_abitante y=percentuale_rd series=regione xAxisTitle="kg per abitante" yAxisTitle="% raccolta differenziata" pointSize=6 />
+
+## Comuni della regione selezionata
+
+La tabella usa lo stesso filtro della dispersione per scendere nel dettaglio dei comuni più interessanti nell'area scelta.
+
+<DataTable data={comuni_scatter} rows=25 search=true downloadable=true />
 
 ## Grandi comuni
 

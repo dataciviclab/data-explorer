@@ -7,24 +7,13 @@ last_modified: 2026-03-24
 
 Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili.
 
-*Domanda guida: dove il carico resta più alto e dove i procedimenti definiti tengono il passo dei nuovi arrivi.*
+<div class="guide-question">La giustizia civile nel mio distretto sta migliorando?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM civile_flussi.flussi ORDER BY anno DESC
 ```
 
 <Dropdown name=anno_sel data={anni} value=anno>
-  <DropdownOption value="2024" valueLabel="2024" />
-  <DropdownOption value="2023" valueLabel="2023" />
-  <DropdownOption value="2022" valueLabel="2022" />
-  <DropdownOption value="2021" valueLabel="2021" />
-  <DropdownOption value="2020" valueLabel="2020" />
-  <DropdownOption value="2019" valueLabel="2019" />
-  <DropdownOption value="2018" valueLabel="2018" />
-  <DropdownOption value="2017" valueLabel="2017" />
-  <DropdownOption value="2016" valueLabel="2016" />
-  <DropdownOption value="2015" valueLabel="2015" />
-  <DropdownOption value="2014" valueLabel="2014" />
 </Dropdown>
 
 ```sql distretti
@@ -69,7 +58,55 @@ LIMIT 15
 
 Questo è il blocco principale della pagina: mostra dove il carico finale resta più pesante nell'anno selezionato.
 
-<BarChart data={distretti} x=distretto y=pendenti_finali yAxisTitle="Pendenti finali" />
+<BarChart data={distretti} x=distretto y=pendenti_finali yAxisTitle="Pendenti finali" swapXY=true />
+
+```sql distretti_trend
+SELECT
+  ROW_NUMBER() OVER (ORDER BY distretto) AS distretto_id,
+  distretto
+FROM (
+  SELECT DISTINCT distretto
+  FROM civile_flussi.flussi
+) t
+ORDER BY distretto
+```
+
+<Dropdown name=distretto_sel data={distretti_trend} value=distretto_id label=distretto defaultValue={1} />
+
+```sql pendenti_trend
+WITH distretti_scelti AS (
+  SELECT
+    ROW_NUMBER() OVER (ORDER BY distretto) AS distretto_id,
+    distretto
+  FROM (
+    SELECT DISTINCT distretto
+    FROM civile_flussi.flussi
+  ) t
+)
+SELECT
+  CAST(anno AS INTEGER) AS anno,
+  'Nazionale' AS serie,
+  SUM(pendenti_finali) AS pendenti_finali
+FROM civile_flussi.flussi
+GROUP BY 1, 2
+UNION ALL
+SELECT
+  CAST(f.anno AS INTEGER) AS anno,
+  d.distretto AS serie,
+  SUM(f.pendenti_finali) AS pendenti_finali
+FROM civile_flussi.flussi f
+JOIN distretti_scelti d
+  ON f.distretto = d.distretto
+WHERE d.distretto_id = ${inputs.distretto_sel.value}
+GROUP BY 1, 2
+ORDER BY anno, serie
+```
+
+## Pendenti nel tempo
+
+La linea mette a confronto il totale nazionale con il distretto selezionato. Serve a capire se il carico finale si sta alleggerendo nel tempo o se il distretto resta sopra la media.
+
+<LineChart data={pendenti_trend} x=anno y=pendenti_finali series=serie xAxisTitle="Anno" yAxisTitle="Pendenti finali" />
 
 ## Distretti dove i definiti tengono meno
 
@@ -78,6 +115,16 @@ Un rapporto vicino a `1` indica che i procedimenti definiti sono simili ai sopra
 <DataTable data={distretti_tenuta} rows=15 search=true downloadable=true />
 
 ## Macromaterie più pesanti
+
+<div class="method-note">
+Le <strong>Procedure concorsuali (pre-riforma)</strong> possono mostrare nuovi arrivi quasi nulli ma molti definiti:
+non è un buco nei dati, ma l'effetto della riforma che ha chiuso progressivamente il perimetro precedente.
+</div>
+
+<div class="section-note">
+Da qui cambia anche la granularità della lettura: non stiamo più confrontando i distretti,
+ma le aree del contenzioso a livello nazionale nell'anno selezionato.
+</div>
 
 La tabella finale serve come terzo livello di lettura: aiuta a capire quali aree del contenzioso pesano di più nei flussi recenti.
 

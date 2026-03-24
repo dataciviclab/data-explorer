@@ -7,15 +7,13 @@ last_modified: 2026-03-24
 
 Questo dataset raccoglie i dati Terna sulla produzione elettrica per fonte e regione.
 
-*Domanda guida: quali fonti pesano di più nel mix nazionale e quali regioni concentrano la produzione.*
+<div class="guide-question">La mia regione sta diventando più rinnovabile?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM terna.energia ORDER BY anno DESC
 ```
 
 <Dropdown name=anno_sel data={anni} value=anno>
-  <DropdownOption value="2024" valueLabel="2024" />
-  <DropdownOption value="2023" valueLabel="2023" />
 </Dropdown>
 
 ```sql fonti_nazionali
@@ -24,18 +22,8 @@ SELECT
   SUM(produzione_gwh) AS produzione_gwh
 FROM terna.energia
 WHERE anno = '${inputs.anno_sel.value}'
+  AND tipo_produzione = 'Netta'
 GROUP BY fonte
-ORDER BY produzione_gwh DESC
-```
-
-```sql fonti_regionali
-SELECT
-  regione,
-  fonte,
-  SUM(produzione_gwh) AS produzione_gwh
-FROM terna.energia
-WHERE anno = '${inputs.anno_sel.value}'
-GROUP BY regione, fonte
 ORDER BY produzione_gwh DESC
 ```
 
@@ -45,8 +33,61 @@ SELECT
   SUM(produzione_gwh) AS produzione_gwh
 FROM terna.energia
 WHERE anno = '${inputs.anno_sel.value}'
+  AND tipo_produzione = 'Netta'
 GROUP BY regione
 ORDER BY produzione_gwh DESC
+```
+
+```sql macro_fonte
+SELECT 0 AS macro_fonte_id, 'Tutte le fonti' AS macro_fonte
+UNION ALL
+SELECT 1 AS macro_fonte_id, 'Rinnovabili' AS macro_fonte
+UNION ALL
+SELECT 2 AS macro_fonte_id, 'Fossili' AS macro_fonte
+ORDER BY macro_fonte_id
+```
+
+<Dropdown name=macro_fonte_sel data={macro_fonte} value=macro_fonte_id label=macro_fonte defaultValue={0} />
+
+```sql mix_regionale
+WITH classificato AS (
+  SELECT
+    regione,
+    fonte,
+    produzione_gwh,
+    CASE
+      WHEN fonte = 'Termoelettrico' THEN 'Fossili'
+      ELSE 'Rinnovabili'
+    END AS macro_fonte
+  FROM terna.energia
+  WHERE anno = '${inputs.anno_sel.value}'
+    AND tipo_produzione = 'Netta'
+),
+filtrato AS (
+  SELECT *
+  FROM classificato
+  WHERE ${inputs.macro_fonte_sel.value} = 0
+     OR (${inputs.macro_fonte_sel.value} = 1 AND macro_fonte = 'Rinnovabili')
+     OR (${inputs.macro_fonte_sel.value} = 2 AND macro_fonte = 'Fossili')
+),
+totali_regione AS (
+  SELECT
+    regione,
+    SUM(produzione_gwh) AS totale_regionale
+  FROM filtrato
+  GROUP BY regione
+)
+SELECT
+  f.regione,
+  f.fonte,
+  f.macro_fonte,
+  SUM(f.produzione_gwh) AS produzione_gwh,
+  ROUND(SUM(f.produzione_gwh) / NULLIF(t.totale_regionale, 0) * 100, 1) AS quota_percentuale
+FROM filtrato f
+JOIN totali_regione t
+  ON f.regione = t.regione
+GROUP BY f.regione, f.fonte, f.macro_fonte, t.totale_regionale
+ORDER BY f.regione, quota_percentuale DESC, produzione_gwh DESC
 ```
 
 ## Fonti più pesanti a livello nazionale
@@ -57,15 +98,23 @@ Aiuta a capire quali fonti dominano il mix complessivo nell'anno selezionato, pr
 
 ## Produzione totale per regione
 
-Il confronto tra regioni mostra dove si concentra la capacita' produttiva complessiva, indipendentemente dalla fonte.
+Il confronto tra regioni mostra dove si concentra la capacità produttiva complessiva, indipendentemente dalla fonte.
 
-<BarChart data={regioni_totale} x=regione y=produzione_gwh yAxisTitle="Produzione GWh" />
+<BarChart data={regioni_totale} x=regione y=produzione_gwh yAxisTitle="Produzione GWh" swapXY=true />
 
 ## Mix regionale per fonte
 
-La tabella serve come terzo livello di lettura: dopo il quadro nazionale e quello regionale aggregato, permette di vedere dove ogni fonte pesa di più.
+Il selettore permette di leggere il mix completo oppure il solo sottoinsieme rinnovabili/fossili. La vista stacked rende più immediata la composizione interna di ogni regione.
 
-<DataTable data={fonti_regionali} rows=30 search=true downloadable=true />
+<BarChart data={mix_regionale} x=regione y=produzione_gwh series=fonte type="stacked100" swapXY=true yAxisTitle="% del totale regionale" xLabelWrap=12 />
+
+<div class="section-note">
+Quando selezioni solo <strong>Rinnovabili</strong> o solo <strong>Fossili</strong>, la quota percentuale è calcolata sul sottoinsieme mostrato e non sull'intero totale regionale.
+</div>
+
+La tabella ordina le fonti per quota dentro ciascuna regione, così il dettaglio segue la stessa logica di lettura della barra impilata.
+
+<DataTable data={mix_regionale} rows=30 search=true downloadable=true />
 
 ## Risorse e dati
 

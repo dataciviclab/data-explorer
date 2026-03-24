@@ -3,15 +3,15 @@ title: Come funziona
 description: Cosa trovi in questo sito, come arrivano i dati e cosa non troverai.
 ---
 
-DataCivicLab Explorer e' il frontend pubblico dei dataset civici del Lab.
-Ogni pagina parte da una domanda concreta su un fenomeno pubblico italiano,
-e porta al dato piu vicino che siamo riusciti a trovare, pulire e leggere.
+DataCivicLab Explorer è il frontend pubblico dei dataset civici del Lab.
+Ogni pagina parte da una domanda concreta su un fenomeno pubblico italiano
+e porta al dato più vicino che siamo riusciti a trovare, pulire e leggere.
 
 ## Cosa trovi qui
 
 Le pagine del sito non sono dashboard automatizzate.
-Sono letture curate: una domanda, un filtro per anno, qualche grafico e una tabella scaricabile.
-Il dato grezzo e' sempre raggiungibile dal footer di ogni pagina.
+Sono letture curate: una domanda guida, filtri semplici quando servono, grafici leggibili e una tabella scaricabile.
+Il dato grezzo è sempre raggiungibile dal footer di ogni pagina.
 
 ## Da dove arrivano i dati
 
@@ -28,10 +28,10 @@ I file parquet clean sono pubblici e scaricabili direttamente dal link in fondo 
 
 - Dati in tempo reale: i dataset sono snapshot annuali o pluriannuali
 - Copertura completa: ogni dataset ha un perimetro dichiarato, con anni e fonti espliciti
-- Analisi automatizzate: ogni lettura e' scritta e verificata a mano dal team del Lab
-- Dati non verificabili: se non c'e' il link alla fonte originale, non lo pubblichiamo
+- Analisi automatizzate: ogni lettura è scritta e verificata a mano dal team del Lab
+- Dati non verificabili: se non c'è il link alla fonte originale, non lo pubblichiamo
 
 ## Chi siamo
 
-DataCivicLab e' una comunita' aperta di analisi civica sui dati pubblici italiani.
+DataCivicLab è una comunità aperta di analisi civica sui dati pubblici italiani.
 I dataset, le analisi e le discussioni sono pubblici su [GitHub](https://github.com/dataciviclab).
