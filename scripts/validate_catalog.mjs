@@ -1,6 +1,17 @@
-import { readFile } from "node:fs/promises";
+import { readFile, access } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+
+const VALID_STATUSES = new Set(["A", "B", "C"]);
+
+async function fileExists(relativePath) {
+  try {
+    await access(path.resolve(process.cwd(), relativePath));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function readJson(relativePath) {
   const absolutePath = path.resolve(process.cwd(), relativePath);
@@ -61,6 +72,9 @@ async function main() {
     assert(isNonEmptyString(dataset.name), `${prefix}.name must be a non-empty string`, errors);
     assert(isNonEmptyString(dataset.theme), `${prefix}.theme must be a non-empty string`, errors);
     assert(isNonEmptyString(dataset.status), `${prefix}.status must be a non-empty string`, errors);
+    if (isNonEmptyString(dataset.status)) {
+      assert(VALID_STATUSES.has(dataset.status), `${prefix}.status must be one of A, B, C — got: ${dataset.status}`, errors);
+    }
     assert(Array.isArray(dataset.years), `${prefix}.years must be an array`, errors);
     assert(isNonEmptyString(dataset.source), `${prefix}.source must be a non-empty string`, errors);
 
@@ -117,6 +131,26 @@ async function main() {
       `dataset ${datasetSlug} points to theme ${dataset.theme}, but is missing from that theme's dataset list`,
       errors,
     );
+  }
+
+  // Check che ogni dataset status:A abbia la pagina corrispondente
+  for (const dataset of datasetBySlug.values()) {
+    if (dataset.status === "A") {
+      const pagePath = `pages/dataset/${dataset.slug}.md`;
+      if (!(await fileExists(pagePath))) {
+        errors.push(`dataset ${dataset.slug} has status A but page ${pagePath} does not exist`);
+      }
+    }
+  }
+
+  // Check che ogni tema con dataset abbia la pagina corrispondente
+  for (const theme of themeBySlug.values()) {
+    if (Array.isArray(theme.datasets) && theme.datasets.length > 0) {
+      const themePage = `pages/temi/${theme.slug}.md`;
+      if (!(await fileExists(themePage))) {
+        errors.push(`theme ${theme.slug} has datasets but page ${themePage} does not exist`);
+      }
+    }
   }
 
   if (errors.length > 0) {
