@@ -1,0 +1,45 @@
+:root {
+  --dcl-ink-900: #10243f;
+  --dcl-ink-700: #33506f;
+  --dcl-ink-500: #58718e;
+  --dcl-surface-50: #f5f9fc;
+  --dcl-surface-100: #e9f1f8;
+  --dcl-border-200: #c9d9e8;
+  --dcl-accent-600: #1f5f99;
+}
+
+body {
+  color: var(--dcl-ink-900);
+}
+
+p,
+li {
+  line-height: 1.65;
+}
+
+h2 {
+  margin-top: 2.75rem;
+}
+
+.guide-question {
+  margin: 1rem 0 1.5rem;
+  padding: 0.95rem 1rem;
+  border-left: 4px solid var(--dcl-accent-600);
+  background: var(--dcl-surface-50);
+  color: var(--dcl-ink-900);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.section-note {
+  margin: 0.4rem 0 1rem;
+  color: var(--dcl-ink-700);
+}
+
+.method-note {
+  margin: 1rem 0 1.35rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--dcl-border-200);
+  background: var(--dcl-surface-100);
+  color: var(--dcl-ink-900);
+}
