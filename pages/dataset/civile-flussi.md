@@ -2,12 +2,12 @@
 title: Flussi della giustizia civile
 description: Lettura pubblica dei flussi civili del Ministero della Giustizia, con focus su carico, pendenti e materie.
 source: Ministero della Giustizia
-last_modified: 2026-03-23
+last_modified: 2026-03-24
 ---
 
 Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili.
 
-Domanda guida: dove il carico resta più alto e dove i procedimenti definiti tengono il passo dei nuovi arrivi.
+*Domanda guida: dove il carico resta più alto e dove i procedimenti definiti tengono il passo dei nuovi arrivi.*
 
 ```sql anni
 SELECT DISTINCT anno FROM civile_flussi.flussi ORDER BY anno DESC
@@ -83,4 +83,7 @@ La tabella finale serve come terzo livello di lettura: aiuta a capire quali aree
 
 <DataTable data={materie} rows=15 search=true downloadable=true />
 
-[Scarica il clean parquet 2024](https://storage.googleapis.com/dataciviclab-clean/civile_flussi_2014_2024/2024/civile_flussi_2014_2024_2024_clean.parquet)
+## Risorse e dati
+
+- [Scarica il clean parquet 2024](https://storage.googleapis.com/dataciviclab-clean/civile_flussi_2014_2024/2024/civile_flussi_2014_2024_2024_clean.parquet)
+- [Fonte originale: Ministero della Giustizia — statistiche civili](https://datiestatistiche.giustizia.it)

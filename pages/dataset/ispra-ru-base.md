@@ -2,12 +2,12 @@
 title: Rifiuti urbani nei comuni
 description: Lettura pubblica dei dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per territorio.
 source: ISPRA
-last_modified: 2026-03-23
+last_modified: 2026-03-24
 ---
 
 Questo dataset raccoglie i dati ISPRA sui rifiuti urbani dei comuni italiani.
 
-Domanda guida: dove la raccolta differenziata pesa di più e quali territori concentrano i volumi maggiori.
+*Domanda guida: dove la raccolta differenziata pesa di più e quali territori concentrano i volumi maggiori.*
 
 ```sql anni
 SELECT DISTINCT anno FROM ispra_ru.rifiuti ORDER BY anno DESC
@@ -59,4 +59,7 @@ Tra i comuni con almeno 100 mila abitanti, la tabella aiuta a vedere dove la rac
 
 <DataTable data={grandi_comuni} rows=20 search=true downloadable=true />
 
-[Scarica il clean parquet 2024](https://storage.googleapis.com/dataciviclab-clean/ispra_ru_base/2024/ispra_ru_base_2024_clean.parquet)
+## Risorse e dati
+
+- [Scarica il clean parquet 2024](https://storage.googleapis.com/dataciviclab-clean/ispra_ru_base/2024/ispra_ru_base_2024_clean.parquet)
+- [Fonte originale: ISPRA Catasto Rifiuti Urbani](https://www.catasto-rifiuti.isprambiente.it)
