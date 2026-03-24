@@ -7,7 +7,7 @@ last_modified: 2026-03-24
 
 Questo dataset raccoglie i dati Terna sulla produzione elettrica per fonte e regione.
 
-<div class="guide-question">La mia regione sta diventando più rinnovabile?</div>
+<div class="guide-question">Com'è composto il mix elettrico della mia regione?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM terna.energia ORDER BY anno DESC
@@ -57,7 +57,8 @@ WITH classificato AS (
     produzione_gwh,
     CASE
       WHEN fonte = 'Termoelettrico' THEN 'Fossili'
-      ELSE 'Rinnovabili'
+      WHEN fonte IN ('Idrico', 'Eolico', 'Fotovoltaico', 'Geotermoelettrico') THEN 'Rinnovabili'
+      ELSE 'Altre fonti / accumulo'
     END AS macro_fonte
   FROM terna.energia
   WHERE anno = '${inputs.anno_sel.value}'
@@ -109,7 +110,7 @@ Il selettore permette di leggere il mix completo oppure il solo sottoinsieme rin
 <BarChart data={mix_regionale} x=regione y=produzione_gwh series=fonte type="stacked100" swapXY=true yAxisTitle="% del totale regionale" xLabelWrap=12 />
 
 <div class="section-note">
-Quando selezioni solo <strong>Rinnovabili</strong> o solo <strong>Fossili</strong>, la quota percentuale è calcolata sul sottoinsieme mostrato e non sull'intero totale regionale.
+Quando selezioni solo <strong>Rinnovabili</strong> o solo <strong>Fossili</strong>, la quota percentuale è calcolata sul sottoinsieme mostrato e non sull'intero totale regionale. Voci come <strong>Accumulo Stand Alone</strong> restano visibili solo nella vista completa.
 </div>
 
 La tabella ordina le fonti per quota dentro ciascuna regione, così il dettaglio segue la stessa logica di lettura della barra impilata.

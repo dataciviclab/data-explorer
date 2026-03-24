@@ -85,8 +85,11 @@ base AS (
     ROUND(CAST(totale_ru_tonnellate AS DOUBLE) * 1000.0 / NULLIF(popolazione, 0), 1) AS kg_per_abitante,
     ROUND(totale_ru_tonnellate, 0) AS totale_ru_tonnellate
   FROM ispra_ru.rifiuti
-  WHERE ${inputs.regione_sel.value} = 0
-     OR regione = (SELECT regione FROM regione_scelta)
+  WHERE anno = '${inputs.anno_sel.value}'
+    AND (
+      ${inputs.regione_sel.value} = 0
+      OR regione = (SELECT regione FROM regione_scelta)
+    )
 )
 SELECT *
 FROM base
