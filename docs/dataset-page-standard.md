@@ -16,7 +16,7 @@ Ogni pagina dataset dovrebbe avere questi blocchi, nello stesso ordine:
 4. un filtro minimo, quasi sempre l'anno
 5. un blocco principale
 6. un blocco secondario
-7. una nota interpretativa breve
+7. una nota di lettura breve
 8. un link al clean parquet pubblico
 
 ## Principio dataset-first
