@@ -101,7 +101,8 @@ Le note dentro pagina sono ammesse solo se aiutano davvero la lettura del blocco
 Regole:
 
 - `section-note`: ok per spiegare una metrica, un filtro o il perimetro del blocco
-- `method-note`: usare con cautela, solo se evita una lettura palesemente sbagliata del dato
+- `method-note`: usare con cautela, solo se evita una lettura sbagliata del dato e non e' removibile senza rendere il blocco poco comprensibile
+- se una `method-note` porta da sola il peso interpretativo del blocco, quel contenuto probabilmente non e' ancora pronto per il Data Explorer
 - se la nota diventa il cuore della pagina, quel contenuto probabilmente appartiene a `dataciviclab/analisi`
 
 ## Cosa evitare
@@ -133,5 +134,6 @@ Prima di considerare una pagina pronta, chiedersi:
 - il primo blocco mostra davvero il dataset nella sua forma più naturale?
 - la domanda guida orienta la lettura senza promettere più di quanto la pagina mostri?
 - le metriche derivate arrivano solo dopo la vista base?
+- `section-note` e `method-note` sono davvero minime e non stanno facendo il lavoro che dovrebbe fare un'analisi?
 - la pagina resta leggibile con poco testo?
 - il dettaglio finale riporta l'utente al dataset?

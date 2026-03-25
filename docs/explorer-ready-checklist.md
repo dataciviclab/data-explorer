@@ -57,6 +57,7 @@ Prima di aggiungere un dataset al sito, verificare:
 - `catalog/datasets.json` e `catalog/themes.json` possono rappresentarlo senza eccezioni ad hoc
 - le colonne usate dalle query sono stabili e comprensibili
 - la pagina può essere letta anche da un utente non tecnico
+- eventuali `section-note` e `method-note` sono davvero minime e non stanno reggendo da sole il senso del blocco
 - il link al dato grezzo è disponibile
 - le query non fanno promesse più forti dei dati disponibili
 
