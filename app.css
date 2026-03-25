@@ -348,3 +348,15 @@
     widows: 2;
   }
 }
+
+:global(img[src*='dataciviclab-wordmark']) {
+  height: 1.9rem !important;
+  width: auto;
+  max-width: none;
+}
+
+@media (min-width: 768px) {
+  :global(img[src*='dataciviclab-wordmark']) {
+    height: 2.1rem !important;
+  }
+}
