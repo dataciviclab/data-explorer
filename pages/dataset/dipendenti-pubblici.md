@@ -73,7 +73,7 @@ totale_annuo AS (
 SELECT
   CAST(b.anno AS INTEGER) AS anno,
   cs.comparto,
-  ROUND(100.0 * b.dipendenti_totali / NULLIF(t.totale_pa, 0), 2) AS quota_su_totale_pct
+  ROUND(1.0 * b.dipendenti_totali / NULLIF(t.totale_pa, 0), 4) AS quota_su_totale_pct
 FROM base b
 JOIN comparti_scelti cs
   ON b.comparto = cs.comparto
@@ -101,10 +101,10 @@ SELECT
   b23.assunti_totali,
   b23.cessati_totali,
   b23.assunti_totali - b23.cessati_totali AS saldo_netto,
-  ROUND(100.0 * b23.assunti_totali / NULLIF(b23.dipendenti_totali, 0), 2) AS tasso_assunzione_pct,
-  ROUND(100.0 * b23.cessati_totali / NULLIF(b23.dipendenti_totali, 0), 2) AS tasso_uscita_pct,
-  ROUND(100.0 * b23.donne_totali / NULLIF(b23.dipendenti_totali, 0), 2) AS quota_donne_pct,
-  ROUND(100.0 * (b23.dipendenti_totali - b21.dipendenti_totali) / NULLIF(b21.dipendenti_totali, 0), 2) AS delta_pct_2023_vs_2021
+  ROUND(1.0 * b23.assunti_totali / NULLIF(b23.dipendenti_totali, 0), 4) AS tasso_assunzione_pct,
+  ROUND(1.0 * b23.cessati_totali / NULLIF(b23.dipendenti_totali, 0), 4) AS tasso_uscita_pct,
+  ROUND(1.0 * b23.donne_totali / NULLIF(b23.dipendenti_totali, 0), 4) AS quota_donne_pct,
+  ROUND(1.0 * (b23.dipendenti_totali - b21.dipendenti_totali) / NULLIF(b21.dipendenti_totali, 0), 4) AS delta_pct_2023_vs_2021
 FROM base b23
 LEFT JOIN base b21
   ON b23.comparto = b21.comparto
