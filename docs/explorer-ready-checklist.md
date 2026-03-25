@@ -82,3 +82,9 @@ Ogni pagina dataset dovrebbe avere almeno:
 ## Principio guida
 
 Nel Data Explorer entrano prima i dataset che si leggono bene, non quelli semplicemente disponibili.
+
+## Riferimento
+
+Per la forma della pagina, usare anche:
+
+- `docs/dataset-page-standard.md`
