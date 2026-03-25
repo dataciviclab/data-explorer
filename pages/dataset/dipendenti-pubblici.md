@@ -23,6 +23,16 @@ FROM (
 ORDER BY dipendenti_2023 DESC, comparto
 ```
 
+```sql stock_2023
+SELECT
+  comparto,
+  SUM(donne_totali + uomini_totali) AS dipendenti_totali
+FROM dipendenti_pubblici.occupazione
+WHERE anno = '2023'
+GROUP BY comparto
+ORDER BY dipendenti_totali DESC
+```
+
 ```sql delta_comparti
 WITH comparti AS (
   SELECT
@@ -113,9 +123,15 @@ WHERE b23.anno = '2023'
 ORDER BY b23.dipendenti_totali DESC
 ```
 
+## Dipendenti per comparto nel 2023
+
+Una lettura della distribuzione di base: quanti dipendenti pubblici ci sono in ogni comparto nell'anno più recente disponibile.
+
+<BarChart data={stock_2023} x=comparto y=dipendenti_totali yAxisTitle="Dipendenti totali" swapXY=true />
+
 ## Dove si concentra la crescita 2023 vs 2021
 
-Questo è il blocco principale della pagina: mostra in quali comparti si concentra davvero l'aumento degli organici nel triennio.
+Il confronto mostra in quali comparti si concentra davvero l'aumento degli organici nel triennio.
 
 <BarChart data={delta_comparti} x=comparto y=delta_2023_vs_2021 yAxisTitle="Delta dipendenti 2023 vs 2021" swapXY=true />
 
