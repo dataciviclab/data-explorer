@@ -16,18 +16,30 @@ Ogni pagina dataset dovrebbe avere questi blocchi, nello stesso ordine:
 4. un filtro minimo, quasi sempre l'anno
 5. un blocco principale
 6. un blocco secondario
-7. una nota interpretativa breve
+7. una nota di lettura breve
 8. un link al clean parquet pubblico
+
+## Principio dataset-first
+
+Nel `Data Explorer` la gerarchia editoriale deve partire dal dataset, non da una tesi.
+
+Regole:
+
+- il primo blocco deve mostrare la distribuzione base del dataset nell'anno più recente
+- solo dopo possono arrivare delta, confronti, trend o metriche derivate
+- le letture più interpretative restano nel repo `dataciviclab/analisi`
 
 ## Blocco principale
 
-Il blocco principale deve essere quello che risponde meglio alla domanda guida.
+Il blocco principale deve essere quello che risponde meglio alla domanda guida senza saltare la struttura base del dataset.
 
 Regole:
 
 - deve essere uno solo
 - meglio un grafico o una tabella forte, non due blocchi equivalenti
 - deve essere leggibile senza conoscere già il dataset
+- deve mostrare prima stock, distribuzione o composizione base nell'anno più recente
+- non deve partire subito da ranking, delta o proxy se il dataset non è ancora stato mostrato nella sua forma naturale
 
 ## Blocco secondario
 
@@ -38,6 +50,7 @@ Regole:
 - meglio una `DataTable` scaricabile oppure un confronto mirato
 - deve restare semplice
 - nel v0 non servono più di `2-3` query curate per pagina
+- qui possono entrare confronto, delta, trend o altre letture derivate
 
 ## Query curate
 
@@ -80,3 +93,13 @@ Regole:
 ## Regola pratica del v0
 
 Meglio una pagina con una sola lettura forte e pulita che una pagina con molte query deboli.
+
+## Confine editoriale
+
+| Posizione | Contenuto |
+|-----------|-----------|
+| Blocco 1 | stock o distribuzione base nell'anno più recente |
+| Blocco 2 | confronto, delta, trend o lettura derivata |
+| Tabella finale | vista completa scaricabile |
+
+Le letture interpretative più forti appartengono a `dataciviclab/analisi`, non alle pagine del Data Explorer.
