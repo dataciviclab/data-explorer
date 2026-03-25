@@ -1,0 +1,13 @@
+<svg width="240" height="56" viewBox="0 0 240 56" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>DataCivicLab</title>
+  <circle cx="12" cy="34" r="5" fill="#1D9E75" />
+  <circle cx="24" cy="20" r="7" fill="#1D9E75" />
+  <circle cx="38" cy="12" r="4" fill="#5DCAA5" opacity="0.92" />
+  <circle cx="46" cy="28" r="5" fill="#5DCAA5" opacity="0.88" />
+  <circle cx="18" cy="10" r="3" fill="#9FE1CB" opacity="0.72" />
+  <circle cx="42" cy="40" r="3" fill="#9FE1CB" opacity="0.62" />
+  <line x1="58" y1="8" x2="58" y2="48" stroke="#BDC7D2" stroke-width="1.5" />
+  <text x="68" y="34" font-family="system-ui, sans-serif" font-size="22">
+    <tspan font-weight="600" fill="#12263F">Data</tspan><tspan font-weight="300" fill="#12263F">Civic</tspan><tspan font-weight="600" fill="#12263F">Lab</tspan>
+  </text>
+</svg>
