@@ -25,5 +25,14 @@
     "status": "A",
     "years": [2023, 2024],
     "source": "Terna"
+  },
+  {
+    "slug": "dipendenti-pubblici",
+    "technical_slug": "dipendenti_pubblici_2021_2023",
+    "name": "Dipendenti pubblici per comparto",
+    "theme": "welfare-lavoro",
+    "status": "A",
+    "years": [2021, 2022, 2023],
+    "source": "MEF / RGS / BDAP"
   }
 ]

@@ -1,0 +1,4 @@
+name: dipendenti_pubblici
+type: duckdb
+options:
+  filename: ':memory:'

@@ -17,7 +17,7 @@
   {
     "slug": "welfare-lavoro",
     "name": "Welfare e lavoro",
-    "datasets": []
+    "datasets": ["dipendenti-pubblici"]
   },
   {
     "slug": "giustizia",
