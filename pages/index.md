@@ -20,15 +20,17 @@ I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine 
 
 - [Territorio e ambiente](/temi/territorio-ambiente)
 - [Giustizia](/temi/giustizia)
+- [Welfare e lavoro](/temi/welfare-lavoro)
 
 ## Dataset v0
 
 - [Rifiuti urbani nei comuni](/dataset/ispra-ru-base)
 - [Flussi della giustizia civile](/dataset/civile-flussi)
 - [Mix elettrico per regione](/dataset/terna-electricity)
+- [Dipendenti pubblici per comparto](/dataset/dipendenti-pubblici)
 
 ## Cosa c'è nel v0
 
-- `3` dataset pubblici già leggibili
-- `2` temi attivi
+- `4` dataset pubblici già leggibili
+- `3` temi attivi
 - dati sorgente disponibili come clean parquet pubblici del Lab
