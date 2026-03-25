@@ -11,21 +11,18 @@
 	const queriesInitKey = 'dcl_showQueries_initialized';
 
 	const syncBrandTargets = () => {
-		const headerBrandLink = document.querySelector(
-			'header div.flex.gap-x-4.items-center > a.text-sm.font-bold.text-base-content'
-		);
-		headerBrandLink?.setAttribute('data-dcl-brand-link', 'header');
-		headerBrandLink
-			?.querySelectorAll('img[alt="Home"]')
-			.forEach((img) => img.setAttribute('data-dcl-wordmark', 'header'));
+		document.querySelectorAll('header img[alt="Home"]').forEach((img) => {
+			img.setAttribute('data-dcl-wordmark', 'header');
+			img.closest('a')?.setAttribute('data-dcl-brand-link', 'header');
+		});
 
-		const mobileDrawerBrandLink = document.querySelector(
-			'div.bg-base-100.border-r.border-base-200.shadow-lg a.block.mt-1.text-sm.font-bold'
-		);
-		mobileDrawerBrandLink?.setAttribute('data-dcl-brand-link', 'drawer');
-		mobileDrawerBrandLink
-			?.querySelectorAll('img[alt="Home"]')
-			.forEach((img) => img.setAttribute('data-dcl-wordmark', 'drawer'));
+		[...document.querySelectorAll('img[alt="Home"]')]
+			.filter((img) => !img.closest('header'))
+			.forEach((img) => {
+				img.setAttribute('data-dcl-wordmark', 'drawer');
+				img.closest('a')?.setAttribute('data-dcl-brand-link', 'drawer');
+				img.src = img.className.includes('dark:block') ? darkLogo : lightLogo;
+			});
 	};
 
 	onMount(() => {
