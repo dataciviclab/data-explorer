@@ -7,7 +7,7 @@ last_modified: 2026-03-26
 
 Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili nei tribunali distrettuali italiani.
 
-<div class="guide-question">Quanti procedimenti civili pendono in ogni distretto, e quanti ne entrano ogni anno?</div>
+<div class="guide-question">Come si distribuisce il carico civile tra i distretti italiani nell'anno selezionato, e quanto i procedimenti definiti tengono il passo dei nuovi arrivi?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM civile_flussi.flussi ORDER BY anno DESC
@@ -60,11 +60,17 @@ LIMIT 15
 
 ## Rapporto definiti / sopravvenuti per distretto
 
+Valori più vicini a 1 indicano una maggiore capacità di tenere il passo dei nuovi arrivi.
+
 <DataTable data={distretti_tenuta} rows=15 search=true downloadable=true />
 
 ## Dettaglio per macromateria
 
 Distribuzione a livello nazionale nell'anno selezionato.
+
+<div class="method-note">
+Le <strong>Procedure concorsuali (pre-riforma)</strong> possono mostrare nuovi arrivi quasi nulli ma molti definiti: non è un buco nei dati, ma l'effetto della riforma che ha chiuso progressivamente il perimetro precedente.
+</div>
 
 <DataTable data={materie} rows=15 search=true downloadable=true />
 
