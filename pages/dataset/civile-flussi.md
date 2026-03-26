@@ -2,12 +2,12 @@
 title: Flussi della giustizia civile
 description: Lettura pubblica dei flussi civili del Ministero della Giustizia, con focus su carico, pendenti e materie.
 source: Ministero della Giustizia
-last_modified: 2026-03-24
+last_modified: 2026-03-26
 ---
 
-Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili.
+Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili nei tribunali distrettuali italiani.
 
-<div class="guide-question">La giustizia civile nel mio distretto sta migliorando?</div>
+<div class="guide-question">Quanti procedimenti civili pendono in ogni distretto, e quanti ne entrano ogni anno?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM civile_flussi.flussi ORDER BY anno DESC
@@ -29,18 +29,6 @@ GROUP BY distretto
 ORDER BY pendenti_finali DESC
 ```
 
-```sql materie
-SELECT
-  macromateria,
-  SUM(sopravvenuti) AS sopravvenuti,
-  SUM(definiti_totale) AS definiti_totale
-FROM civile_flussi.flussi
-WHERE anno = '${inputs.anno_sel.value}'
-GROUP BY macromateria
-ORDER BY sopravvenuti DESC
-LIMIT 15
-```
-
 ```sql distretti_tenuta
 SELECT
   distretto,
@@ -54,79 +42,29 @@ ORDER BY rapporto_definiti_sopravvenuti ASC, sopravvenuti DESC
 LIMIT 15
 ```
 
-## Pendenti finali per distretto
+```sql materie
+SELECT
+  macromateria,
+  SUM(sopravvenuti) AS sopravvenuti,
+  SUM(definiti_totale) AS definiti_totale
+FROM civile_flussi.flussi
+WHERE anno = '${inputs.anno_sel.value}'
+GROUP BY macromateria
+ORDER BY sopravvenuti DESC
+LIMIT 15
+```
 
-Questo è il blocco principale della pagina: mostra dove il carico finale resta più pesante nell'anno selezionato.
+## Carico per distretto
 
 <BarChart data={distretti} x=distretto y=pendenti_finali yAxisTitle="Pendenti finali" swapXY=true />
 
-```sql distretti_trend
-SELECT
-  ROW_NUMBER() OVER (ORDER BY distretto) AS distretto_id,
-  distretto
-FROM (
-  SELECT DISTINCT distretto
-  FROM civile_flussi.flussi
-) t
-ORDER BY distretto
-```
-
-<Dropdown name=distretto_sel data={distretti_trend} value=distretto_id label=distretto defaultValue={1} />
-
-```sql pendenti_trend
-WITH distretti_scelti AS (
-  SELECT
-    ROW_NUMBER() OVER (ORDER BY distretto) AS distretto_id,
-    distretto
-  FROM (
-    SELECT DISTINCT distretto
-    FROM civile_flussi.flussi
-  ) t
-)
-SELECT
-  CAST(anno AS INTEGER) AS anno,
-  'Nazionale' AS serie,
-  ROUND(SUM(definiti_totale) / NULLIF(SUM(sopravvenuti), 0), 3) AS rapporto_definiti_sopravvenuti
-FROM civile_flussi.flussi
-GROUP BY 1, 2
-UNION ALL
-SELECT
-  CAST(f.anno AS INTEGER) AS anno,
-  d.distretto AS serie,
-  ROUND(SUM(f.definiti_totale) / NULLIF(SUM(f.sopravvenuti), 0), 3) AS rapporto_definiti_sopravvenuti
-FROM civile_flussi.flussi f
-JOIN distretti_scelti d
-  ON f.distretto = d.distretto
-WHERE d.distretto_id = ${inputs.distretto_sel.value}
-GROUP BY 1, 2
-ORDER BY anno, serie
-```
-
-## Definiti vs sopravvenuti nel tempo
-
-La linea mette a confronto il distretto selezionato con il totale nazionale usando il rapporto tra procedimenti definiti e sopravvenuti. Valori più vicini a `1` indicano una maggiore capacità di tenere il passo dei nuovi arrivi.
-
-<LineChart data={pendenti_trend} x=anno y=rapporto_definiti_sopravvenuti series=serie xAxisTitle="Anno" yAxisTitle="Rapporto definiti / sopravvenuti" />
-
-## Distretti dove i definiti tengono meno
-
-Un rapporto vicino a `1` indica che i procedimenti definiti sono simili ai sopravvenuti dell'anno. Valori più bassi suggeriscono maggiore difficoltà a riassorbire il flusso in entrata.
+## Rapporto definiti / sopravvenuti per distretto
 
 <DataTable data={distretti_tenuta} rows=15 search=true downloadable=true />
 
-## Macromaterie più pesanti
+## Dettaglio per macromateria
 
-<div class="method-note">
-Le <strong>Procedure concorsuali (pre-riforma)</strong> possono mostrare nuovi arrivi quasi nulli ma molti definiti:
-non è un buco nei dati, ma l'effetto della riforma che ha chiuso progressivamente il perimetro precedente.
-</div>
-
-<div class="section-note">
-Da qui cambia anche la granularità della lettura: non stiamo più confrontando i distretti,
-ma le aree del contenzioso a livello nazionale nell'anno selezionato.
-</div>
-
-La tabella finale serve come terzo livello di lettura: aiuta a capire quali aree del contenzioso pesano di più nei flussi recenti.
+Distribuzione a livello nazionale nell'anno selezionato.
 
 <DataTable data={materie} rows=15 search=true downloadable=true />
 
