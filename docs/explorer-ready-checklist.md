@@ -57,6 +57,7 @@ Prima di aggiungere un dataset al sito, verificare:
 - `catalog/datasets.json` e `catalog/themes.json` possono rappresentarlo senza eccezioni ad hoc
 - le colonne usate dalle query sono stabili e comprensibili
 - la pagina può essere letta anche da un utente non tecnico
+- eventuali `section-note` e `method-note` sono davvero minime e non stanno reggendo da sole il senso del blocco
 - il link al dato grezzo è disponibile
 - le query non fanno promesse più forti dei dati disponibili
 
@@ -75,10 +76,16 @@ Ogni pagina dataset dovrebbe avere almeno:
 
 - una frase iniziale che spiega cosa contiene il dataset
 - una frase che esplicita la domanda guida della pagina
-- una breve nota interpretativa sul blocco più importante
+- se serve, una breve nota di lettura sul blocco più importante
 - `source` e `last_modified` nel frontmatter
 - un link al clean parquet pubblico
 
 ## Principio guida
 
 Nel Data Explorer entrano prima i dataset che si leggono bene, non quelli semplicemente disponibili.
+
+## Riferimento
+
+Per la forma della pagina, usare anche:
+
+- `docs/dataset-page-standard.md`
