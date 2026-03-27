@@ -233,26 +233,22 @@
   }
 
   .guide-question {
+    @apply bg-base-200/80 text-base-content border-l-4 border-primary rounded-r-md;
     margin: 1rem 0 1.5rem;
     padding: 0.95rem 1rem;
-    border-left: 4px solid #1f5f99;
-    background: #f5f9fc;
-    color: #10243f;
     font-size: 1.05rem;
     font-weight: 600;
   }
 
   .section-note {
+    @apply text-base-content-muted;
     margin: 0.4rem 0 1rem;
-    color: #33506f;
   }
 
   .method-note {
+    @apply bg-base-200 text-base-content border border-base-300 rounded-md;
     margin: 1rem 0 1.35rem;
     padding: 0.9rem 1rem;
-    border: 1px solid #c9d9e8;
-    background: #e9f1f8;
-    color: #10243f;
   }
 }
 
