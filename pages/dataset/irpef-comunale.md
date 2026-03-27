@@ -7,7 +7,7 @@ last_modified: 2026-03-27
 
 Questo dataset raccoglie i dati IRPEF comunali su contribuenti, reddito imponibile e imposta netta, aggregati per comune e regione nel periodo 2019-2023.
 
-<div class="guide-question">Come si distribuisce la capacità fiscale IRPEF tra regioni e principali capoluoghi italiani nel periodo 2019-2023?</div>
+<div class="guide-question">Come si distribuisce la capacità fiscale IRPEF tra le regioni italiane, e come cambia il confronto tra alcuni principali capoluoghi nel periodo 2019-2023?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM irpef_comunale.capacita_fiscale ORDER BY anno DESC
