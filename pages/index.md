@@ -19,6 +19,7 @@ I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine 
 ## Temi attivi
 
 - [Territorio e ambiente](/temi/territorio-ambiente)
+- [Finanza pubblica](/temi/finanza-pubblica)
 - [Giustizia](/temi/giustizia)
 - [Welfare e lavoro](/temi/welfare-lavoro)
 
@@ -28,9 +29,10 @@ I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine 
 - [Flussi della giustizia civile](/dataset/civile-flussi)
 - [Mix elettrico per regione](/dataset/terna-electricity)
 - [Dipendenti pubblici per comparto](/dataset/dipendenti-pubblici)
+- [IRPEF comunale](/dataset/irpef-comunale)
 
 ## Cosa c'è nel v0
 
-- `4` dataset pubblici già leggibili
-- `3` temi attivi
+- `5` dataset pubblici già leggibili
+- `4` temi attivi
 - dati sorgente disponibili come clean parquet pubblici del Lab

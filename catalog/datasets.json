@@ -34,5 +34,14 @@
     "status": "A",
     "years": [2021, 2022, 2023],
     "source": "MEF / RGS / BDAP"
+  },
+  {
+    "slug": "irpef-comunale",
+    "technical_slug": "irpef_comunale_2019_2023",
+    "name": "IRPEF comunale",
+    "theme": "finanza-pubblica",
+    "status": "A",
+    "years": [2019, 2020, 2021, 2022, 2023],
+    "source": "MEF / Finanze"
   }
 ]
