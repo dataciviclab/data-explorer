@@ -20,5 +20,6 @@ FROM read_parquet(
 )
 WHERE comune IS NOT NULL
   AND regione IS NOT NULL
+  AND regione <> 'Mancante/errata'
   AND numero_contribuenti IS NOT NULL
   AND reddito_imponibile_eur IS NOT NULL
