@@ -1,0 +1,4 @@
+name: irpef_comunale
+type: duckdb
+options:
+  filename: ':memory:'

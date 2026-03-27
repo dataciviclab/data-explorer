@@ -7,7 +7,7 @@
   {
     "slug": "finanza-pubblica",
     "name": "Finanza pubblica",
-    "datasets": []
+    "datasets": ["irpef-comunale"]
   },
   {
     "slug": "sanita",
