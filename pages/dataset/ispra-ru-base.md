@@ -3,6 +3,8 @@ title: Rifiuti urbani nei comuni
 description: Lettura pubblica dei dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per territorio.
 source: ISPRA
 last_modified: 2026-03-24
+discussion_url: https://github.com/dataciviclab/dataciviclab/discussions/22
+analisi_url: https://github.com/dataciviclab/progetto-pilota
 ---
 
 Questo dataset raccoglie i dati ISPRA sui rifiuti urbani dei comuni italiani.
@@ -113,6 +115,11 @@ La tabella usa lo stesso filtro della dispersione per scendere nel dettaglio dei
 Tra i comuni con almeno 100 mila abitanti, la tabella aiuta a vedere dove la raccolta differenziata resta alta anche su volumi più grandi.
 
 <DataTable data={grandi_comuni} rows=20 search=true downloadable=true />
+
+## Approfondisci
+
+- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/22) - domanda aperta e commenti della community
+- [Analisi completa](https://github.com/dataciviclab/progetto-pilota) - notebook e metodologia
 
 ## Risorse e dati
 

@@ -3,6 +3,8 @@ title: IRPEF comunale
 description: Lettura pubblica dei dati IRPEF comunali del MEF, con focus su contribuenti, reddito imponibile e confronto tra regioni e principali capoluoghi.
 source: MEF / Finanze
 last_modified: 2026-03-27
+discussion_url: https://github.com/dataciviclab/dataciviclab/discussions/88
+analisi_url: https://github.com/dataciviclab/dataciviclab/tree/main/analisi/irpef-comunale
 ---
 
 Questo dataset raccoglie i dati IRPEF comunali su contribuenti, reddito imponibile e imposta netta, aggregati per comune e regione nel periodo 2019-2023.
@@ -62,6 +64,11 @@ La shortlist include nove principali capoluoghi: Roma, Milano, Torino, Genova, N
 Leggi questi dati come misura di capacità fiscale osservata, non come reddito pro capite dei residenti.
 
 <DataTable data={capoluoghi_confronto} rows=20 search=true downloadable=true />
+
+## Approfondisci
+
+- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/88) - domanda aperta e commenti della community
+- [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/irpef-comunale) - notebook e metodologia
 
 ## Risorse e dati
 
