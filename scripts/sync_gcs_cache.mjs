@@ -2,28 +2,10 @@ import { createWriteStream } from 'node:fs';
 import { mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
+import cachePlan from './gcs-cache-plan.json' with { type: 'json' };
 
 const force = process.env.FORCE_GCS_SYNC === '1';
 const root = process.cwd();
-
-const cachePlan = [
-  {
-    slug: 'ispra_ru_base',
-    files: [2020, 2021, 2022, 2023, 2024].map((year) => ({
-      remoteUrl: `https://storage.googleapis.com/dataciviclab-clean/ispra_ru_base/${year}/ispra_ru_base_${year}_clean.parquet`,
-      relativePath: path.join('.evidence', 'gcs-cache', 'ispra_ru_base', String(year), `ispra_ru_base_${year}_clean.parquet`)
-    }))
-  },
-  {
-    slug: 'civile_flussi_2014_2024',
-    files: [
-      {
-        remoteUrl: 'https://storage.googleapis.com/dataciviclab-clean/civile_flussi_2014_2024/2024/civile_flussi_2014_2024_2024_clean.parquet',
-        relativePath: path.join('.evidence', 'gcs-cache', 'civile_flussi_2014_2024', '2024', 'civile_flussi_2014_2024_2024_clean.parquet')
-      }
-    ]
-  }
-];
 
 async function fileExists(filePath) {
   try {
