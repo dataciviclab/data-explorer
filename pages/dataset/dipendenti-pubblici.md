@@ -3,6 +3,7 @@ title: Dipendenti pubblici per comparto
 description: Lettura pubblica dei dati BDAP / RGS sul pubblico impiego, con focus su crescita, turnover e composizione dei comparti.
 source: MEF / RGS / BDAP
 last_modified: 2026-03-25
+analisi_url: https://github.com/dataciviclab/dataciviclab/tree/main/analisi/dipendenti-pubblici
 ---
 
 Questo dataset raccoglie i dati BDAP / RGS sui dipendenti pubblici italiani e li rende leggibili per comparto nel triennio 2021-2023.
@@ -85,6 +86,10 @@ Il confronto mostra in quali comparti si concentra davvero l'aumento degli organ
 La tabella finale aiuta a leggere insieme stock, saldo netto, tassi di entrata/uscita, quota donne e crescita percentuale 2023 vs 2021 per comparto.
 
 <DataTable data={turnover_2023} rows=20 search=true downloadable=true />
+
+## Approfondisci
+
+- [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/dipendenti-pubblici) - notebook e metodologia
 
 ## Risorse e dati
 

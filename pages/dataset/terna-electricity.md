@@ -3,6 +3,8 @@ title: Mix elettrico per regione
 description: Lettura pubblica dei dati Terna sul mix elettrico regionale e sul peso delle fonti nel sistema nazionale.
 source: Terna
 last_modified: 2026-03-24
+discussion_url: https://github.com/dataciviclab/dataciviclab/discussions/115
+analisi_url: https://github.com/dataciviclab/dataciviclab/tree/main/analisi/terna-electricity-by-source
 ---
 
 Questo dataset raccoglie i dati Terna sulla produzione elettrica per fonte e regione.
@@ -116,6 +118,11 @@ Quando selezioni solo <strong>Rinnovabili</strong> o solo <strong>Fossili</stron
 La tabella ordina le fonti per quota dentro ciascuna regione, così il dettaglio segue la stessa logica di lettura della barra impilata.
 
 <DataTable data={mix_regionale} rows=30 search=true downloadable=true />
+
+## Approfondisci
+
+- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/115) - domanda aperta e commenti della community
+- [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/terna-electricity-by-source) - notebook e metodologia
 
 ## Risorse e dati
 

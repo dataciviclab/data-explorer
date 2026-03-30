@@ -3,6 +3,8 @@ title: Flussi della giustizia civile
 description: Lettura pubblica dei flussi civili del Ministero della Giustizia, con focus su carico, pendenti e materie.
 source: Ministero della Giustizia
 last_modified: 2026-03-26
+discussion_url: https://github.com/dataciviclab/dataciviclab/discussions/94
+analisi_url: https://github.com/dataciviclab/dataciviclab/tree/main/analisi/civile-flussi
 ---
 
 Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili nei tribunali distrettuali italiani.
@@ -73,6 +75,11 @@ Le <strong>Procedure concorsuali (pre-riforma)</strong> possono mostrare nuovi a
 </div>
 
 <DataTable data={materie} rows=15 search=true downloadable=true />
+
+## Approfondisci
+
+- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/94) - domanda aperta e commenti della community
+- [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/civile-flussi) - notebook e metodologia
 
 ## Risorse e dati
 
