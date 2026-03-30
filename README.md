@@ -38,6 +38,8 @@ Verifica sources:
 npm run sources
 ```
 
+Nota: prima di `sources`, il repo sincronizza in locale i parquet necessari per `ispra-ru` dentro `.evidence/gcs-cache/`. Il bucket GCS resta la fonte pubblica, ma il source SQL di `ispra-ru` legge dalla cache locale per ridurre dipendenza remota durante il refresh.
+
 Validazione catalogo:
 
 ```powershell
