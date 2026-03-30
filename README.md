@@ -38,7 +38,7 @@ Verifica sources:
 npm run sources
 ```
 
-Nota: prima di `sources`, il repo sincronizza in locale i parquet necessari dentro `.evidence/gcs-cache/`. Al momento il pattern copre `ispra-ru` e `civile-flussi`: il bucket GCS resta la fonte pubblica, ma i source SQL leggono dalla cache locale per ridurre dipendenza remota durante il refresh.
+Nota: prima di `sources`, il repo sincronizza in locale i parquet necessari dentro `.evidence/gcs-cache/`. Al momento il pattern copre `ispra-ru` e `civile-flussi`: il bucket GCS resta la fonte pubblica, ma i source SQL leggono dalla cache locale per ridurre dipendenza remota durante il refresh. La convenzione del repo e' documentata in `docs/gcs-cache-convention.md`.
 
 Validazione catalogo:
 
