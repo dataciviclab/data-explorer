@@ -6,6 +6,7 @@
     "build": "evidence build",
     "build:strict": "evidence build:strict",
     "dev": "evidence dev --open /",
+    "presources": "node scripts/sync_ispra_ru_cache.mjs",
     "test": "npm run validate:catalog && evidence build",
     "sources": "evidence sources",
     "sources:strict": "evidence sources --strict",
