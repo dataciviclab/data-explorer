@@ -45,5 +45,22 @@
         "relativePath": ".evidence/gcs-cache/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet"
       }
     ]
+  },
+  {
+    "slug": "dipendenti_pubblici_2021_2023",
+    "files": [
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici_2021_2023/2021/dipendenti_pubblici_2021_2023_2021_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/dipendenti_pubblici_2021_2023/2021/dipendenti_pubblici_2021_2023_2021_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici_2021_2023/2022/dipendenti_pubblici_2021_2023_2022_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/dipendenti_pubblici_2021_2023/2022/dipendenti_pubblici_2021_2023_2022_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici_2021_2023/2023/dipendenti_pubblici_2021_2023_2023_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/dipendenti_pubblici_2021_2023/2023/dipendenti_pubblici_2021_2023_2023_clean.parquet"
+      }
+    ]
   }
 ]
