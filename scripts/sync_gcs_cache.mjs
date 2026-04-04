@@ -6,7 +6,6 @@ import cachePlan from './gcs-cache-plan.json' with { type: 'json' };
 
 const force = process.env.FORCE_GCS_SYNC === '1';
 const root = process.cwd();
-
 async function fileExists(filePath) {
   try {
     const info = await stat(filePath);
