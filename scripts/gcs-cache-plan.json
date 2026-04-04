@@ -32,5 +32,18 @@
         "relativePath": ".evidence/gcs-cache/civile_flussi_2014_2024/2024/civile_flussi_2014_2024_2024_clean.parquet"
       }
     ]
+  },
+  {
+    "slug": "terna_electricity_by_source",
+    "files": [
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/terna_electricity_by_source/2023/terna_electricity_by_source_2023_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/terna_electricity_by_source/2023/terna_electricity_by_source_2023_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet"
+      }
+    ]
   }
 ]
