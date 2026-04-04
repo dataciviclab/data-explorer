@@ -11,11 +11,11 @@ SELECT
   addizionale_comunale_eur
 FROM read_parquet(
   [
-    'https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2019/irpef_comunale_2019_2023_2019_clean.parquet',
-    'https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2020/irpef_comunale_2019_2023_2020_clean.parquet',
-    'https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2021/irpef_comunale_2019_2023_2021_clean.parquet',
-    'https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2022/irpef_comunale_2019_2023_2022_clean.parquet',
-    'https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2023/irpef_comunale_2019_2023_2023_clean.parquet'
+    '.evidence/gcs-cache/irpef_comunale_2019_2023/2019/irpef_comunale_2019_2023_2019_clean.parquet',
+    '.evidence/gcs-cache/irpef_comunale_2019_2023/2020/irpef_comunale_2019_2023_2020_clean.parquet',
+    '.evidence/gcs-cache/irpef_comunale_2019_2023/2021/irpef_comunale_2019_2023_2021_clean.parquet',
+    '.evidence/gcs-cache/irpef_comunale_2019_2023/2022/irpef_comunale_2019_2023_2022_clean.parquet',
+    '.evidence/gcs-cache/irpef_comunale_2019_2023/2023/irpef_comunale_2019_2023_2023_clean.parquet'
   ]
 )
 WHERE comune IS NOT NULL

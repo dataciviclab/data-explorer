@@ -62,5 +62,30 @@
         "relativePath": ".evidence/gcs-cache/dipendenti_pubblici_2021_2023/2023/dipendenti_pubblici_2021_2023_2023_clean.parquet"
       }
     ]
+  },
+  {
+    "slug": "irpef_comunale_2019_2023",
+    "files": [
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2019/irpef_comunale_2019_2023_2019_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/irpef_comunale_2019_2023/2019/irpef_comunale_2019_2023_2019_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2020/irpef_comunale_2019_2023_2020_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/irpef_comunale_2019_2023/2020/irpef_comunale_2019_2023_2020_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2021/irpef_comunale_2019_2023_2021_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/irpef_comunale_2019_2023/2021/irpef_comunale_2019_2023_2021_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2022/irpef_comunale_2019_2023_2022_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/irpef_comunale_2019_2023/2022/irpef_comunale_2019_2023_2022_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/irpef_comunale_2019_2023/2023/irpef_comunale_2019_2023_2023_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/irpef_comunale_2019_2023/2023/irpef_comunale_2019_2023_2023_clean.parquet"
+      }
+    ]
   }
 ]
