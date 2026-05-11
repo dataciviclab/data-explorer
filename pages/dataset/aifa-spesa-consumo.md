@@ -30,10 +30,7 @@ ORDER BY spesa_ml_eur DESC
 ```sql top_classi_atc1
 SELECT
   descrizione_atc1,
-  ROUND(SUM(spesa_convenzionata) / 1e6, 2) AS spesa_ml_eur,
-  ROUND(SUM(spesa_convenzionata) / NULLIF(SUM(
-    (SELECT SUM(spesa_convenzionata) FROM aifa_spesa_consumo.spesa WHERE anno = '${inputs.anno_sel.value}')
-  ), 0) * 100, 1) AS quota_pct
+  ROUND(SUM(spesa_convenzionata) / 1e6, 2) AS spesa_ml_eur
 FROM aifa_spesa_consumo.spesa
 WHERE anno = '${inputs.anno_sel.value}'
 GROUP BY descrizione_atc1
@@ -41,19 +38,7 @@ ORDER BY spesa_ml_eur DESC
 LIMIT 10
 ```
 
-```sql regioni_disctinct
-SELECT 0 AS regione_id, 'Tutte le regioni' AS regione
-UNION ALL
-SELECT ROW_NUMBER() OVER (ORDER BY regione) AS regione_id, regione
-FROM (
-  SELECT DISTINCT regione FROM aifa_spesa_consumo.spesa
-) t
-ORDER BY regione_id
-```
-
-<Dropdown name=regione_sel data={regioni_disctinct} value=regione_id label=regione defaultValue={0} />
-
-```sql spesa_mensile_regione
+```sql spesa_mensile
 SELECT
   mese,
   regione,
@@ -61,7 +46,6 @@ SELECT
   ROUND(SUM(numero_confezioni_convenzionata) / 1e6, 2) AS confezioni_ml
 FROM aifa_spesa_consumo.spesa
 WHERE anno = '${inputs.anno_sel.value}'
-  AND (${inputs.regione_sel.value} = 0 OR regione = (SELECT regione FROM regioni_disctinct WHERE regione_id = ${inputs.regione_sel.value}))
 GROUP BY mese, regione
 ORDER BY mese, spesa_ml_eur DESC
 ```
@@ -74,15 +58,15 @@ La classifica regionale mostra dove si concentra la spesa complessiva. Il valore
 
 ## Top 10 classi terapeutiche ATC1
 
-Le classi a maggiore spesa nell'anno selezionato. Il岐 calcolo è sul totale nazionale, indipendentemente dalla regione scelta.
+Le classi a maggiore spesa nell'anno selezionato, calcolate sul totale nazionale.
 
 <BarChart data={top_classi_atc1} x=descrizione_atc1 y=spesa_ml_eur yAxisTitle="Spesa (M€)" swapXY=true />
 
 ## Andamento mensile
 
-Il grafico mostra l'evoluzione della spesa mese per mese. Il filtro regione controlla sia il trend sia la tabella di dettaglio.
+L'evoluzione della spesa mese per mese per le principali regioni.
 
-<LineChart data={spesa_mensile_regione} x=mese y=spesa_ml_eur series=regione yAxisTitle="Spesa (M€)" />
+<LineChart data={spesa_mensile} x=mese y=spesa_ml_eur series=regione yAxisTitle="Spesa (M€)" />
 
 <div class="section-note">
 I dati si riferiscono al canale della <strong>farmaceutica convenzionata</strong> (prescrizioni SSN dispensate in farmacia). Sono esclusi gli acquisti diretti e il canale tracciabilità.
@@ -90,7 +74,7 @@ I dati si riferiscono al canale della <strong>farmaceutica convenzionata</strong
 
 ## Dettaglio mensile per regione
 
-<DataTable data={spesa_mensile_regione} rows=30 search=true downloadable=true />
+<DataTable data={spesa_mensile} rows=30 search=true downloadable=true />
 
 ## Risorse e dati
 
