@@ -12,7 +12,7 @@
   {
     "slug": "sanita",
     "name": "Sanità",
-    "datasets": []
+    "datasets": ["aifa-spesa-consumo"]
   },
   {
     "slug": "welfare-lavoro",

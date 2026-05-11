@@ -87,5 +87,38 @@
         "relativePath": ".evidence/gcs-cache/irpef_comunale_2019_2023/2023/irpef_comunale_2019_2023_2023_clean.parquet"
       }
     ]
+  },
+  {
+    "slug": "aifa_spesa_consumo",
+    "files": [
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2018/aifa_spesa_consumo_2018_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/aifa_spesa_consumo/2018/aifa_spesa_consumo_2018_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2019/aifa_spesa_consumo_2019_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/aifa_spesa_consumo/2019/aifa_spesa_consumo_2019_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2020/aifa_spesa_consumo_2020_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/aifa_spesa_consumo/2020/aifa_spesa_consumo_2020_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2021/aifa_spesa_consumo_2021_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/aifa_spesa_consumo/2021/aifa_spesa_consumo_2021_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2022/aifa_spesa_consumo_2022_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/aifa_spesa_consumo/2022/aifa_spesa_consumo_2022_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2023/aifa_spesa_consumo_2023_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/aifa_spesa_consumo/2023/aifa_spesa_consumo_2023_clean.parquet"
+      },
+      {
+        "remoteUrl": "https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2024/aifa_spesa_consumo_2024_clean.parquet",
+        "relativePath": ".evidence/gcs-cache/aifa_spesa_consumo/2024/aifa_spesa_consumo_2024_clean.parquet"
+      }
+    ]
   }
 ]
