@@ -46,8 +46,6 @@ LIMIT 20
 
 ## Regioni: quota di raccolta differenziata
 
-La classifica per regione usa una quota calcolata sui volumi complessivi, non una semplice media dei comuni. Questo rende il confronto più leggibile quando i comuni hanno dimensioni molto diverse.
-
 <BarChart data={sintesi_regioni} x=regione y=quota_rd yAxisTitle="% raccolta differenziata" swapXY=true />
 
 ```sql regioni_select
@@ -98,28 +96,16 @@ FROM base
 ORDER BY percentuale_rd DESC, kg_per_abitante DESC
 ```
 
-## Scatter %RD vs kg/ab
-
-La dispersione aiuta a leggere insieme qualità della raccolta e quantità prodotta per abitante. Il filtro regione controlla sia lo scatter sia la tabella di dettaglio.
-
 <ScatterPlot data={comuni_scatter} x=kg_per_abitante y=percentuale_rd series=regione xAxisTitle="kg per abitante" yAxisTitle="% raccolta differenziata" pointSize=6 />
 
-## Comuni della regione selezionata
-
-La tabella usa lo stesso filtro della dispersione per scendere nel dettaglio dei comuni più interessanti nell'area scelta.
-
 <DataTable data={comuni_scatter} rows=25 search=true downloadable=true />
-
-## Grandi comuni
-
-Tra i comuni con almeno 100 mila abitanti, la tabella aiuta a vedere dove la raccolta differenziata resta alta anche su volumi più grandi.
 
 <DataTable data={grandi_comuni} rows=20 search=true downloadable=true />
 
 ## Approfondisci
 
-- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/22) - domanda aperta e commenti della community
-- [Analisi completa](https://github.com/dataciviclab/progetto-pilota) - notebook e metodologia
+- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/22)
+- [Analisi completa](https://github.com/dataciviclab/progetto-pilota)
 
 ## Risorse e dati
 

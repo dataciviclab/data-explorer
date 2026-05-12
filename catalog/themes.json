@@ -2,12 +2,12 @@
   {
     "slug": "territorio-ambiente",
     "name": "Territorio e ambiente",
-    "datasets": ["ispra-ru-base", "terna-electricity"]
+    "datasets": ["ispra_ru_base", "terna_capacita_rinnovabile"]
   },
   {
     "slug": "finanza-pubblica",
     "name": "Finanza pubblica",
-    "datasets": ["irpef-comunale"]
+    "datasets": ["irpef_comunale"]
   },
   {
     "slug": "sanita",
@@ -17,11 +17,11 @@
   {
     "slug": "welfare-lavoro",
     "name": "Welfare e lavoro",
-    "datasets": ["dipendenti-pubblici"]
+    "datasets": ["dipendenti_pubblici"]
   },
   {
     "slug": "giustizia",
     "name": "Giustizia",
-    "datasets": ["civile-flussi"]
+    "datasets": ["civile_flussi"]
   }
 ]

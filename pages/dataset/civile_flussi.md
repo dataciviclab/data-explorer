@@ -9,7 +9,7 @@ analisi_url: https://github.com/dataciviclab/dataciviclab/tree/main/analisi/civi
 
 Questo dataset raccoglie i dati del Ministero della Giustizia sui flussi civili nei tribunali distrettuali italiani.
 
-<div class="guide-question">Come si distribuisce il carico civile tra i distretti italiani nell'anno selezionato, e quanto i procedimenti definiti tengono il passo dei nuovi arrivi?</div>
+<div class="guide-question">Come si distribuisce il carico civile tra i distretti italiani?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM civile_flussi.flussi ORDER BY anno DESC
@@ -56,32 +56,18 @@ ORDER BY sopravvenuti DESC
 LIMIT 15
 ```
 
-## Carico per distretto
-
 <BarChart data={distretti} x=distretto y=pendenti_finali yAxisTitle="Pendenti finali" swapXY=true />
 
-## Rapporto definiti / sopravvenuti per distretto
-
-Valori più vicini a 1 indicano una maggiore capacità di tenere il passo dei nuovi arrivi.
-
 <DataTable data={distretti_tenuta} rows=15 search=true downloadable=true />
-
-## Dettaglio per macromateria
-
-Distribuzione a livello nazionale nell'anno selezionato.
-
-<div class="method-note">
-Le <strong>Procedure concorsuali (pre-riforma)</strong> possono mostrare nuovi arrivi quasi nulli ma molti definiti: non è un buco nei dati, ma l'effetto della riforma che ha chiuso progressivamente il perimetro precedente.
-</div>
 
 <DataTable data={materie} rows=15 search=true downloadable=true />
 
 ## Approfondisci
 
-- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/94) - domanda aperta e commenti della community
-- [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/civile-flussi) - notebook e metodologia
+- [Discussione civica](https://github.com/dataciviclab/dataciviclab/discussions/94)
+- [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/civile-flussi)
 
 ## Risorse e dati
 
-- [Scarica il clean parquet 2024](https://storage.googleapis.com/dataciviclab-clean/civile_flussi_2014_2024/2024/civile_flussi_2014_2024_2024_clean.parquet)
-- [Fonte originale: Ministero della Giustizia — statistiche civili](https://datiestatistiche.giustizia.it)
+- [Scarica il clean parquet](https://storage.googleapis.com/dataciviclab-clean/civile_flussi/2025/civile_flussi_2025_clean.parquet)
+- [Fonte originale: Ministero della Giustizia](https://datiestatistiche.giustizia.it)

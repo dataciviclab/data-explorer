@@ -1,15 +1,32 @@
 SELECT
   CAST(anno AS VARCHAR) AS anno,
   comparto,
-  donne_totali,
-  uomini_totali,
-  assunti_totali,
-  cessati_totali
+  (donne_tempo_pieno + donne_part_time_inf_50 + donne_part_time_sup_50) AS donne_totali,
+  (uomini_tempo_pieno + uomini_part_time_inf_50 + uomini_part_time_sup_50) AS uomini_totali,
+  (donne_assunte + uomini_assunti) AS assunti_totali,
+  (donne_cessate + uomini_cessati) AS cessati_totali
 FROM read_parquet(
-  [
-    '.evidence/gcs-cache/dipendenti_pubblici_2021_2023/2021/dipendenti_pubblici_2021_2023_2021_clean.parquet',
-    '.evidence/gcs-cache/dipendenti_pubblici_2021_2023/2022/dipendenti_pubblici_2021_2023_2022_clean.parquet',
-    '.evidence/gcs-cache/dipendenti_pubblici_2021_2023/2023/dipendenti_pubblici_2021_2023_2023_clean.parquet'
-  ]
+  'https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2021/dipendenti_pubblici_2021_clean.parquet'
 )
-WHERE comparto IS NOT NULL
+UNION ALL
+SELECT
+  CAST(anno AS VARCHAR) AS anno,
+  comparto,
+  (donne_tempo_pieno + donne_part_time_inf_50 + donne_part_time_sup_50) AS donne_totali,
+  (uomini_tempo_pieno + uomini_part_time_inf_50 + uomini_part_time_sup_50) AS uomini_totali,
+  (donne_assunte + uomini_assunti) AS assunti_totali,
+  (donne_cessate + uomini_cessati) AS cessati_totali
+FROM read_parquet(
+  'https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2022/dipendenti_pubblici_2022_clean.parquet'
+)
+UNION ALL
+SELECT
+  CAST(anno AS VARCHAR) AS anno,
+  comparto,
+  (donne_tempo_pieno + donne_part_time_inf_50 + donne_part_time_sup_50) AS donne_totali,
+  (uomini_tempo_pieno + uomini_part_time_inf_50 + uomini_part_time_sup_50) AS uomini_totali,
+  (donne_assunte + uomini_assunti) AS assunti_totali,
+  (donne_cessate + uomini_cessati) AS cessati_totali
+FROM read_parquet(
+  'https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2023/dipendenti_pubblici_2023_clean.parquet'
+)
