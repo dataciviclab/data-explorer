@@ -3,18 +3,11 @@ title: DataCivicLab Explorer
 description: Frontend pubblico leggero sui dataset civici del Lab, con temi, query curate e link ai clean parquet pubblici.
 ---
 
-DataCivicLab Explorer è un frontend pubblico leggero sui dataset civici del Lab.
+DataCivicLab Explorer e' un frontend pubblico leggero sui dataset civici del Lab.
 
 Il v0 parte da pochi dataset `explorer-ready`, organizzati per tema, con query curate, tabelle scaricabili e link diretti al dato grezzo.
 
 I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine statiche con Evidence.dev.
-
-## Come usare il sito
-
-- entra da un tema se vuoi orientarti su un'area civica del Lab
-- entra da un dataset se hai già una domanda specifica
-- usa le tabelle per cercare, filtrare e scaricare CSV
-- apri il link al clean parquet se vuoi riusare il dato direttamente
 
 ## Temi attivi
 
@@ -25,14 +18,14 @@ I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine 
 
 ## Dataset v0
 
-- [Rifiuti urbani nei comuni](/dataset/ispra-ru-base)
-- [Flussi della giustizia civile](/dataset/civile-flussi)
-- [Mix elettrico per regione](/dataset/terna-electricity)
-- [Dipendenti pubblici per comparto](/dataset/dipendenti-pubblici)
-- [IRPEF comunale](/dataset/irpef-comunale)
+- [Rifiuti urbani nei comuni](/dataset/ispra_ru_base)
+- [Flussi della giustizia civile](/dataset/civile_flussi)
+- [Mix elettrico per regione](/dataset/terna_capacita_rinnovabile)
+- [Dipendenti pubblici per comparto](/dataset/dipendenti_pubblici)
+- [IRPEF comunale](/dataset/irpef_comunale)
 
-## Cosa c'è nel v0
+## Cosa c'e' nel v0
 
-- `5` dataset pubblici già leggibili
+- `5` dataset pubblici gia' leggibili
 - `4` temi attivi
 - dati sorgente disponibili come clean parquet pubblici del Lab
