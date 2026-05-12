@@ -2,162 +2,78 @@
 
 Frontend pubblico dati del Lab, basato su Evidence.dev, DuckDB e clean parquet pubblici su GCS.
 
+Il catalogo dataset viene generato automaticamente da `dataset-incubator/registry/clean_catalog.json`.
+I source SQL leggono i parquet direttamente da GCS via HTTP (nessuna cache locale).
+
 ## Stato
 
 Bootstrap v0 locale completato con:
 
-- catalogo minimo
-- 3 dataset `explorer-ready`
-- 2 temi attivi
+- catalogo generato dal registry DI (23+ dataset disponibili)
+- 5 dataset `featured` con pagine curate
+- 4 temi attivi
 - build statica Evidence verde
-
-Dataset v0:
-
-- `ispra_ru_base`
-- `civile_flussi_2014_2024`
-- `terna_electricity_by_source`
 
 ## Setup locale
 
 Node 20:
 
-```powershell
+```bash
 fnm use 20
 node --version
 ```
 
 Install:
 
-```powershell
+```bash
 npm install --legacy-peer-deps
 ```
 
-Verifica sources:
+Genera catalogo:
 
-```powershell
-npm run sources
+```bash
+npm run generate:catalog
 ```
 
-Nota: prima di `sources`, il repo sincronizza in locale i parquet necessari dentro `.evidence/gcs-cache/`. Al momento il pattern copre `ispra-ru` e `civile-flussi`: il bucket GCS resta la fonte pubblica, ma i source SQL leggono dalla cache locale per ridurre dipendenza remota durante il refresh. La convenzione del repo e' documentata in `docs/gcs-cache-convention.md`.
+Valida catalogo:
 
-Validazione catalogo:
-
-```powershell
+```bash
 npm run validate:catalog
 ```
 
 Build:
 
-```powershell
+```bash
 npm run build
 ```
 
 Preview locale:
 
-```powershell
+```bash
 npm run preview
 ```
 
 ## Struttura
 
-- `catalog/` = catalogo dataset e temi
-- `docs/` = convenzioni editoriali e checklist operative del sito
-- `sources/` = query SQL Evidence per i parquet pubblici
-- `pages/` = homepage, temi e pagine dataset
+- `scripts/generate_catalog.mjs` — genera `catalog/datasets.json` da DI + themes.json
+- `catalog/themes.json` — unico file editoriale manuale (temi + featured dataset)
+- `catalog/datasets.json` — GENERATO (non versionato come source of truth)
+- `sources/` — query SQL Evidence per i parquet pubblici (lettura GCS diretta)
+- `pages/` — homepage, temi e pagine dataset
 
-## Contratto del catalogo
+## Catalogo
 
-Il catalogo vive in:
+Il catalogo si genera a build time:
 
-- `catalog/datasets.json`
-- `catalog/themes.json`
+1. `generate_catalog.mjs` fetcha `dataset-incubator/registry/clean_catalog.json`
+2. Lo fonde con `catalog/themes.json` (scelta editoriale)
+3. Produce `catalog/datasets.json` usato dalla navigazione
 
-I due file sono la fonte di verità minima per:
-
-- navigazione pubblica
-- relazione tra dataset e temi
-- metadata leggibili del v0
-
-### `datasets.json`
-
-Ogni dataset è un oggetto JSON.
-
-Campi obbligatori:
-
-- `slug`
-  - slug pubblico usato nelle route del sito
-- `technical_slug`
-  - slug tecnico usato nel data lake e nei path GCS
-- `name`
-  - nome leggibile del dataset
-- `theme`
-  - slug del tema pubblico di riferimento
-- `status`
-  - stato di readiness del dataset nel Data Explorer
-- `years`
-  - lista degli anni disponibili nel v0
-- `source`
-  - ente o fonte del dataset
-
-Campi opzionali futuri:
-
-- descrizione breve
-- coverage territoriale
-- note sullo schema
-- query consigliate
-- link pubblici aggiuntivi
-
-Regole:
-
-- `slug` deve essere unico nel repo
-- `theme` deve esistere in `themes.json`
-- `technical_slug` può differire dallo slug pubblico
-- `years` deve riflettere gli anni realmente esposti nel sito, non necessariamente tutti quelli disponibili fuori dal v0
-
-### `themes.json`
-
-Ogni tema è un oggetto JSON.
-
-Campi obbligatori:
-
-- `slug`
-  - slug pubblico del tema
-- `name`
-  - nome leggibile del tema
-- `datasets`
-  - lista degli slug pubblici dei dataset inclusi nel tema
-
-Regole:
-
-- `slug` deve essere unico
-- ogni dataset elencato deve esistere in `datasets.json`
-- un dataset del v0 deve comparire sia nel proprio `theme` in `datasets.json`, sia nella lista `datasets` del tema corrispondente
-
-### Metadata tecnici vs pubblici
-
-Nel catalogo convivono due livelli diversi:
-
-- metadata pubblici:
-  - `slug`
-  - `name`
-  - `theme`
-  - `source`
-- metadata tecnici:
-  - `technical_slug`
-  - `years`
-  - `status`
-
-Il principio è:
-
-- lo slug pubblico guida le route e la navigazione
-- lo slug tecnico collega il sito al data lake del Lab
-- i temi sono l'identità pubblica
-- i dataset restano l'unità tecnica di base
+Tutti gli slug usano il formato DI (underscore, es. `ispra_ru_base`).
 
 ## Note
 
-- il repo può partire privato per il bootstrap
-- prima di GitHub Pages dovrà essere reso pubblico
-- i dati letti dalle pagine arrivano dal bucket pubblico `dataciviclab-clean`
-- la checklist di readiness sta in `docs/explorer-ready-checklist.md`
-- lo standard minimo delle pagine dataset sta in `docs/dataset-page-standard.md`
+- i dati letti dalle pagine arrivano dal bucket pubblico `dataciviclab-clean` via HTTP
+- la cache GCS locale e' stata rimossa -- i source SQL leggono direttamente da GCS
+- per aggiungere un dataset: 1) themes.json se featured, 2) pagina dataset se serve
+- il deploy si triggera su push a main
