@@ -1,15 +1,15 @@
 ---
 title: Mix elettrico per regione
-description: Lettura pubblica dei dati Terna sul mix elettrico regionale e sul peso delle fonti nel sistema nazionale.
+description: Lettura pubblica dei dati Terna sulla capacita' rinnovabile installata per regione e fonte.
 source: Terna
 last_modified: 2026-03-24
 discussion_url: https://github.com/dataciviclab/dataciviclab/discussions/115
 analisi_url: https://github.com/dataciviclab/dataciviclab/tree/main/analisi/terna-electricity-by-source
 ---
 
-Questo dataset raccoglie i dati Terna sulla produzione elettrica per fonte e regione.
+Questo dataset raccoglie i dati Terna sulla capacita' di generazione rinnovabile installata per regione e fonte.
 
-<div class="guide-question">Com'e' composto il mix elettrico della mia regione?</div>
+<div class="guide-question">Quali fonti rinnovabili hanno piu' capacita' installata nella mia regione?</div>
 
 ```sql anni
 SELECT DISTINCT anno FROM terna.energia ORDER BY anno DESC
@@ -20,84 +20,47 @@ SELECT DISTINCT anno FROM terna.energia ORDER BY anno DESC
 
 ```sql fonti_nazionali
 SELECT
-  fonte,
-  SUM(produzione_gwh) AS produzione_gwh
+  fonti,
+  SUM(potenza_mw) AS potenza_mw
 FROM terna.energia
 WHERE anno = '${inputs.anno_sel.value}'
-  AND tipo_produzione = 'Netta'
-GROUP BY fonte
-ORDER BY produzione_gwh DESC
+GROUP BY fonti
+ORDER BY potenza_mw DESC
 ```
 
 ```sql regioni_totale
 SELECT
   regione,
-  SUM(produzione_gwh) AS produzione_gwh
+  SUM(potenza_mw) AS potenza_mw
 FROM terna.energia
 WHERE anno = '${inputs.anno_sel.value}'
-  AND tipo_produzione = 'Netta'
 GROUP BY regione
-ORDER BY produzione_gwh DESC
+ORDER BY potenza_mw DESC
 ```
-
-```sql macro_fonte
-SELECT 0 AS macro_fonte_id, 'Tutte le fonti' AS macro_fonte
-UNION ALL
-SELECT 1 AS macro_fonte_id, 'Rinnovabili' AS macro_fonte
-UNION ALL
-SELECT 2 AS macro_fonte_id, 'Fossili' AS macro_fonte
-ORDER BY macro_fonte_id
-```
-
-<Dropdown name=macro_fonte_sel data={macro_fonte} value=macro_fonte_id label=macro_fonte defaultValue={0} />
 
 ```sql mix_regionale
-WITH classificato AS (
-  SELECT
-    regione,
-    fonte,
-    produzione_gwh,
-    CASE
-      WHEN fonte = 'Termoelettrico' THEN 'Fossili'
-      WHEN fonte IN ('Idrico', 'Eolico', 'Fotovoltaico', 'Geotermoelettrico') THEN 'Rinnovabili'
-      ELSE 'Altre fonti / accumulo'
-    END AS macro_fonte
-  FROM terna.energia
-  WHERE anno = '${inputs.anno_sel.value}'
-    AND tipo_produzione = 'Netta'
-),
-filtrato AS (
-  SELECT *
-  FROM classificato
-  WHERE ${inputs.macro_fonte_sel.value} = 0
-     OR (${inputs.macro_fonte_sel.value} = 1 AND macro_fonte = 'Rinnovabili')
-     OR (${inputs.macro_fonte_sel.value} = 2 AND macro_fonte = 'Fossili')
-),
-totali_regione AS (
-  SELECT
-    regione,
-    SUM(produzione_gwh) AS totale_regionale
-  FROM filtrato
-  GROUP BY regione
-)
 SELECT
-  f.regione,
-  f.fonte,
-  f.macro_fonte,
-  SUM(f.produzione_gwh) AS produzione_gwh,
-  ROUND(SUM(f.produzione_gwh) / NULLIF(t.totale_regionale, 0) * 100, 1) AS quota_percentuale
-FROM filtrato f
-JOIN totali_regione t
-  ON f.regione = t.regione
-GROUP BY f.regione, f.fonte, f.macro_fonte, t.totale_regionale
-ORDER BY f.regione, quota_percentuale DESC, produzione_gwh DESC
+  regione,
+  fonti,
+  SUM(potenza_mw) AS potenza_mw,
+  ROUND(SUM(potenza_mw) / SUM(SUM(potenza_mw)) OVER (PARTITION BY regione) * 100, 1) AS quota_percentuale
+FROM terna.energia
+WHERE anno = '${inputs.anno_sel.value}'
+GROUP BY regione, fonti
+ORDER BY regione, potenza_mw DESC
 ```
 
-<BarChart data={fonti_nazionali} x=fonte y=produzione_gwh yAxisTitle="Produzione GWh" />
+## Fonti per capacita' installata a livello nazionale
 
-<BarChart data={regioni_totale} x=regione y=produzione_gwh yAxisTitle="Produzione GWh" swapXY=true />
+<BarChart data={fonti_nazionali} x=fonti y=potenza_mw yAxisTitle="Potenza installata (MW)" />
 
-<BarChart data={mix_regionale} x=regione y=produzione_gwh series=fonte type="stacked100" swapXY=true yAxisTitle="% del totale regionale" xLabelWrap=12 />
+## Capacita' totale per regione
+
+<BarChart data={regioni_totale} x=regione y=potenza_mw yAxisTitle="Potenza installata (MW)" swapXY=true />
+
+## Mix regionale per fonte
+
+<BarChart data={mix_regionale} x=regione y=potenza_mw series=fonti type="stacked100" swapXY=true yAxisTitle="% del totale regionale" xLabelWrap=12 />
 
 <DataTable data={mix_regionale} rows=30 search=true downloadable=true />
 

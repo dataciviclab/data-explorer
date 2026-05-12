@@ -1,8 +1,7 @@
 SELECT
-  CAST(anno AS VARCHAR) AS anno,
+  CAST(anno_di_imposta AS VARCHAR) AS anno,
   regione,
-  comune,
-  CAST(NULL AS VARCHAR) AS provincia,
+  denominazione_comune AS comune,
   numero_contribuenti,
   reddito_imponibile_eur,
   imposta_netta_eur
@@ -11,10 +10,9 @@ FROM read_parquet(
 )
 UNION ALL
 SELECT
-  CAST(anno AS VARCHAR) AS anno,
+  CAST(anno_di_imposta AS VARCHAR) AS anno,
   regione,
-  comune,
-  CAST(NULL AS VARCHAR) AS provincia,
+  denominazione_comune AS comune,
   numero_contribuenti,
   reddito_imponibile_eur,
   imposta_netta_eur
@@ -23,10 +21,9 @@ FROM read_parquet(
 )
 UNION ALL
 SELECT
-  CAST(anno AS VARCHAR) AS anno,
+  CAST(anno_di_imposta AS VARCHAR) AS anno,
   regione,
-  comune,
-  CAST(NULL AS VARCHAR) AS provincia,
+  denominazione_comune AS comune,
   numero_contribuenti,
   reddito_imponibile_eur,
   imposta_netta_eur
@@ -35,10 +32,9 @@ FROM read_parquet(
 )
 UNION ALL
 SELECT
-  CAST(anno AS VARCHAR) AS anno,
+  CAST(anno_di_imposta AS VARCHAR) AS anno,
   regione,
-  comune,
-  CAST(NULL AS VARCHAR) AS provincia,
+  denominazione_comune AS comune,
   numero_contribuenti,
   reddito_imponibile_eur,
   imposta_netta_eur
@@ -47,10 +43,9 @@ FROM read_parquet(
 )
 UNION ALL
 SELECT
-  CAST(anno AS VARCHAR) AS anno,
+  CAST(anno_di_imposta AS VARCHAR) AS anno,
   regione,
-  comune,
-  CAST(NULL AS VARCHAR) AS provincia,
+  denominazione_comune AS comune,
   numero_contribuenti,
   reddito_imponibile_eur,
   imposta_netta_eur
