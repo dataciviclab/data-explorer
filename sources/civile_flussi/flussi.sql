@@ -10,5 +10,5 @@ SELECT
   definiti_totale,
   pendenti_finali
 FROM read_parquet(
-  '.evidence/gcs-cache/civile_flussi_2014_2024/2024/civile_flussi_2014_2024_2024_clean.parquet'
+  '.evidence/gcs-cache/civile_flussi/2025/civile_flussi_2025_clean.parquet'
 )

@@ -10,11 +10,11 @@
   },
   {
     "slug": "civile-flussi",
-    "technical_slug": "civile_flussi_2014_2024",
+    "technical_slug": "civile_flussi",
     "name": "Flussi della giustizia civile",
     "theme": "giustizia",
     "status": "A",
-    "years": [2024],
+    "years": [2025],
     "source": "Ministero della Giustizia"
   },
   {

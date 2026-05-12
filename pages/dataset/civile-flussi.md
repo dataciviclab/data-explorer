@@ -83,5 +83,5 @@ Le <strong>Procedure concorsuali (pre-riforma)</strong> possono mostrare nuovi a
 
 ## Risorse e dati
 
-- [Scarica il clean parquet 2024](https://storage.googleapis.com/dataciviclab-clean/civile_flussi_2014_2024/2024/civile_flussi_2014_2024_2024_clean.parquet)
+- [Scarica il clean parquet 2025](https://storage.googleapis.com/dataciviclab-clean/civile_flussi/2025/civile_flussi_2025_clean.parquet)
 - [Fonte originale: Ministero della Giustizia — statistiche civili](https://datiestatistiche.giustizia.it)
