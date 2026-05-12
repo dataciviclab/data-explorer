@@ -13,6 +13,7 @@ I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine 
 
 - [Territorio e ambiente](/temi/territorio-ambiente)
 - [Finanza pubblica](/temi/finanza-pubblica)
+- [Sanita](/temi/sanita)
 - [Giustizia](/temi/giustizia)
 - [Welfare e lavoro](/temi/welfare-lavoro)
 
@@ -23,9 +24,10 @@ I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine 
 - [Mix elettrico per regione](/dataset/terna_capacita_rinnovabile)
 - [Dipendenti pubblici per comparto](/dataset/dipendenti_pubblici)
 - [IRPEF comunale](/dataset/irpef_comunale)
+- [Spesa farmaceutica convenzionata](/dataset/aifa_spesa_consumo)
 
 ## Cosa c'e' nel v0
 
-- `5` dataset pubblici gia' leggibili
-- `4` temi attivi
+- `6` dataset pubblici gia' leggibili
+- `5` temi attivi
 - dati sorgente disponibili come clean parquet pubblici del Lab
