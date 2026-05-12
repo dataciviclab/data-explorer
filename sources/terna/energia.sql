@@ -1,13 +1,21 @@
 SELECT
   CAST(anno AS VARCHAR) AS anno,
-  tipo_produzione,
+  tipo_capacita,
   regione,
   provincia,
-  fonte,
-  produzione_gwh
+  fonti,
+  potenza_mw
 FROM read_parquet(
-  [
-    '.evidence/gcs-cache/terna_electricity_by_source/2023/terna_electricity_by_source_2023_clean.parquet',
-    '.evidence/gcs-cache/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet'
-  ]
+  'https://storage.googleapis.com/dataciviclab-clean/terna_capacita_rinnovabile/2023/terna_capacita_rinnovabile_2023_clean.parquet'
+)
+UNION ALL
+SELECT
+  CAST(anno AS VARCHAR) AS anno,
+  tipo_capacita,
+  regione,
+  provincia,
+  fonti,
+  potenza_mw
+FROM read_parquet(
+  'https://storage.googleapis.com/dataciviclab-clean/terna_capacita_rinnovabile/2024/terna_capacita_rinnovabile_2024_clean.parquet'
 )
