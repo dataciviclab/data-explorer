@@ -1,0 +1,39 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Generate catalog
+        run: npm run generate:catalog
+
+      - name: Validate catalog
+        run: npm run validate:catalog
+
+      - name: Compile sources
+        run: npm run sources
+
+      - name: Build site
+        run: npm run build
