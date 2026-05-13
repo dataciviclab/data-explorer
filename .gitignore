@@ -5,3 +5,4 @@ build
 static/data
 *.options.yaml
 .env
+catalog/datasets.json
