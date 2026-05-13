@@ -31,7 +31,7 @@ function generateCatalogEntry(diEntry, themeSlug) {
     name: diEntry.name,
     description: diEntry.description || '',
     theme: themeSlug || null,
-    status: diEntry.status || 'candidate',
+    stage: diEntry.stage || 'incubating',
     years: years,
     source: diEntry.source || '',
     di_slug: diEntry.slug,
