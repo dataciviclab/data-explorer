@@ -34,6 +34,7 @@ function generateCatalogEntry(diEntry, themeSlug) {
     stage: diEntry.stage || 'incubating',
     years: years,
     source: diEntry.source || '',
+    source_id: diEntry.source_id || null,
     di_slug: diEntry.slug,
     columns: columns,
   };
