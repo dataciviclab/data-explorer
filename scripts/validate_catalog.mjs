@@ -2,7 +2,7 @@ import { readFile, access } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const VALID_STATUSES = new Set(["candidate", "clean_ready", "public_catalog_ready", "deprecated"]);
+const VALID_STATUSES = new Set(["incubating", "published", "deprecated"]);
 
 async function fileExists(relativePath) {
   try {
@@ -67,8 +67,8 @@ async function main() {
     datasetSlugs.add(ds.slug);
     datasetBySlug.set(ds.slug, ds);
 
-    if (ds.status && !VALID_STATUSES.has(ds.status)) {
-      errors.push(prefix + ".status must be one of [" + Array.from(VALID_STATUSES).join(", ") + "] - got: " + ds.status);
+    if (ds.stage && !VALID_STATUSES.has(ds.stage)) {
+      errors.push(prefix + ".stage must be one of [" + Array.from(VALID_STATUSES).join(", ") + "] - got: " + ds.stage);
     }
 
     if (Array.isArray(ds.years)) {
@@ -95,10 +95,10 @@ async function main() {
   }
 
   for (const ds of datasetBySlug.values()) {
-    if (ds.status === "public_catalog_ready") {
+    if (ds.stage === "published") {
       const pagePath = "pages/dataset/" + ds.slug + ".md";
       if (!(await fileExists(pagePath))) {
-        errors.push("dataset " + ds.slug + " has status " + ds.status + " but page " + pagePath + " does not exist");
+        errors.push("dataset " + ds.slug + " has stage " + ds.stage + " but page " + pagePath + " does not exist");
       }
     }
   }
