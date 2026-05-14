@@ -1,0 +1,4 @@
+name: bdap_entrate_stato
+type: duckdb
+options:
+  filename: ':memory:'
