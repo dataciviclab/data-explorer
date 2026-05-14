@@ -17,7 +17,7 @@
   {
     "slug": "welfare-lavoro",
     "name": "Welfare e lavoro",
-    "datasets": ["dipendenti_pubblici"]
+    "datasets": ["dipendenti_pubblici", "inps_pensioni_trimestrale"]
   },
   {
     "slug": "giustizia",
