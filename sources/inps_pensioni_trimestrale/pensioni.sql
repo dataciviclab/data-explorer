@@ -1,3 +1,5 @@
+-- Il parquet 2024 contiene l'intero storico 2020-2024 (17 trimestri).
+-- Se in futuro il dataset viene splittato per anno, aggiornare il path.
 SELECT
   CAST(anno AS VARCHAR) AS anno,
   trimestre,

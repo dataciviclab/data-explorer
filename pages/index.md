@@ -25,9 +25,11 @@ I dati vengono letti dai clean parquet pubblici del Lab e trasformati in pagine 
 - [Dipendenti pubblici per comparto](/dataset/dipendenti_pubblici)
 - [IRPEF comunale](/dataset/irpef_comunale)
 - [Spesa farmaceutica convenzionata](/dataset/aifa_spesa_consumo)
+- [Entrate dello Stato](/dataset/bdap_entrate_stato)
+- [Pensioni INPS](/dataset/inps_pensioni_trimestrale)
 
 ## Cosa c'e' nel v0
 
-- `6` dataset pubblici gia' leggibili
+- `8` dataset pubblici gia' leggibili
 - `5` temi attivi
 - dati sorgente disponibili come clean parquet pubblici del Lab

@@ -62,7 +62,7 @@ La gestione **FPLD** (Fondo Pensioni Lavoratori Dipendenti) è la componente pre
 
 ## Dettaglio
 
-<DataTable data={distribuzione_gestione} rows=20 search=true downloadable=true />
+<DataTable data={trend_pensioni} rows=20 search=true downloadable=true />
 
 ## Risorse e dati
 
