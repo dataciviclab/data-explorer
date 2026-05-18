@@ -94,11 +94,26 @@ async function main() {
     }
   }
 
+  const featuredDatasetSlugs = new Set();
+  for (const theme of themeBySlug.values()) {
+    if (Array.isArray(theme.datasets)) {
+      for (const slug of theme.datasets) {
+        if (isNonEmptyString(slug)) featuredDatasetSlugs.add(slug);
+      }
+    }
+  }
+
   for (const ds of datasetBySlug.values()) {
     if (ds.stage === "published") {
       const pagePath = "pages/dataset/" + ds.slug + ".md";
       if (!(await fileExists(pagePath))) {
-        errors.push("dataset " + ds.slug + " has stage " + ds.stage + " but page " + pagePath + " does not exist");
+        const isFeatured = featuredDatasetSlugs.has(ds.slug);
+        const message = "dataset " + ds.slug + " has stage published but page " + pagePath + " does not exist";
+        if (isFeatured) {
+          errors.push(message + " — dataset is featured in a theme, page is required");
+        } else {
+          console.warn("[warn] " + message + " — skipping, create the page to expose it");
+        }
       }
     }
   }
