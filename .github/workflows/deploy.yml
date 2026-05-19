@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages (Observable Framework)
 
 on:
   push:
@@ -31,19 +31,18 @@ jobs:
       - uses: actions/configure-pages@v6
         id: pages
 
-      - run: |
-          printf '\ndeployment:\n  basePath: "%s"\n' "$BASE_PATH" >> evidence.config.yaml
-        env:
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
 
-      - run: npm ci --legacy-peer-deps
-      - run: npm run sources
-      - run: npm run validate:catalog
-      - run: npm run build
+      - name: Build Observable Framework
+        run: npx observable build
+
+      - name: Copy CNAME for custom domain
+        run: cp static/CNAME dist/observable/
 
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: build
+          path: dist/observable
 
   deploy:
     needs: build
