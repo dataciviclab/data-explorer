@@ -6,3 +6,8 @@ static/data
 *.options.yaml
 .env
 catalog/datasets.json
+
+# Observable Framework
+.observablehq/
+dist/observable/
+__pycache__/
