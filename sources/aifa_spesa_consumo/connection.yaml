@@ -1,4 +1,0 @@
-name: aifa_spesa_consumo
-type: duckdb
-options:
-  filename: ':memory:'
