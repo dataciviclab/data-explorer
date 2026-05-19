@@ -23,6 +23,7 @@ const catalog = await FileAttachment("data/catalog.json").json();
 - [Rifiuti urbani](/dataset/rifiuti-urbani) — produzione e raccolta differenziata per comune e regione
 - [Flussi giustizia civile](/dataset/flussi-giustizia-civile) — sopravvenuti, definiti e pendenti per distretto
 - [Dipendenti pubblici](/dataset/dipendenti-pubblici) — pubblico impiego per comparto (2010-2023)
+- [Capacità rinnovabile](/dataset/capacita-rinnovabile) — potenza installata per regione e fonte (Terna)
 
 <div style="margin-top: 2em; opacity: 0.6; font-size: 0.85em;">
 Catalogo aggiornato: ${catalog.updated_at} · 
