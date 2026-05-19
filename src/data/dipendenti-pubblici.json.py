@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Data loader: Dipendenti pubblici — aggregazione per comparto e anno."""
 import duckdb, json, sys
+sys.path.insert(0, "src/data")
+from _util import GCS_BASE
 
-GCS_BASE = "https://storage.googleapis.com/dataciviclab-clean"
 slug = "dipendenti_pubblici"
 years = list(range(2010, 2024))
 

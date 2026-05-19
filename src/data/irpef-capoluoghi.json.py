@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Data loader: IRPEF — capoluoghi di regione (per confronto chart)."""
-import duckdb, json, re, sys
+import duckdb, json, sys
+sys.path.insert(0, "src/data")
+from _util import GCS_BASE
 
-GCS_BASE = "https://storage.googleapis.com/dataciviclab-clean"
 slug = "irpef_comunale"
 years = list(range(2019, 2024))
 CAPOLUOGHI = ["ROMA", "MILANO", "TORINO", "GENOVA", "NAPOLI", "BOLOGNA", "PALERMO",

@@ -31,8 +31,14 @@ jobs:
       - uses: actions/configure-pages@v6
         id: pages
 
-      - name: Install dependencies
+      - name: Install Node dependencies
         run: npm ci --legacy-peer-deps
+
+      - name: Install Python dependencies
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
 
       - name: Build Observable Framework
         run: npx observable build

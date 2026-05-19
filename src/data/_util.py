@@ -2,7 +2,7 @@
 """Utility condivisa per data loader Observable. Legge parquet da GCS via DuckDB e produce JSON."""
 import json, sys, duckdb, requests
 
-GCS_BASE = "https://storage.googleapis.com/dataciviclab-clean"
+GCS_BASE = "https://storage.googleapis.com/dataciviclab-clean"  # riusabile: from _util import GCS_BASE
 
 
 def _parquet_exists(slug, year):
