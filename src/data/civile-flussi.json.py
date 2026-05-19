@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Data loader: Flussi giustizia civile — aggregazione per distretto e anno.
 
-Nota: il parquet ha tutti gli anni in un unico file (2025).
-Usiamo solo quell'anno come riferimento, il GROUP BY gestisce il resto."""
+Nota: il parquet 2025 contiene tutti gli anni (2014-2025).
+Usiamo solo quell'anno come riferimento — il GROUP BY gestisce il resto."""
 import sys; sys.path.insert(0, "src/data")
 from _util import load_dataset
 

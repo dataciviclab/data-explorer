@@ -38,6 +38,7 @@ const mediaRd = Math.round(totRD / totRU * 1000) / 10;
 ```js
 const comuniFiltrati = comuni
   .filter(d => d.anno === annoSel)
+  .map(d => ({...d, percentuale_rd: Math.round(d.totale_rd_tonnellate / d.totale_ru_tonnellate * 1000) / 10}))
   .sort((a, b) => b.percentuale_rd - a.percentuale_rd);
 ```
 
