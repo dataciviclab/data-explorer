@@ -25,6 +25,7 @@ const catalog = await FileAttachment("data/catalog.json").json();
 - [Dipendenti pubblici](/dataset/dipendenti-pubblici) — pubblico impiego per comparto (2010-2023)
 - [Capacità rinnovabile](/dataset/capacita-rinnovabile) — potenza installata per regione e fonte (Terna)
 - [Spesa farmaceutica](/dataset/spesa-farmaceutica) — spesa e consumo SSN per regione e classe ATC
+- [Entrate dello Stato](/dataset/entrate-stato) — previsioni definitive per titolo (BDAP RGS)
 
 <div style="margin-top: 2em; opacity: 0.6; font-size: 0.85em;">
 Catalogo aggiornato: ${catalog.updated_at} · 
