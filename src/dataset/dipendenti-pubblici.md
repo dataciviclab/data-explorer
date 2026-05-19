@@ -15,14 +15,12 @@ const data = await FileAttachment("../data/dipendenti-pubblici.json").json();
 
 ```js
 const comparti = [...new Set(data.map(d => d.comparto))].sort();
-const compartoSel = view(Inputs.select(
-  [{label: "Tutti i comparti", value: "Tutti"}, ...comparti.map(c => ({label: c, value: c}))],
-  {label: "Comparto", value: "Tutti", key: "comp"}
-));
+const opzioni = ["Tutti i comparti", ...comparti];
+const compartoSel = view(Inputs.select(opzioni, {label: "Comparto", value: "Tutti i comparti"}));
 ```
 
 ```js
-const filtered = compartoSel === "Tutti" ? data : data.filter(d => d.comparto === compartoSel);
+const filtered = compartoSel === "Tutti i comparti" ? data : data.filter(d => d.comparto === compartoSel);
 ```
 
 ```js
@@ -53,7 +51,7 @@ const pctDonne2023 = Math.round(data.filter(d => d.anno === 2023).reduce((s, d) 
 
 ```js
 Plot.plot({
-  title: compartoSel === "Tutti" ? "Dipendenti totali per anno" : `Dipendenti — ${compartoSel}`,
+  title: compartoSel === "Tutti i comparti" ? "Dipendenti totali per anno" : `Dipendenti — ${compartoSel}`,
   width: 800,
   height: 400,
   y: {grid: true, tickFormat: "~s"},
