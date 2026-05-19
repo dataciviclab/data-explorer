@@ -47,27 +47,23 @@ const pctDonne2023 = Math.round(data.filter(d => d.anno === 2023).reduce((s, d) 
 
 ---
 
-## Andamento per comparto
+## Andamento
+
+```js
+const trendData = compartoSel === "Tutti i comparti"
+  ? Array.from(d3.rollup(data, v => d3.sum(v, d => d.totale), d => d.anno), ([anno, totale]) => ({anno, totale})).sort((a,b) => a.anno - b.anno)
+  : filtered;
+```
 
 ```js
 Plot.plot({
-  title: compartoSel === "Tutti i comparti" ? "Dipendenti totali per anno" : `Dipendenti — ${compartoSel}`,
+  title: `Dipendenti ${compartoSel === "Tutti i comparti" ? "totali" : compartoSel}`,
   width: 800,
   height: 400,
   y: {grid: true, tickFormat: "~s"},
-  color: compartoSel === "Tutti" ? {legend: true} : {scheme: "Blues"},
   marks: [
-    Plot.lineY(filtered, {
-      x: "anno",
-      y: "totale",
-      ...(compartoSel === "Tutti" ? {stroke: "comparto"} : {}),
-      tip: true
-    }),
-    Plot.dot(filtered, {
-      x: "anno",
-      y: "totale",
-      ...(compartoSel === "Tutti" ? {stroke: "comparto"} : {}),
-    }),
+    Plot.lineY(trendData, {x: "anno", y: "totale", tip: true}),
+    Plot.dot(trendData, {x: "anno", y: "totale", fill: "steelblue"}),
   ]
 })
 ```
