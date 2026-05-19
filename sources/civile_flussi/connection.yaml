@@ -1,4 +1,0 @@
-name: civile_flussi
-type: duckdb
-options:
-  filename: ':memory:'

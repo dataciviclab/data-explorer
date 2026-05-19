@@ -1,79 +1,44 @@
 # data-explorer
 
-Frontend pubblico dati del Lab, basato su Evidence.dev, DuckDB e clean parquet pubblici su GCS.
+Frontend pubblico dati del Lab, basato su **Observable Framework**, DuckDB e clean parquet pubblici su GCS.
 
-Il catalogo dataset viene generato automaticamente da `dataset-incubator/registry/clean_catalog.json`.
-I source SQL leggono i parquet direttamente da GCS via HTTP (nessuna cache locale).
+**Live**: [explorer.dataciviclab.org](https://explorer.dataciviclab.org)
 
-## Stato
-
-Bootstrap v0 locale completato con:
-
-- catalogo generato dal registry DI (23+ dataset disponibili)
-- 5 dataset `featured` con pagine curate
-- 4 temi attivi
-- build statica Evidence verde
-
-## Setup locale
-
-Node 20:
-
-```bash
-fnm use 20
-node --version
-```
-
-Install:
+## Setup
 
 ```bash
 npm install --legacy-peer-deps
+pip install -r requirements.txt
+npm run dev
 ```
 
-Genera catalogo:
+Apri http://localhost:3000
 
-```bash
-npm run generate:catalog
-```
+## Pagine
 
-Valida catalogo:
+| Pagina | Dataset |
+|---|---|
+| Home | Catalogo completo dei dataset |
+| IRPEF comunale | Capacità fiscale per comune e regione |
+| Rifiuti urbani | Produzione e raccolta differenziata |
+| Flussi giustizia civile | Sopravvenuti, definiti e pendenti |
+| Dipendenti pubblici | Pubblico impiego per comparto |
+| Capacità rinnovabile | Potenza installata Terna |
+| Spesa farmaceutica | AIFA spesa e consumo SSN |
+| Entrate dello Stato | Previsioni BDAP RGS |
+| Pensioni INPS | Numero pensioni per gestione |
 
-```bash
-npm run validate:catalog
-```
+## Data loader
 
-Build:
+Gli script Python in `src/data/` leggono i parquet da GCS via DuckDB a build time e producono JSON aggregato. La utility `_util.py` gestisce GROUP BY, WHERE e skip anni mancanti.
 
-```bash
-npm run build
-```
+## Deploy
 
-Preview locale:
+Su **GitHub Pages** via workflow CI: `npm run build` → `observable build` → deploy su `explorer.dataciviclab.org`.
 
-```bash
-npm run preview
-```
+## Stack
 
-## Struttura
-
-- `scripts/generate_catalog.mjs` — genera `catalog/datasets.json` da DI + themes.json
-- `catalog/themes.json` — unico file editoriale manuale (temi + featured dataset)
-- `catalog/datasets.json` — GENERATO (non versionato come source of truth)
-- `sources/` — query SQL Evidence per i parquet pubblici (lettura GCS diretta)
-- `pages/` — homepage, temi e pagine dataset
-
-## Catalogo
-
-Il catalogo si genera a build time:
-
-1. `generate_catalog.mjs` fetcha `dataset-incubator/registry/clean_catalog.json`
-2. Lo fonde con `catalog/themes.json` (scelta editoriale)
-3. Produce `catalog/datasets.json` usato dalla navigazione
-
-Tutti gli slug usano il formato DI (underscore, es. `ispra_ru_base`).
-
-## Note
-
-- i dati letti dalle pagine arrivano dal bucket pubblico `dataciviclab-clean` via HTTP
-- la cache GCS locale e' stata rimossa -- i source SQL leggono direttamente da GCS
-- per aggiungere un dataset: 1) themes.json se featured, 2) pagina dataset se serve
-- il deploy si triggera su push a main
+- **Observable Framework** — static site generator
+- **Observable Plot** — chart
+- **DuckDB** — query engine per parquet su GCS
+- **Python** — data loader

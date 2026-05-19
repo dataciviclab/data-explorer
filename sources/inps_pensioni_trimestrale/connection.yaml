@@ -1,4 +1,0 @@
-name: inps_pensioni_trimestrale
-type: duckdb
-options:
-  filename: ':memory:'

@@ -24,16 +24,12 @@ jobs:
           node-version: "20"
           cache: npm
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
       - run: npm ci --legacy-peer-deps
+      - run: pip install -r requirements.txt
 
-      - name: Generate catalog
-        run: npm run generate:catalog
-
-      - name: Validate catalog
-        run: npm run validate:catalog
-
-      - name: Compile sources
-        run: npm run sources
-
-      - name: Build site
-        run: npm run build
+      - name: Build Observable Framework
+        run: npx observable build

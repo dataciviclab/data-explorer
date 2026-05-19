@@ -2,34 +2,26 @@
   "name": "data-explorer",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "evidence build",
-    "build:strict": "evidence build:strict",
-    "dev": "evidence dev --open /",
+    "build": "observable build",
+    "dev": "observable preview",
+    "preview": "observable preview",
     "generate:catalog": "node scripts/generate_catalog.mjs",
-    "presources": "npm run generate:catalog",
-    "test": "npm run validate:catalog && evidence build",
-    "sources": "evidence sources",
-    "sources:strict": "evidence sources --strict",
-    "preview": "evidence preview",
+    "generate:observable": "node scripts/generate_observable.mjs",
     "validate:catalog": "node scripts/validate_catalog.mjs"
   },
   "engines": {
     "npm": ">=7.0.0",
     "node": "20.x"
   },
-  "type": "module",
   "dependencies": {
-    "@evidence-dev/core-components": "5.4.2",
-    "@evidence-dev/duckdb": "2.0.1",
-    "@evidence-dev/evidence": "40.1.8",
-    "git-remote-origin-url": "4.0.0"
+    "@observablehq/framework": "^1.13.4",
+    "@observablehq/plot": "^0.6.17",
+    "duckdb": "^1.4.4",
+    "esbuild": "^0.25.1"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "3.1.2",
-    "autoprefixer": "10.5.0",
-    "postcss": "8.5.14",
-    "postcss-load-config": "5.1.0",
-    "tailwindcss": "3.4.18"
+    "git-remote-origin-url": "4.0.0"
   }
 }
