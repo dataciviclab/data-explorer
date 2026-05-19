@@ -24,6 +24,7 @@ const catalog = await FileAttachment("data/catalog.json").json();
 - [Flussi giustizia civile](/dataset/flussi-giustizia-civile) — sopravvenuti, definiti e pendenti per distretto
 - [Dipendenti pubblici](/dataset/dipendenti-pubblici) — pubblico impiego per comparto (2010-2023)
 - [Capacità rinnovabile](/dataset/capacita-rinnovabile) — potenza installata per regione e fonte (Terna)
+- [Spesa farmaceutica](/dataset/spesa-farmaceutica) — spesa e consumo SSN per regione e classe ATC
 
 <div style="margin-top: 2em; opacity: 0.6; font-size: 0.85em;">
 Catalogo aggiornato: ${catalog.updated_at} · 
