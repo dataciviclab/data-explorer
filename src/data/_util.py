@@ -1,13 +1,28 @@
 #!/usr/bin/env python3
-"""Utility condivisa per data loader Observable. Legge parquet da GCS via DuckDB e produce JSON."""
-import json, sys, duckdb, requests
+"""Utility condivisa per data loader Observable Framework.
 
-GCS_BASE = "https://storage.googleapis.com/dataciviclab-clean"  # riusabile: from _util import GCS_BASE
+Legge clean parquet da GCS via DuckDB e produce JSON per il frontend.
+
+I path GCS seguono il path contract canonico definito in:
+    lab-connectors/lab_connectors/gcs/paths.py  (paths.json)
+Pattern usato: clean_parquet → {slug}/{year}/{slug}_{year}_clean.parquet
+"""
+import json
+import sys
+
+import duckdb
+import requests
+
+from lab_connectors.gcs.paths import CLEAN_BUCKET, https_url
+
+# GCS_BASE: backward compat per data loader che lo importano direttamente.
+# Calcolato dal contratto invece che hardcoded.
+GCS_BASE = f"https://storage.googleapis.com/{CLEAN_BUCKET}"
 
 
-def _parquet_exists(slug, year):
+def _parquet_exists(slug: str, year: int) -> bool:
     """Verifica se il parquet esiste su GCS (HEAD request)."""
-    url = f"{GCS_BASE}/{slug}/{year}/{slug}_{year}_clean.parquet"
+    url = https_url("clean", "clean_parquet", slug=slug, year=year)
     try:
         r = requests.head(url, timeout=5)
         return r.status_code == 200
@@ -15,28 +30,36 @@ def _parquet_exists(slug, year):
         return False
 
 
-def load_dataset(slug, years, group_cols, metric_cols, where=""):
+def load_dataset(
+    slug: str,
+    years: list[int],
+    group_cols: list[str],
+    metric_cols: list[str],
+    where: str = "",
+) -> None:
     """
     Legge parquet GCS per un dataset, raggruppa per group_cols,
     somma metric_cols, output JSON su stdout.
     Salta gli anni in cui il parquet non esiste.
     """
     con = duckdb.connect()
-    
+
     valid_years = [y for y in years if _parquet_exists(slug, y)]
     if not valid_years:
         json.dump([], sys.stdout)
         return
-    
+
     parquet_refs = " UNION ALL ".join(
-        f"SELECT * FROM read_parquet('{GCS_BASE}/{slug}/{y}/{slug}_{y}_clean.parquet')"
+        "SELECT * FROM read_parquet('"
+        + https_url("clean", "clean_parquet", slug=slug, year=y)
+        + "')"
         for y in valid_years
     )
-    
+
     group_sql = ", ".join(group_cols)
     metrics_sql = ", ".join(f"SUM({m}) AS {m}" for m in metric_cols)
     where_sql = f"WHERE {where}" if where else ""
-    
+
     query = f"""
         SELECT {group_sql}, {metrics_sql}
         FROM ({parquet_refs})
@@ -44,9 +67,12 @@ def load_dataset(slug, years, group_cols, metric_cols, where=""):
         GROUP BY {group_sql}
         ORDER BY {group_sql}
     """
-    
+
     rows = con.sql(query).fetchall()
     columns = group_cols + metric_cols
-    data = [dict(zip(columns, [int(v) if isinstance(v, float) and v == v else v for v in row])) for row in rows]
-    
+    data = [
+        dict(zip(columns, [int(v) if isinstance(v, float) and v == v else v for v in row]))
+        for row in rows
+    ]
+
     json.dump(data, sys.stdout, ensure_ascii=False)
