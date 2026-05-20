@@ -2,12 +2,23 @@
 /**
  * Genera pagine Observable Framework per tutti i dataset del catalogo.
  * Crea src/data/{slug}.json.py (data loader) e src/dataset/{slug}.md (pagina).
+ *
+ * I path GCS seguono il path contract canonico:
+ *   lab-connectors/lab_connectors/gcs/paths.py  (paths.json)
+ * Pattern clean_parquet: {bucket}/{slug}/{year}/{slug}_{year}_clean.parquet
  */
 import fs from "fs";
 import path from "path";
 
+const PATHS_CONTRACT_URL =
+  "https://raw.githubusercontent.com/dataciviclab/lab-connectors/main/lab_connectors/gcs/paths.json";
+
 const CATALOG_URL =
   "https://raw.githubusercontent.com/dataciviclab/dataset-incubator/main/registry/clean_catalog.json";
+
+const GCS_CLEAN_BUCKET =
+  (await fetch(PATHS_CONTRACT_URL).then(r => r.json())).buckets.clean;
+
 const DATA_DIR = "src/data";
 const PAGES_DIR = "src/dataset";
 
@@ -102,7 +113,7 @@ function pageTemplate(slug, name, description, source, stage, dims, metrics, has
   // Resources
   lines.push("---", "");
   lines.push("## Risorse", "");
-  lines.push("- [Scarica il parquet](https://storage.googleapis.com/dataciviclab-clean/" + slug + "/)");
+  lines.push("- [Scarica il parquet](https://storage.googleapis.com/" + GCS_CLEAN_BUCKET + "/" + slug + "/)");
   lines.push("- [Vai alla pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/" + slug.replace(/_/g, "-") + ")");
 
   return lines.join("\n") + "\n";
