@@ -10,11 +10,15 @@
 import fs from "fs";
 import path from "path";
 
+const PATHS_CONTRACT_URL =
+  "https://raw.githubusercontent.com/dataciviclab/lab-connectors/main/lab_connectors/gcs/paths.json";
+
 const CATALOG_URL =
   "https://raw.githubusercontent.com/dataciviclab/dataset-incubator/main/registry/clean_catalog.json";
 
-// Bucket name dal path contract (lab-connectors/gcs/paths.json)
-const GCS_CLEAN_BUCKET = "dataciviclab-clean";
+const GCS_CLEAN_BUCKET =
+  (await fetch(PATHS_CONTRACT_URL).then(r => r.json())).buckets.clean;
+
 const DATA_DIR = "src/data";
 const PAGES_DIR = "src/dataset";
 
