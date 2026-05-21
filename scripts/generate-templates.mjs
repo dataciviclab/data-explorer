@@ -44,8 +44,8 @@ export function pageTemplate(slug, name, description, source, stage, dims, metri
   const bucket = gcsBucket || "dataciviclab-clean";
   const lines = [
     '---',
-    'title: ' + name,
-    'description: ' + (description || "").slice(0, 200),
+    'title: ' + JSON.stringify(name),
+    'description: ' + JSON.stringify((description || "").slice(0, 200)),
     '---',
     '',
     '# ' + name,

@@ -66,8 +66,8 @@ describe("pageTemplate()", () => {
       gcsBucket
     );
 
-    assert.match(result, /title: Test Dataset/);
-    assert.match(result, /description: Una descrizione di test/);
+    assert.match(result, /title: "Test Dataset"/);
+    assert.match(result, /description: "Una descrizione di test"/);
     assert.match(result, /\*\*Fonte\*\*: Fonte Test/);
     assert.match(result, /✅ Pubblicato/);
   });
@@ -199,7 +199,7 @@ describe("pageTemplate()", () => {
     );
 
     // description vuota → non deve apparire una riga description: vuota
-    assert.match(result, /title: No Desc/);
+    assert.match(result, /title: "No Desc"/);
     // Nessun errore, la pagina deve essere valida
     assert.ok(result.includes("# No Desc"));
   });
@@ -219,7 +219,7 @@ describe("pageTemplate()", () => {
     );
 
     // Deve comunque generare qualcosa senza crash
-    assert.match(result, /title: Empty Dims/);
+    assert.match(result, /title: "Empty Dims"/);
     assert.match(result, /const filtered = data;/);
     // Solo 2 card (record e ?), senza metrica
     assert.ok(result.includes('card'));
