@@ -71,7 +71,7 @@ def load_dataset(
     rows = con.sql(query).fetchall()
     columns = group_cols + metric_cols
     data = [
-        dict(zip(columns, [int(v) if isinstance(v, float) and v == v else v for v in row]))
+        dict(zip(columns, [int(v) if isinstance(v, float) and v == v and v == int(v) else v for v in row]))
         for row in rows
     ]
 
