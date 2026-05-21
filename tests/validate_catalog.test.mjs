@@ -8,7 +8,7 @@
  * non errore — non sono auto-generabili.
  */
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { before, describe, it } from "node:test";
 import { access } from "node:fs/promises";
 import path from "node:path";
 
