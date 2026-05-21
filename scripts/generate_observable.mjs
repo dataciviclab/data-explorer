@@ -9,6 +9,8 @@
  */
 import fs from "fs";
 import path from "path";
+import process from "node:process";
+import { fileURLToPath } from "node:url";
 import { loaderTemplate, pageTemplate } from "./generate-templates.mjs";
 
 const PATHS_CONTRACT_URL =
@@ -17,23 +19,17 @@ const PATHS_CONTRACT_URL =
 const CATALOG_URL =
   "https://raw.githubusercontent.com/dataciviclab/dataset-incubator/main/registry/clean_catalog.json";
 
-const GCS_CLEAN_BUCKET =
-  (await fetch(PATHS_CONTRACT_URL).then(r => r.json())).buckets.clean;
-
 const DATA_DIR = "src/data";
 const PAGES_DIR = "src/dataset";
 
-fs.mkdirSync(DATA_DIR, { recursive: true });
-fs.mkdirSync(PAGES_DIR, { recursive: true });
-
-const resp = await fetch(CATALOG_URL);
-const catalog = await resp.json();
-const datasets = catalog.datasets;
-
-// ── Genera ──────────────────────────────────────────────────────────────────
-let generated = 0, skipped = 0;
-
-for (const ds of datasets) {
+/**
+ * Processa un singolo dataset dal catalogo: calcola loader e pagina.
+ *
+ * Funzione pura (nessun I/O) — restituisce { slug, name, loader, page, skipped }
+ * dove loader e page sono stringhe di contenuto da scrivere su file.
+ * Se metrics.length === 0, restituisce { skipped: true }.
+ */
+export function processDataset(ds, gcsBucket) {
   const slug = ds.slug;
   const name = ds.name || slug;
   const description = ds.description || "";
@@ -42,14 +38,14 @@ for (const ds of datasets) {
   const columns = ds.columns || [];
   const stage = ds.stage || "?";
   const yearRange = period.start && period.end
-    ? "list(range(" + period.start + ", " + period.end + " + 1))"
+    ? `list(range(${  period.start  }, ${  period.end  } + 1))`
     : "list(range(2019, 2026))";
 
   const dims = columns.filter(c => c.role === "dimension");
   const metrics = columns.filter(c => c.role === "metric")
-    .filter(c => !/\d{4}/.test(c.name)); // esclude colonne con anno (es. incremento_2020_2021)
+    .filter(c => !/\d{4}/.test(c.name));
 
-  if (metrics.length === 0) { skipped++; continue; }
+  if (metrics.length === 0) return { slug, skipped: true };
 
   const yearCol = dims.find(d => d.name.toLowerCase().includes("anno"));
   const groupDim = dims.find(d => !d.name.toLowerCase().includes("anno"))
@@ -57,25 +53,49 @@ for (const ds of datasets) {
   const groupCol = groupDim.name;
   const metricNames = metrics.map(m => m.name);
 
-  // Determina le colonne di raggruppamento
   const groupCols = [groupCol];
   if (yearCol) groupCols.unshift(yearCol.name);
 
-  // Data loader
   const loader = loaderTemplate(slug, name, groupCols, metricNames, yearRange);
-  fs.writeFileSync(path.join(DATA_DIR, slug + ".json.py"), loader);
-  fs.chmodSync(path.join(DATA_DIR, slug + ".json.py"), 0o755);
-
-  // Pagina
   const page = pageTemplate(
     slug, name, description, source, stage,
     dims, metrics,
     !!yearCol, yearCol?.name,
-    GCS_CLEAN_BUCKET
+    gcsBucket
   );
-  fs.writeFileSync(path.join(PAGES_DIR, slug + ".md"), page);
 
-  generated++;
+  return { slug, name, loader, page, skipped: false };
 }
 
-console.log(JSON.stringify({ generated, skipped, total: datasets.length }));
+// ── Esecuzione diretta ──────────────────────────────────────────────────────
+
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  const GCS_CLEAN_BUCKET =
+    (await fetch(PATHS_CONTRACT_URL).then(r => r.json())).buckets.clean;
+
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.mkdirSync(PAGES_DIR, { recursive: true });
+
+  const resp = await fetch(CATALOG_URL);
+  const catalog = await resp.json();
+  const datasets = catalog.datasets;
+
+  let generated = 0, skipped = 0;
+
+  for (const ds of datasets) {
+    const result = processDataset(ds, GCS_CLEAN_BUCKET);
+    if (result.skipped) { skipped++; continue; }
+
+    // Data loader
+    fs.writeFileSync(path.join(DATA_DIR, `${result.slug  }.json.py`), result.loader);
+    fs.chmodSync(path.join(DATA_DIR, `${result.slug  }.json.py`), 0o755);
+
+    // Pagina
+    fs.writeFileSync(path.join(PAGES_DIR, `${result.slug  }.md`), result.page);
+
+    generated++;
+  }
+
+  console.log(JSON.stringify({ generated, skipped, total: datasets.length }));
+}

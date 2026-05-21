@@ -14,3 +14,4 @@ __pycache__/
 src/data/*.json.py
 src/dataset/*.md
 
+.coverage

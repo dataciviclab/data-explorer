@@ -12,15 +12,15 @@
 export function loaderTemplate(slug, name, groupCols, metricNames, yearRange) {
   return [
     '#!/usr/bin/env python3',
-    '"""Data loader: ' + name + ' — aggregazione."""',
+    `"""Data loader: ${  name  } — aggregazione."""`,
     'import sys; sys.path.insert(0, "src/data")',
     'from _util import load_dataset',
     '',
     'load_dataset(',
-    '    slug="' + slug + '",',
-    '    years=' + yearRange + ',',
-    '    group_cols=["' + groupCols.join('", "') + '"],',
-    '    metric_cols=["' + metricNames.join('", "') + '"],',
+    `    slug="${  slug  }",`,
+    `    years=${  yearRange  },`,
+    `    group_cols=["${  groupCols.join('", "')  }"],`,
+    `    metric_cols=["${  metricNames.join('", "')  }"],`,
     ')',
     '',
   ].join("\n");
@@ -44,21 +44,21 @@ export function pageTemplate(slug, name, description, source, stage, dims, metri
   const bucket = gcsBucket || "dataciviclab-clean";
   const lines = [
     '---',
-    'title: ' + JSON.stringify(name),
-    'description: ' + JSON.stringify((description || "").slice(0, 200)),
+    `title: ${  JSON.stringify(name)}`,
+    `description: ${  JSON.stringify((description || "").slice(0, 200))}`,
     '---',
     '',
-    '# ' + name,
+    `# ${  name}`,
     '',
   ];
   if (description) lines.push(description, "");
-  if (source) lines.push("**Fonte**: " + source + "  ");
-  lines.push("**Stato**: " + (stage === "published" ? "✅ Pubblicato" : "🔬 Incubazione") + "  ");
+  if (source) lines.push(`**Fonte**: ${  source  }  `);
+  lines.push(`**Stato**: ${  stage === "published" ? "✅ Pubblicato" : "🔬 Incubazione"  }  `);
   lines.push("", "---", "");
 
   // Load data
   lines.push("```js");
-  lines.push('const data = await FileAttachment("../data/' + slug + '.json").json();');
+  lines.push(`const data = await FileAttachment("../data/${  slug  }.json").json();`);
   lines.push("```");
   lines.push("");
 
@@ -67,16 +67,16 @@ export function pageTemplate(slug, name, description, source, stage, dims, metri
   lines.push("const totalRows = data.length;");
   lines.push("const firstKeys = Object.keys(data[0] || {});");
   const firstDim = dims.length > 0 ? dims[0].name : "?";
-  lines.push('const entityCount = new Set(data.map(d => d.' + firstDim + ')).size;');
+  lines.push(`const entityCount = new Set(data.map(d => d.${  firstDim  })).size;`);
   lines.push("```");
   lines.push("");
 
   lines.push('<div class="grid grid-cols-3">');
   lines.push('  <div class="card"><h3>Record</h3><span class="big">${totalRows.toLocaleString()}</span></div>');
-  lines.push('  <div class="card"><h3>' + firstDim.replace(/_/g, " ") + '</h3><span class="big">${entityCount.toLocaleString()}</span></div>');
+  lines.push(`  <div class="card"><h3>${  firstDim.replace(/_/g, " ")  }</h3><span class="big">\${entityCount.toLocaleString()}</span></div>`);
   if (metrics.length > 0) {
     const firstMetric = metrics[0].name;
-    lines.push('  <div class="card"><h3>' + firstMetric.replace(/_/g, " ") + '</h3><span class="big">${d3.format(".2s")(d3.sum(data, d => d.' + firstMetric + '))}</span></div>');
+    lines.push(`  <div class="card"><h3>${  firstMetric.replace(/_/g, " ")  }</h3><span class="big">\${d3.format(".2s")(d3.sum(data, d => d.${  firstMetric  }))}</span></div>`);
   }
   lines.push('</div>');
   lines.push("");
@@ -84,9 +84,9 @@ export function pageTemplate(slug, name, description, source, stage, dims, metri
   // Year filter
   if (hasYear && yearCol) {
     lines.push("```js");
-    lines.push('const anni = [...new Set(data.map(d => d.' + yearCol + '))].sort((a,b) => b - a);');
+    lines.push(`const anni = [...new Set(data.map(d => d.${  yearCol  }))].sort((a,b) => b - a);`);
     lines.push('const anno = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));');
-    lines.push('const filtered = data.filter(d => d.' + yearCol + ' === anno);');
+    lines.push(`const filtered = data.filter(d => d.${  yearCol  } === anno);`);
     lines.push("```");
     lines.push("");
   } else {
@@ -106,8 +106,8 @@ export function pageTemplate(slug, name, description, source, stage, dims, metri
   // Resources
   lines.push("---", "");
   lines.push("## Risorse", "");
-  lines.push("- [Scarica il parquet](https://storage.googleapis.com/" + bucket + "/" + slug + "/)");
-  lines.push("- [Vai alla pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/" + slug.replace(/_/g, "-") + ")");
+  lines.push(`- [Scarica il parquet](https://storage.googleapis.com/${  bucket  }/${  slug  }/)`);
+  lines.push(`- [Vai alla pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/${  slug.replace(/_/g, "-")  })`);
 
-  return lines.join("\n") + "\n";
+  return `${lines.join("\n")  }\n`;
 }
