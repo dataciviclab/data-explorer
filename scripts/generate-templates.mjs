@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 /**
- * Template functions per la generazione di loader Python e pagine Markdown
- * per Observable Framework. Funzioni pure — nessun I/O, nessun fetch.
+ * Template functions per Observable Framework.
  *
- * Usate da generate_observable.mjs e testate in tests/generate-templates.test.mjs.
+ * loaderTemplate(): genera data loader Python — usato da generate-loaders.mjs.
+ * pageTemplate():   genera pagina Markdown — uso MANUALE (copia-incolla
+ *                   per chi crea una pagina curata). Non usata da script.
+ *
+ * Funzioni pure — nessun I/O, nessun fetch.
  */
 
 /**
