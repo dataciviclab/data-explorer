@@ -9,7 +9,8 @@
     "preview": "observable preview",
     "generate:catalog": "node scripts/generate_catalog.mjs",
     "generate:observable": "node scripts/generate_observable.mjs",
-    "validate:catalog": "node scripts/validate_catalog.mjs"
+    "validate:catalog": "node scripts/validate_catalog.mjs",
+    "test": "node --test"
   },
   "engines": {
     "npm": ">=7.0.0",

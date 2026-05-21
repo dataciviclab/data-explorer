@@ -1,8 +1,22 @@
-import { readFile, access } from "node:fs/promises";
+#!/usr/bin/env node
+/**
+ * Valida che tutti i dataset pubblicati in clean_catalog.json abbiano
+ * pagina (src/dataset/{slug}.md) e data loader (src/data/{slug}.json.py).
+ *
+ * Questo protegge il contratto pubblico: ogni dataset published nel catalogo
+ * remoto deve essere accessibile nell'Explorer.
+ *
+ * Dataset puramente enumerativi (senza metriche numeriche) generano solo
+ * warning, non errori — non sono auto-generabili da generate_observable.mjs.
+ *
+ * Uso: node scripts/validate_catalog.mjs
+ */
+import { access } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const VALID_STATUSES = new Set(["incubating", "published", "deprecated"]);
+const CATALOG_URL =
+  "https://raw.githubusercontent.com/dataciviclab/dataset-incubator/main/registry/clean_catalog.json";
 
 async function fileExists(relativePath) {
   try {
@@ -13,132 +27,85 @@ async function fileExists(relativePath) {
   }
 }
 
-async function readJson(relativePath) {
-  const absolutePath = path.resolve(process.cwd(), relativePath);
-  const raw = await readFile(absolutePath, "utf8");
-  return JSON.parse(raw);
-}
-
-function assert(condition, message, errors) {
-  if (!condition) errors.push(message);
-}
-
-function isNonEmptyString(value) {
-  return typeof value === "string" && value.trim().length > 0;
+/**
+ * Un dataset ha metriche se almeno una colonna ha role="metric".
+ */
+function hasMetrics(columns) {
+  return (columns || []).some((c) => c.role === "metric");
 }
 
 async function main() {
-  const catalog = await readJson("catalog/datasets.json");
-  const themes = await readJson("catalog/themes.json");
+  const resp = await fetch(CATALOG_URL);
+  if (!resp.ok) {
+    throw new Error(
+      "Failed to fetch clean_catalog.json: HTTP " + resp.status
+    );
+  }
+  const catalog = await resp.json();
+  const datasets = catalog.datasets || [];
+
   const errors = [];
+  const warnings = [];
+  let published = 0;
+  let enumerative = 0;
 
-  assert(catalog && typeof catalog === "object", "catalog/datasets.json must be an object with datasets[]", errors);
-  assert(Array.isArray(catalog.datasets), "catalog/datasets.json datasets must be an array", errors);
-  assert(Array.isArray(themes), "catalog/themes.json must be an array", errors);
+  for (const ds of datasets) {
+    if (ds.stage !== "published") continue;
+    published++;
 
-  if (errors.length > 0) {
-    throw new Error(errors.join("\n"));
-  }
+    const slug = ds.slug;
+    const columns = ds.columns || [];
+    const isEnumerative = !hasMetrics(columns);
 
-  const datasets = catalog.datasets;
-  const datasetSlugs = new Set();
-  const datasetBySlug = new Map();
-  const themeSlugs = new Set();
-  const themeBySlug = new Map();
-
-  for (const [index, theme] of themes.entries()) {
-    const prefix = "themes[" + index + "]";
-    assert(isNonEmptyString(theme.slug), prefix + ".slug must be a non-empty string", errors);
-    assert(isNonEmptyString(theme.name), prefix + ".name must be a non-empty string", errors);
-    assert(Array.isArray(theme.datasets), prefix + ".datasets must be an array", errors);
-    if (!isNonEmptyString(theme.slug)) continue;
-    assert(!themeSlugs.has(theme.slug), "duplicate theme slug: " + theme.slug, errors);
-    themeSlugs.add(theme.slug);
-    themeBySlug.set(theme.slug, theme);
-  }
-
-  for (const [index, ds] of datasets.entries()) {
-    const prefix = "datasets[" + index + "]";
-    assert(isNonEmptyString(ds.slug), prefix + ".slug must be a non-empty string", errors);
-    assert(isNonEmptyString(ds.name), prefix + ".name must be a non-empty string", errors);
-    assert(isNonEmptyString(ds.source), prefix + ".source must be a non-empty string", errors);
-    if (!isNonEmptyString(ds.slug)) continue;
-    assert(!datasetSlugs.has(ds.slug), "duplicate dataset slug: " + ds.slug, errors);
-    datasetSlugs.add(ds.slug);
-    datasetBySlug.set(ds.slug, ds);
-
-    if (ds.stage && !VALID_STATUSES.has(ds.stage)) {
-      errors.push(prefix + ".stage must be one of [" + Array.from(VALID_STATUSES).join(", ") + "] - got: " + ds.stage);
+    if (isEnumerative) {
+      enumerative++;
     }
 
-    if (Array.isArray(ds.years)) {
-      assert(ds.years.length > 0, prefix + ".years must not be empty", errors);
-      for (const year of ds.years) {
-        assert(Number.isInteger(year), prefix + ".years must contain integers only", errors);
-      }
-    }
+    const pagePath = "src/dataset/" + slug + ".md";
+    const loaderPath = "src/data/" + slug + ".json.py";
+    const pageExists = await fileExists(pagePath);
+    const loaderExists = await fileExists(loaderPath);
 
-    if (ds.theme && isNonEmptyString(ds.theme)) {
-      assert(themeSlugs.has(ds.theme), "dataset " + ds.slug + " references unknown theme: " + ds.theme, errors);
-    }
-  }
+    if (!pageExists || !loaderExists) {
+      const msg =
+        'Published dataset "' + slug + '" (' + ds.name + ")" +
+        (!pageExists ? " — missing page: " + pagePath : "") +
+        (!loaderExists ? " — missing loader: " + loaderPath : "");
 
-  for (const [themeSlug, theme] of themeBySlug.entries()) {
-    const listedDatasets = Array.isArray(theme.datasets) ? theme.datasets : [];
-    const seen = new Set();
-    for (const dsSlug of listedDatasets) {
-      if (!isNonEmptyString(dsSlug)) continue;
-      assert(!seen.has(dsSlug), "theme " + themeSlug + " lists dataset " + dsSlug + " more than once", errors);
-      seen.add(dsSlug);
-      assert(datasetBySlug.has(dsSlug), "theme " + themeSlug + " references unknown dataset: " + dsSlug, errors);
-    }
-  }
-
-  const featuredDatasetSlugs = new Set();
-  for (const theme of themeBySlug.values()) {
-    if (Array.isArray(theme.datasets)) {
-      for (const slug of theme.datasets) {
-        if (isNonEmptyString(slug)) featuredDatasetSlugs.add(slug);
+      if (isEnumerative) {
+        warnings.push(
+          msg + " [enumerative dataset, no auto-generator]"
+        );
+      } else {
+        errors.push(msg);
       }
     }
   }
 
-  for (const ds of datasetBySlug.values()) {
-    if (ds.stage === "published") {
-      const pagePath = "pages/dataset/" + ds.slug + ".md";
-      if (!(await fileExists(pagePath))) {
-        const isFeatured = featuredDatasetSlugs.has(ds.slug);
-        const message = "dataset " + ds.slug + " has stage published but page " + pagePath + " does not exist";
-        if (isFeatured) {
-          errors.push(message + " — dataset is featured in a theme, page is required");
-        } else {
-          console.warn("[warn] " + message + " — skipping, create the page to expose it");
-        }
-      }
-    }
-  }
-
-  for (const theme of themeBySlug.values()) {
-    if (Array.isArray(theme.datasets) && theme.datasets.length > 0) {
-      const themePage = "pages/temi/" + theme.slug + ".md";
-      if (!(await fileExists(themePage))) {
-        errors.push("theme " + theme.slug + " has datasets but page " + themePage + " does not exist");
-      }
-    }
+  if (warnings.length > 0) {
+    console.warn("\nWarnings (" + warnings.length + "):\n");
+    for (const w of warnings) console.warn("  - " + w);
   }
 
   if (errors.length > 0) {
-    console.error("Catalog validation failed:\n");
-    for (const error of errors) {
-      console.error("- " + error);
-    }
+    console.error("\nCatalog validation failed:\n");
+    for (const err of errors) console.error("  - " + err);
+    console.error(
+      "\n" + errors.length + " error(s), " +
+      warnings.length + " warning(s) — " +
+      published + " published (" + enumerative + " enumerative)."
+    );
     process.exit(1);
   }
 
-  console.log("Catalog validation passed: " + datasets.length + " datasets, " + themes.length + " themes.");
+  console.log(
+    "Catalog validation passed: " + published +
+    " published (" + enumerative + " enumerative), " +
+    warnings.length + " warnings."
+  );
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : String(err));
   process.exit(1);
 });

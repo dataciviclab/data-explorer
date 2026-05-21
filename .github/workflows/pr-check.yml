@@ -31,5 +31,14 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: pip install -r requirements.txt
 
+      - name: Generate pages from remote catalog
+        run: npm run generate:observable
+
+      - name: Validate catalog (published datasets → pages)
+        run: npm run validate:catalog
+
+      - name: Run unit tests
+        run: npm test
+
       - name: Build Observable Framework
         run: npx observable build
