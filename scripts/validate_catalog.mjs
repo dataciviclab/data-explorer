@@ -9,7 +9,8 @@
  * Dataset puramente enumerativi (senza metriche numeriche) generano solo
  * warning, non errori — non sono auto-generabili da generate_observable.mjs.
  *
- * Uso: node scripts/validate_catalog.mjs
+ * Uso: node scripts/generate_observable.mjs && node scripts/validate_catalog.mjs
+ *     npm run check:catalog  (wrapper che esegue entrambi)
  */
 import { access } from "node:fs/promises";
 import path from "node:path";

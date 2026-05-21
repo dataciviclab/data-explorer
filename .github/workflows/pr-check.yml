@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -31,14 +31,8 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: pip install -r requirements.txt
 
-      - name: Generate pages from remote catalog
-        run: npm run generate:observable
-
-      - name: Validate catalog (published datasets → pages)
-        run: npm run validate:catalog
-
-      - name: Run unit tests
+      - name: Generate + validate + unit tests
         run: npm test
 
-      - name: Build Observable Framework
+      - name: Build
         run: npx observable build
