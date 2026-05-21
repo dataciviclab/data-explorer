@@ -40,8 +40,8 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
 
-      - name: Generate pages from remote catalog
-        run: npm run generate:observable
+      - name: Generate data loaders from remote catalog
+        run: npm run generate:loaders
 
       - name: Build Observable Framework
         run: npx observable build

@@ -12,5 +12,7 @@ catalog/datasets.json
 dist/observable/
 __pycache__/
 src/data/*.json.py
-src/dataset/*.md
+# Le pagine .md sono manuali/editoriali — NON ignorarle
+# src/dataset/*.md  (rimosso: le pagine curate vanno tracciate in git)
 
+.coverage

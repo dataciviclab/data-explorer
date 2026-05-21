@@ -30,12 +30,16 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
       - run: pip install -r requirements.txt
+      - run: pip install pytest-cov  # per coverage:py
+
+      - name: Lint
+        run: npm run lint
 
       - name: Unit tests
         run: npm test
 
-      - name: Generate pages from remote catalog
-        run: npm run generate:observable
+      - name: Generate data loaders from remote catalog
+        run: npm run generate:loaders
 
       - name: Build
         run: npx observable build
