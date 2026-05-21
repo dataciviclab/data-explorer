@@ -31,7 +31,7 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: pip install -r requirements.txt
 
-      - name: Generate + validate + unit tests
+      - name: Unit tests
         run: npm test
 
       - name: Build

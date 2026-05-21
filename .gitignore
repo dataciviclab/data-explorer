@@ -11,5 +11,4 @@ catalog/datasets.json
 .observablehq/
 dist/observable/
 __pycache__/
-src/data/*.json.py
-src/dataset/*.md
+
