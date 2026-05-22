@@ -41,7 +41,7 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Generate data loaders from remote catalog
-        run: npm run generate:loaders
+        run: echo "loaders rimossi — i loader sono manuali e tracciati in git"
 
       - name: Build Observable Framework
         run: npx observable build

@@ -1,47 +1,9 @@
 /**
- * Test unitari per le template functions di generazione pagine.
- *
- * Verifica che loaderTemplate() e pageTemplate() producano output corretto
- * per diversi scenari di input.
+ * Test unitari per pageTemplate.
  */
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { loaderTemplate, pageTemplate } from "../scripts/generate-templates.mjs";
-
-describe("loaderTemplate()", () => {
-  it("genera un data loader Python corretto per diverse configurazioni", () => {
-    // slug con groupCols e metriche multiple
-    const r1 = loaderTemplate(
-      "test-slug", "Test Dataset",
-      ["anno", "regione"], ["valore"],
-      "list(range(2020, 2025))"
-    );
-    assert.match(r1, /slug="test-slug"/);
-    assert.match(r1, /from _util import load_dataset/);
-    assert.match(r1, /load_dataset\(/);
-    assert.match(r1, /group_cols=\["anno", "regione"\]/);
-    assert.match(r1, /metric_cols=\["valore"\]/);
-    assert.match(r1, /list\(range\(2020, 2025\)\)/);
-
-    // metriche multiple
-    const r2 = loaderTemplate(
-      "multi", "Multi",
-      ["categoria"], ["spesa", "quantita", "ricavi"],
-      "list(range(2019, 2024))"
-    );
-    assert.match(r2, /"spesa"/);
-    assert.match(r2, /"quantita"/);
-    assert.match(r2, /"ricavi"/);
-
-    // groupCols singolo
-    const r3 = loaderTemplate(
-      "simple", "Simple",
-      ["id"], ["valore"],
-      "list(range(2020, 2022))"
-    );
-    assert.match(r3, /group_cols=\["id"\]/);
-  });
-});
+import { pageTemplate } from "../scripts/generate-templates.mjs";
 
 describe("pageTemplate()", () => {
   const defaultDims = [

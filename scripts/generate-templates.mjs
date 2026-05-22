@@ -1,35 +1,5 @@
 #!/usr/bin/env node
 /**
- * Template functions per Observable Framework.
- *
- * loaderTemplate(): genera data loader Python — usato da generate-loaders.mjs.
- * pageTemplate():   genera pagina Markdown — uso MANUALE (copia-incolla
- *                   per chi crea una pagina curata). Non usata da script.
- *
- * Funzioni pure — nessun I/O, nessun fetch.
- */
-
-/**
- * Genera il contenuto di un data loader Python (src/data/{slug}.json.py).
- */
-export function loaderTemplate(slug, name, groupCols, metricNames, yearRange) {
-  return [
-    '#!/usr/bin/env python3',
-    `"""Data loader: ${  name  } — aggregazione."""`,
-    'import sys; sys.path.insert(0, "src/data")',
-    'from _util import load_dataset',
-    '',
-    'load_dataset(',
-    `    slug="${  slug  }",`,
-    `    years=${  yearRange  },`,
-    `    group_cols=["${  groupCols.join('", "')  }"],`,
-    `    metric_cols=["${  metricNames.join('", "')  }"],`,
-    ')',
-    '',
-  ].join("\n");
-}
-
-/**
  * Genera il contenuto di una pagina dataset Markdown (src/dataset/{slug}.md).
  *
  * @param {string} slug - Slug del dataset
