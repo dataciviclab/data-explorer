@@ -27,11 +27,11 @@ Apri http://localhost:3000
 
 ## Aggiungere una pagina dataset
 
-1. **Data loader**: crea `src/data/<slug>.json.py`
-   - loader **base**: usa lo slug del dataset (con underscore) — lettura diretta dal parquet
-   - loader **derivato**: usa slug URL (con trattini) — vista aggregata per la pagina
-   - vedi `src/data/_util.py` per le utility condivise
-   - vedi `src/data/README.md` per il pattern naming
+1. **Data loader**: crea `src/data/<slug>.json.py` con la logica di aggregazione per la tua pagina
+   - usa `load_dataset()` da `src/data/_util.py` per leggere i parquet GCS
+   - il nome del file usa slug URL con trattini (es. `bdap-lea-regioni.json.py`)
+   - lo slug DI (con underscore, es. `bdap_lea`) va come parametro `slug=` a `load_dataset()`
+   - vedi `src/data/_util.py` e i loader esistenti come riferimento
 2. **Pagina**: crea `src/dataset/<slug-url>.md`
    - segui la struttura definita in `docs/dataset-page-standard.md`
    - i data loader sono referenziati come `FileAttachment("../data/<nome>.json")`
