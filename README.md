@@ -14,6 +14,11 @@ npm run dev
 
 Apri http://localhost:3000
 
+## Documentazione
+
+- [`docs/explorer-ready-checklist.md`](docs/explorer-ready-checklist.md) — criteri per pubblicare un dataset nel catalogo
+- [`docs/dataset-page-standard.md`](docs/dataset-page-standard.md) — struttura standard di una pagina dataset
+
 ## Pagine
 
 | Pagina | Dataset |
@@ -42,3 +47,7 @@ Su **GitHub Pages** via workflow CI: `npm run build` → `observable build` → 
 - **Observable Plot** — chart
 - **DuckDB** — query engine per parquet su GCS
 - **Python** — data loader
+
+## Contribuire
+
+Guarda [`CONTRIBUTING.md`](CONTRIBUTING.md) per aggiungere una pagina dataset o contribuire al frontend.
