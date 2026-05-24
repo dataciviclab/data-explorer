@@ -1,6 +1,6 @@
 ---
 title: Consumi in convenzione Consip
-description: Dati Consip sugli acquisti della PA attraverso convenzioni, per regione, tipologia di amministrazione e fornitore
+description: Dati Consip sugli acquisti della PA attraverso convenzioni, per regione e tipologia di amministrazione
 source: Consip
 last_modified: 2025-12-31
 ---
@@ -28,12 +28,9 @@ const totAnno = regioni
 const totOrdini = regioni
   .filter(d => d.anno_riferimento === annoSel)
   .reduce((s, d) => s + d.numero_ordini_con_consumi, 0);
-const totPa = regioni
-  .filter(d => d.anno_riferimento === annoSel)
-  .reduce((s, d) => s + d.n_pa_con_consumi, 0);
 ```
 
-<div class="grid grid-cols-3">
+<div class="grid grid-cols-2">
   <div class="card">
     <h3>Spesa totale</h3>
     <span class="big">€ ${(totAnno / 1e6).toFixed(0)} <small style="opacity:0.6">mln</small></span>
@@ -41,10 +38,6 @@ const totPa = regioni
   <div class="card">
     <h3>Ordini</h3>
     <span class="big">${totOrdini.toLocaleString("it-IT")}</span>
-  </div>
-  <div class="card">
-    <h3>Amministrazioni</h3>
-    <span class="big">${totPa.toLocaleString("it-IT")}</span>
   </div>
 </div>
 
@@ -123,19 +116,15 @@ Plot.plot({
 
 ```js
 Inputs.table(regFiltered, {
-  columns: ["regione_pa", "valore_economico_consumi", "numero_ordini_con_consumi", "n_pa_con_consumi", "n_po_con_consumi"],
+  columns: ["regione_pa", "valore_economico_consumi", "numero_ordini_con_consumi"],
   header: {
     regione_pa: "Regione PA",
     valore_economico_consumi: "Spesa (€)",
-    numero_ordini_con_consumi: "Ordini",
-    n_pa_con_consumi: "PA coinvolte",
-    n_po_con_consumi: "Fornitori"
+    numero_ordini_con_consumi: "Ordini"
   },
   format: {
     valore_economico_consumi: x => `€ ${Math.round(x).toLocaleString("it-IT")}`,
-    numero_ordini_con_consumi: x => x.toLocaleString("it-IT"),
-    n_pa_con_consumi: x => x.toLocaleString("it-IT"),
-    n_po_con_consumi: x => x.toLocaleString("it-IT")
+    numero_ordini_con_consumi: x => x.toLocaleString("it-IT")
   },
   rows: 25,
   width: "100%"

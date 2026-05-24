@@ -7,5 +7,5 @@ load_dataset(
     slug="consip_consumi_convenzione",
     years=list(range(2023, 2026)),
     group_cols=["anno_riferimento", "regione_pa"],
-    metric_cols=["valore_economico_consumi", "numero_ordini_con_consumi", "n_pa_con_consumi", "n_po_con_consumi"],
+    metric_cols=["valore_economico_consumi", "numero_ordini_con_consumi"],
 )
