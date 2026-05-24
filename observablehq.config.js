@@ -8,6 +8,7 @@ export default {
       collapsible: false,
       pages: [
         { name: "IRPEF comunale", path: "/dataset/irpef-comunale" },
+        { name: "Spesa sanitaria LEA", path: "/dataset/bdap-lea" },
         { name: "Rifiuti urbani", path: "/dataset/rifiuti-urbani" },
         { name: "Flussi giustizia", path: "/dataset/flussi-giustizia-civile" },
         { name: "Dipendenti pubblici", path: "/dataset/dipendenti-pubblici" },
