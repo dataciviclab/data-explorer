@@ -14,8 +14,8 @@ themes = [
         "slug": "finanza-pubblica",
         "name": "Finanza pubblica",
         "description": "Entrate dello Stato, capacità fiscale e tributi locali",
-        "datasets": ["irpef-comunale", "entrate-stato"],
-        "questions": ["Come si distribuisce la capacità fiscale tra regioni?", "Quali sono le principali voci di entrata dello Stato?"],
+        "datasets": ["irpef-comunale", "entrate-stato", "consip-consumi-convenzione"],
+        "questions": ["Come si distribuisce la capacità fiscale tra regioni?", "Quali sono le principali voci di entrata dello Stato?", "Quanto spende la PA attraverso le convenzioni Consip?"],
     },
     {
         "slug": "sanita",
