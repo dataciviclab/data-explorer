@@ -21,8 +21,8 @@ themes = [
         "slug": "sanita",
         "name": "Sanità",
         "description": "Spesa farmaceutica, consumi sanitari e prevenzione",
-        "datasets": ["spesa-farmaceutica"],
-        "questions": ["Come cambia tra regioni la spesa farmaceutica per classi terapeutiche?"],
+        "datasets": ["spesa-farmaceutica", "bdap-lea"],
+        "questions": ["Come cambia tra regioni la spesa farmaceutica per classi terapeutiche?", "Quanto spendono le regioni per i Livelli Essenziali di Assistenza?"],
     },
     {
         "slug": "welfare-lavoro",

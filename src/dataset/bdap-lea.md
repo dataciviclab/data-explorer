@@ -1,6 +1,8 @@
 ---
 title: Spesa sanitaria regionale LEA
 description: Dati BDAP sui costi dei Livelli Essenziali di Assistenza per regione, macro-area e voce contabile
+source: BDAP — Banca Dati delle Amministrazioni Pubbliche
+last_modified: 2025-06-30
 ---
 
 # Spesa sanitaria regionale LEA
@@ -133,7 +135,8 @@ Inputs.table(ordinato, {
 
 ---
 
-## Risorsa
+## Risorse
 
 - [BDAP — Open Data](https://bdap-opendata.rgs.mef.gov.it/)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_lea/2024/bdap_lea_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-lea)
