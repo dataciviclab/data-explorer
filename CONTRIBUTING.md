@@ -2,6 +2,9 @@
 
 Questa guida vale per la repo `data-explorer`, il frontend pubblico dei dataset puliti del Lab.
 
+Per le regole GitHub condivise dell'organizzazione, parti prima da
+[`.github`](https://github.com/dataciviclab/.github).
+
 ## A cosa serve questa repo
 
 `data-explorer` espone i dataset del Lab in pagine navigabili, basate su [Observable Framework](https://observablehq.com/framework/), con dati letti dai clean parquet su GCS.
@@ -47,6 +50,15 @@ Prima di proporre una nuova pagina, controlla:
 
 Il principio guida: *nel Data Explorer entrano prima i dataset che si leggono bene, non quelli semplicemente disponibili.*
 
+## Quando aprire una issue
+
+Apri una issue in `data-explorer` se il lavoro riguarda:
+
+- aggiungere la pagina di un nuovo dataset
+- bug o miglioramenti al frontend (data loader, layout, performance)
+- aggiornamento della configurazione o del catalogo
+- cambio di struttura dei dati upstream
+
 ## PR e review
 
 Prima di aprire una PR:
@@ -60,3 +72,5 @@ Prima di aprire una PR:
 - [`docs/`](docs/) — documentazione del repo
 - [`dataset-incubator`](https://github.com/dataciviclab/dataset-incubator) — pipeline e contratto tecnico
 - [`clean_catalog.json`](https://github.com/dataciviclab/dataset-incubator/blob/main/registry/clean_catalog.json) — catalogo dataset disponibili
+- [`lab-connectors`](https://github.com/dataciviclab/lab-connectors) — dipendenza per GCS e HTTP
+- [`.github`](https://github.com/dataciviclab/.github) — policy condivise
