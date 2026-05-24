@@ -1,6 +1,8 @@
 ---
 title: Consumi in convenzione Consip
 description: Dati Consip sugli acquisti della PA attraverso convenzioni, per regione, tipologia di amministrazione e fornitore
+source: Consip
+last_modified: 2025-12-31
 ---
 
 # Consumi in convenzione Consip
@@ -145,4 +147,5 @@ Inputs.table(regFiltered, {
 ## Risorse
 
 - [Consip — Dati](https://dati.consip.it/)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/consip_consumi_convenzione/2025/consip_consumi_convenzione_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/consip-consumi-convenzione)
