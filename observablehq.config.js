@@ -2,6 +2,7 @@ export default {
   root: "src",
   output: "dist/observable",
   title: "DataCivicLab Explorer",
+  theme: ["air", "ocean-floor"],
   pages: [
     {
       name: "Dataset",
