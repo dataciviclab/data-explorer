@@ -24,7 +24,7 @@ themes = [
     {
         "slug": "welfare-lavoro",
         "name": "Welfare e lavoro",
-        "description": "Pubblico impiego, pensioni e previdenza",
+        "description": "Pubblico impiego, pensioni, previdenza e prezzi delle abitazioni",
         "datasets": ["dipendenti-pubblici", "pensioni-inps", "istat-ipab-aree"],
     },
     {

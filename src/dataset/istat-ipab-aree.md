@@ -113,5 +113,5 @@ Inputs.table(ultimiValori, {
 ## Risorse
 
 - [ISTAT — IPAB](https://www.istat.it/it/archivio/16773)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/istat_ipab_aree/2024/istat_ipab_aree_2024_clean.parquet)
+- [Scarica il parquet pulito (2024)](https://storage.googleapis.com/dataciviclab-clean/istat_ipab_aree/2024/istat_ipab_aree_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/istat-ipab-aree)
