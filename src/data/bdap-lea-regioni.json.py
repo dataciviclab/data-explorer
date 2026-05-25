@@ -8,5 +8,5 @@ load_dataset(
     years=[2024],
     group_cols=["descrizione_regione"],
     metric_cols=["importo_totale"],
-    where="codice_voce_contabile = '49999'",
+    where="codice_ente_ssn <> '000'",
 )
