@@ -21,18 +21,22 @@ con = duckdb.connect()
 rows = con.sql(f"""
     SELECT
         descrizione_regione,
-        CASE LEFT(codice_voce_contabile, 1)
-            WHEN '1' THEN 'Prevenzione e sanità pubblica'
-            WHEN '2' THEN 'Assistenza distrettuale'
-            WHEN '3' THEN 'Assistenza ospedaliera'
-            WHEN '4' THEN 'Ricerca'
-        END AS descrizione_voce_contabile,
+        macro_area AS descrizione_voce_contabile,
         SUM(importo_totale) AS importo_totale
-    FROM read_parquet('{url}')
+    FROM (
+        SELECT *,
+            CASE LEFT(codice_voce_contabile, 1)
+                WHEN '1' THEN 'Prevenzione e sanità pubblica'
+                WHEN '2' THEN 'Assistenza distrettuale'
+                WHEN '3' THEN 'Assistenza ospedaliera'
+                WHEN '4' THEN 'Ricerca'
+            END AS macro_area
+        FROM read_parquet('{url}')
+    )
     WHERE codice_ente_ssn <> '000'
-      AND LEFT(codice_voce_contabile, 1) IN ('1', '2', '3', '4')
-    GROUP BY descrizione_regione, descrizione_voce_contabile
-    ORDER BY descrizione_regione, descrizione_voce_contabile
+      AND macro_area IS NOT NULL
+    GROUP BY descrizione_regione, macro_area
+    ORDER BY descrizione_regione, macro_area
 """).fetchall()
 
 data = [
