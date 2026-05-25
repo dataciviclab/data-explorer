@@ -18,5 +18,5 @@ load_dataset(
         "ammortamenti",
         "altri_costi",
     ],
-    where="codice_ente_ssn <> '000'",
+    where="codice_ente_ssn not in ('000', '999')",
 )

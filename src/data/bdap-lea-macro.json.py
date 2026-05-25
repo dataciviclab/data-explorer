@@ -33,7 +33,7 @@ rows = con.sql(f"""
             END AS macro_area
         FROM read_parquet('{url}')
     )
-    WHERE codice_ente_ssn <> '000'
+    WHERE codice_ente_ssn NOT IN ('000', '999')
       AND macro_area IS NOT NULL
     GROUP BY descrizione_regione, macro_area
     ORDER BY descrizione_regione, macro_area

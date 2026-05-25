@@ -22,7 +22,12 @@ const nRegioni = regioni.length;
 const mediaRegione = totSpesa / nRegioni;
 ```
 
-> **Nota sul totale**: la spesa complessiva (~€${(totSpesa / 1e9).toFixed(0)} mld) include le **transazioni inter-ente** per mobilità sanitaria (prestazioni acquistate da altri enti SSN, ~€166 mld). Ogni prestazione è contata sia dall'ente pagante sia dall'ente erogante. Escludendo questo effetto, il costo operativo diretto è circa €230 mld.
+```js
+const totPrestazioni = d3.sum(regioni, d => d.prestazioni_sanitarie);
+const totDiretto = totSpesa - totPrestazioni;
+```
+
+> **Nota sul totale**: la spesa complessiva (~€${(totSpesa / 1e9).toFixed(0)} mld) include le **transazioni inter-ente** per mobilità sanitaria (prestazioni acquistate da altri enti SSN, ~€${(totPrestazioni / 1e9).toFixed(0)} mld). Ogni prestazione è contata sia dall'ente pagante sia dall'ente erogante. Escludendo questo effetto, il costo operativo diretto è circa €${(totDiretto / 1e9).toFixed(0)} mld.
 
 <div class="grid grid-cols-3">
   <div class="card">
