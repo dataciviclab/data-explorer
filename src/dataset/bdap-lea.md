@@ -78,16 +78,9 @@ Plot.plot({
 Come si distribuisce la spesa tra le quattro macro-aree? In tutte le regioni l'assistenza distrettuale e ospedaliera assorbono la quasi totalità delle risorse, mentre prevenzione e ricerca pesano in misura marginale.
 
 ```js
-const macroLabel = {
-  "TOTALE PREVENZIONE COLLETTIVA E SANITA' PUBBLICA": "Prevenzione e sanità pubblica",
-  "TOTALE ASSISTENZA DISTRETTUALE": "Assistenza distrettuale",
-  "TOTALE ASSISTENZA OSPEDALIERA": "Assistenza ospedaliera",
-  "TOTALE COSTI PER ATTIVITA' DI RICERCA": "Ricerca"
-};
-
 const macroShort = macro.map(d => ({
   ...d,
-  macro: macroLabel[d.descrizione_voce_contabile] || d.descrizione_voce_contabile
+  macro: d.descrizione_voce_contabile
 }));
 ```
 
