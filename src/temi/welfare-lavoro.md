@@ -1,11 +1,11 @@
 ---
 title: Welfare e lavoro
-description: Pubblico impiego, pensioni e previdenza
+description: Pubblico impiego, pensioni, previdenza e prezzi delle abitazioni
 ---
 
 # Welfare e lavoro
 
-Dipendenti pubblici per comparto e pensioni INPS per gestione previdenziale. I dataset di questo tema coprono il lavoro pubblico e la previdenza in Italia.
+Dipendenti pubblici, pensioni INPS e indice dei prezzi delle abitazioni per area geografica. I dataset di questo tema coprono il lavoro pubblico, la previdenza e il mercato immobiliare in Italia.
 
 ```js
 const catalog = await FileAttachment("../data/catalog.json").json();

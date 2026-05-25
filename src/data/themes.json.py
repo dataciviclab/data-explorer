@@ -25,7 +25,7 @@ themes = [
         "slug": "welfare-lavoro",
         "name": "Welfare e lavoro",
         "description": "Pubblico impiego, pensioni e previdenza",
-        "datasets": ["dipendenti-pubblici", "pensioni-inps"],
+        "datasets": ["dipendenti-pubblici", "pensioni-inps", "istat-ipab-aree"],
     },
     {
         "slug": "giustizia",
