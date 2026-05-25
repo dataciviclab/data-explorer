@@ -22,6 +22,8 @@ const nRegioni = regioni.length;
 const mediaRegione = totSpesa / nRegioni;
 ```
 
+> **Nota sul totale**: la spesa complessiva (~€${(totSpesa / 1e9).toFixed(0)} mld) include le **transazioni inter-ente** per mobilità sanitaria (prestazioni acquistate da altri enti SSN, ~€166 mld). Ogni prestazione è contata sia dall'ente pagante sia dall'ente erogante. Escludendo questo effetto, il costo operativo diretto è circa €230 mld.
+
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Spesa totale LEA</h3>
@@ -114,13 +116,36 @@ Plot.plot({
 
 ---
 
-## Dettaglio regioni
+## Dettaglio regioni — composizione della spesa
 
 ```js
 Inputs.table(ordinato, {
-  columns: ["descrizione_regione", "importo_totale"],
-  header: {descrizione_regione: "Regione", importo_totale: "Spesa totale (€)"},
-  format: {importo_totale: x => `€ ${Math.round(x).toLocaleString("it-IT")}`},
+  columns: [
+    "descrizione_regione",
+    "importo_totale",
+    "prestazioni_sanitarie",
+    "personale_sanitario",
+    "consumi_sanitari",
+    "servizi_sanitari",
+    "ammortamenti"
+  ],
+  header: {
+    descrizione_regione: "Regione",
+    importo_totale: "Spesa totale (€)",
+    prestazioni_sanitarie: "Prestazioni",
+    personale_sanitario: "Personale",
+    consumi_sanitari: "Consumi",
+    servizi_sanitari: "Servizi",
+    ammortamenti: "Ammortam."
+  },
+  format: {
+    importo_totale: x => `€ ${(x / 1e6).toFixed(0)} mln`,
+    prestazioni_sanitarie: x => `€ ${(x / 1e6).toFixed(0)} mln`,
+    personale_sanitario: x => `€ ${(x / 1e6).toFixed(0)} mln`,
+    consumi_sanitari: x => `€ ${(x / 1e6).toFixed(0)} mln`,
+    servizi_sanitari: x => `€ ${(x / 1e6).toFixed(0)} mln`,
+    ammortamenti: x => `€ ${(x / 1e6).toFixed(0)} mln`
+  },
   rows: 25,
   width: "100%"
 })
