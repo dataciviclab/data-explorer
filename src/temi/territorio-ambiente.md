@@ -28,7 +28,7 @@ const sources = [...new Set(datasets.map(d => d.source))];
   </div>
   <div class="card">
     <h3>Periodo</h3>
-    <span class="big">${periodStart}–${periodEnd}</span>
+    <span class="big">${String(periodStart)}–${String(periodEnd)}</span>
   </div>
   <div class="card">
     <h3>Fonti</h3>
