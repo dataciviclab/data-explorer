@@ -21,7 +21,7 @@ const tipologie = await FileAttachment("../data/consip-consumi-convenzione-tipol
 
 ```js
 const anni = [...new Set(regioni.map(d => d.anno_riferimento))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js

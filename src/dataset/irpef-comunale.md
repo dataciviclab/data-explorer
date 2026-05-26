@@ -21,7 +21,7 @@ const capoluoghi = await FileAttachment("../data/irpef-capoluoghi.json").json();
 
 ```js
 const anni = [...new Set(regioni.map(d => d.anno_di_imposta))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js

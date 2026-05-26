@@ -21,7 +21,7 @@ const comuni = await FileAttachment("../data/ispra-comuni.json").json();
 
 ```js
 const anni = [...new Set(regioni.map(d => d.anno))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
