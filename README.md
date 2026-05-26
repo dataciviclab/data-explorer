@@ -22,7 +22,7 @@ Apri http://localhost:3000
 
 ## Pagine
 
-Il catalogo completo è sulla [home page live](https://explorer.dataciviclab.org). Al momento sono pubblicati 13 dataset su 5 temi.
+Il catalogo completo è sulla [home page live](https://explorer.dataciviclab.org), organizzato per temi e stato di pubblicazione.
 
 ## Data loader
 
