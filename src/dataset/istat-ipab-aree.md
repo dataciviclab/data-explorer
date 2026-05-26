@@ -1,8 +1,11 @@
 ---
 title: Indice prezzi abitazioni (IPAB) per area
-description: Dati ISTAT sull'indice dei prezzi delle abitazioni (IPAB) per area geografica, trimestre e tipologia
+description: Dati ISTAT sull'indice dei prezzi delle abitazioni (IPAB) per area geografica e trimestre, 2010-2025
 source: ISTAT
-last_modified: 2025-12-31
+source_url: https://www.istat.it/it/archivio/16773
+period: "2010–2025"
+last_modified: 2026-05-26
+dataset_slug: istat_ipab_aree
 ---
 
 # Indice prezzi abitazioni (IPAB) per area
@@ -110,8 +113,19 @@ Inputs.table(ultimiValori, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: la serie copre il periodo 2010-2025. Dati precedenti non sono disponibili in questo dataset.
+- **Indice base**: l'indice è calcolato con base 2010=100. Le variazioni percentuali sono relative al 2010, non all'anno precedente.
+- **Tipologia**: i dati si riferiscono a abitazioni esistenti (EXST_DW). Non include abitazioni nuove o di nuova costruzione.
+- **Aree**: la disaggregazione include macro-aree ISTAT e tre città (Milano, Roma, Torino). Non sono disponibili dati comunali o provinciali.
+
+---
+
 ## Risorse
 
-- [ISTAT — IPAB](https://www.istat.it/it/archivio/16773)
-- [Scarica il parquet pulito (2024)](https://storage.googleapis.com/dataciviclab-clean/istat_ipab_aree/2024/istat_ipab_aree_2024_clean.parquet)
+- [ISTAT — IPAB (fonte originale)](https://www.istat.it/it/archivio/16773)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/istat_ipab_aree/2024/istat_ipab_aree_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/istat-ipab-aree)
