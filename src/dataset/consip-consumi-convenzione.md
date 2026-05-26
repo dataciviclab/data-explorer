@@ -1,8 +1,11 @@
 ---
 title: Consumi in convenzione Consip
-description: Dati Consip sugli acquisti della PA attraverso convenzioni, per regione e tipologia di amministrazione
-source: Consip
+description: Dati Consip sugli acquisti della PA attraverso convenzioni, per regione e tipologia di amministrazione, 2023-2025
+source: Consip S.p.A. / MEF
+source_url: https://dati.consip.it/
+period: "2023–2025"
 last_modified: 2025-12-31
+dataset_slug: consip_consumi_convenzione
 ---
 
 # Consumi in convenzione Consip
@@ -18,7 +21,7 @@ const tipologie = await FileAttachment("../data/consip-consumi-convenzione-tipol
 
 ```js
 const anni = [...new Set(regioni.map(d => d.anno_riferimento))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
@@ -133,8 +136,18 @@ Inputs.table(regFiltered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: i dati coprono il periodo 2023-2025. Anni precedenti non sono disponibili in questo dataset.
+- **Regione PA**: la regione indicata è quella della PA acquirente, non quella del fornitore né quella di utilizzo del bene/servizio. Per le amministrazioni centrali, la sede legale è spesso nel Lazio indipendentemente dalla destinazione d'uso.
+- **Convenzioni**: il dato include solo acquisti attraverso convenzioni Consip attive. Acquisti diretti o attraverso altri strumenti (MEPA, accordi quadro) non sono inclusi.
+
+---
+
 ## Risorse
 
-- [Consip — Dati](https://dati.consip.it/)
+- [Consip — Dati (fonte originale)](https://dati.consip.it/)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/consip_consumi_convenzione/2025/consip_consumi_convenzione_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/consip-consumi-convenzione)

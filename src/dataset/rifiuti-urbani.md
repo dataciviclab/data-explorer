@@ -1,6 +1,11 @@
 ---
 title: Rifiuti urbani nei comuni
-description: Dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per comune e regione
+description: Dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per comune e regione, 2020-2024
+source: ISPRA
+source_url: https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani
+period: "2020–2024"
+last_modified: 2026-05-26
+dataset_slug: ispra_ru_base
 ---
 
 # Rifiuti urbani nei comuni
@@ -16,7 +21,7 @@ const comuni = await FileAttachment("../data/ispra-comuni.json").json();
 
 ```js
 const anni = [...new Set(regioni.map(d => d.anno))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
@@ -45,7 +50,7 @@ const comuniFiltrati = comuni
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Rifiuti totali</h3>
-    <span class="big">${Math.round(totRU / 1000000).toLocaleString("it-IT")} <small style="opacity:0.6">t</small></span>
+    <span class="big">${Math.round(totRU).toLocaleString("it-IT")} <small style="opacity:0.6">t</small></span>
   </div>
   <div class="card">
     <h3>Quota RD</h3>
@@ -63,7 +68,7 @@ const comuniFiltrati = comuni
 
 ```js
 Plot.plot({
-  title: `Quota raccolta differenziata per regione — ${annoSel}`,
+  title: `Quota raccolta differenziata per regione — ${String(annoSel)}`,
   width: 800,
   height: 450,
   marginLeft: 120,
@@ -90,7 +95,7 @@ Plot.plot({
 
 ```js
 Plot.plot({
-  title: `Percentuale RD nei grandi comuni — ${annoSel}`,
+  title: `Percentuale RD nei grandi comuni — ${String(annoSel)}`,
   width: 800,
   height: 350,
   marginLeft: 120,
@@ -125,7 +130,18 @@ Inputs.table(regFiltered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: i dati coprono il periodo 2020-2024. I dati 2024 sono preliminari e potrebbero essere rivisti da ISPRA.
+- **Popolazione**: i dati comunali con popolazione ≥ 100.000 abitanti sono un sottoinsieme dei comuni italiani; non rappresentano l'intero territorio nazionale.
+- **Percentuale RD**: calcolata come rapporto tra totale RD e totale RU. Variazioni nella metodologia di calcolo ISPRA tra anni possono influenzare il dato.
+
+---
+
 ## Risorse
 
-- [ISPRA — Rifiuti Urbani](https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani)
+- [ISPRA — Rifiuti Urbani (fonte originale)](https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/ispra_ru_base/2024/ispra_ru_base_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/ispra-ru-base)

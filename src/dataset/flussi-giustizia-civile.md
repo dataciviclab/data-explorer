@@ -1,6 +1,11 @@
 ---
 title: Flussi della giustizia civile
-description: Dati del Ministero della Giustizia sui flussi civili nei tribunali distrettuali italiani
+description: Sopravvenuti, definiti e pendenti per distretto — Ministero della Giustizia, 2014-2025
+source: Ministero della Giustizia — Direzione Generale di Statistica
+source_url: https://datiestatistiche.giustizia.it
+period: "2014–2025"
+last_modified: 2026-05-26
+dataset_slug: civile_flussi
 ---
 
 # Flussi della giustizia civile
@@ -15,7 +20,7 @@ const data = await FileAttachment("../data/civile-flussi.json").json();
 
 ```js
 const anni = [...new Set(data.map(d => d.anno))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
@@ -124,8 +129,19 @@ Inputs.table(filtered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: la serie storica 2014-2025 proviene da un unico file snapshot. Anni precedenti al 2014 non sono disponibili.
+- **Rapporto D/S**: il rapporto definiti/sopravvenuti è un indicatore di smaltimento annuale. Un rapporto > 1 indica smaltimento parziale dell'arretrato, non necessariamente efficienza complessiva del sistema giudiziario.
+- **Granularità**: i dati sono aggregati per distretto di Corte d'Appello. Non è possibile scendere al dettaglio di singoli tribunali con questo dataset.
+
+---
+
 ## Risorse
 
-- [Ministero della Giustizia](https://datiestatistiche.giustizia.it)
+- [Ministero della Giustizia (fonte originale)](https://datiestatistiche.giustizia.it)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/civile_flussi/2025/civile_flussi_2025_clean.parquet)
 - [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/civile-flussi)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/civile-flussi)
