@@ -1,6 +1,7 @@
 # Standard Pagina Dataset
 
-Questo documento definisce la forma minima di una buona pagina dataset nel `Data Explorer`.
+Questo documento definisce i **principi** di una buona pagina dataset nel `Data Explorer`.
+Per il **template operativo** da copiare, vedi [`TEMPLATE-dataset-page.md`](TEMPLATE-dataset-page.md).
 
 ## Obiettivo
 
