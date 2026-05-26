@@ -65,6 +65,7 @@ Plot.plot({
   title: `Dipendenti ${compartoSel === "Tutti i comparti" ? "totali" : compartoSel}`,
   width: 800,
   height: 400,
+  x: {tickFormat: d => String(d)},
   y: {grid: true, tickFormat: "~s"},
   marks: [
     Plot.lineY(trendData, {x: "anno", y: "totale", tip: true}),
@@ -113,7 +114,7 @@ Plot.plot({
 Inputs.table(filtered, {
   columns: ["anno", "comparto", "donne", "uomini", "totale"],
   header: {comparto: "Comparto", donne: "Donne", uomini: "Uomini", totale: "Totale"},
-  format: {donne: x => x.toLocaleString("it-IT"), uomini: x => x.toLocaleString("it-IT"), totale: x => x.toLocaleString("it-IT")},
+  format: {anno: x => String(x), donne: x => x.toLocaleString("it-IT"), uomini: x => x.toLocaleString("it-IT"), totale: x => x.toLocaleString("it-IT")},
   rows: 20,
   width: "100%"
 })

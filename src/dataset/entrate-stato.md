@@ -50,7 +50,7 @@ const totaleEntrate = d3.sum(filtered, d => d.previsioni_definitive_cp);
 
 ```js
 Plot.plot({
-  title: `Previsioni definitive entrata per titolo — ${annoSel}`,
+  title: `Previsioni definitive entrata per titolo — ${String(annoSel)}`,
   width: 800,
   height: 300,
   marginLeft: 200,
@@ -83,6 +83,7 @@ Plot.plot({
   title: "Entrate totali dello Stato per anno",
   width: 800,
   height: 350,
+  x: {tickFormat: d => String(d)},
   y: {grid: true, tickFormat: "~s"},
   marks: [
     Plot.lineY(trend, {x: "esercizio_finanziario", y: "previsioni_definitive_cp", tip: true}),
