@@ -1,6 +1,11 @@
 ---
 title: Entrate dello Stato
-description: Previsioni definitive di entrata dello Stato per titolo (BDAP — RGS MEF)
+description: Previsioni definitive di entrata dello Stato per titolo, natura e tipologia — BDAP RGS MEF, 2008-2024
+source: RGS · BDAP — Banca Dati delle Amministrazioni Pubbliche
+source_url: https://bdap.rgs.mef.gov.it/
+period: "2008–2024"
+last_modified: 2026-05-26
+dataset_slug: bdap_entrate_stato
 ---
 
 # Entrate dello Stato
@@ -15,7 +20,7 @@ const data = await FileAttachment("../data/bdap-entrate.json").json();
 
 ```js
 const anni = [...new Set(data.map(d => d.esercizio_finanziario))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
@@ -45,7 +50,7 @@ const totaleEntrate = d3.sum(filtered, d => d.previsioni_definitive_cp);
 
 ```js
 Plot.plot({
-  title: `Previsioni definitive entrata per titolo — ${annoSel}`,
+  title: `Previsioni definitive entrata per titolo — ${String(annoSel)}`,
   width: 800,
   height: 300,
   marginLeft: 200,
@@ -78,6 +83,7 @@ Plot.plot({
   title: "Entrate totali dello Stato per anno",
   width: 800,
   height: 350,
+  x: {tickFormat: d => String(d)},
   y: {grid: true, tickFormat: "~s"},
   marks: [
     Plot.lineY(trend, {x: "esercizio_finanziario", y: "previsioni_definitive_cp", tip: true}),
@@ -103,7 +109,18 @@ Inputs.table(filtered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Previsioni**: i dati si riferiscono alle previsioni definitive di bilancio, non agli effettivi incassi. La differenza tra previsioni e consuntivo può essere significativa.
+- **Copertura**: la serie parte dal 2008, anno di introduzione della contabilità armonizzata per lo Stato. Anni precedenti non sono comparabili.
+- **Classificazione**: la disaggregazione per titolo segue la classificazione economica del bilancio dello Stato, che può variare tra esercizi finanziari.
+
+---
+
 ## Risorse
 
-- [RGS · BDAP](https://bdap.rgs.mef.gov.it/)
+- [RGS · BDAP (fonte originale)](https://bdap.rgs.mef.gov.it/)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_entrate_stato/2024/bdap_entrate_stato_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-entrate-stato)

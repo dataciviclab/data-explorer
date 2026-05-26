@@ -25,7 +25,7 @@ display(html`<div class="grid grid-cols-2">
   ${themes.map(t => html`<div class="card">
     <h3><a href="/temi/${t.slug}">${t.name}</a></h3>
     <p style="opacity:0.7; font-size:0.9em">${t.description}</p>
-    <p style="font-size:0.85em">${t.datasets.length} dataset · ${t.questions.length} domande</p>
+    <p style="font-size:0.85em">${t.datasets.length} dataset</p>
   </div>`)}
 </div>`)
 ```

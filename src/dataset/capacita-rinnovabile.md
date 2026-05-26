@@ -1,6 +1,11 @@
 ---
 title: Capacità rinnovabile per regione
-description: Dati Terna sulla capacità di generazione rinnovabile installata per regione e fonte
+description: Dati Terna sulla capacità di generazione rinnovabile installata per regione e fonte (potenza netta), 2023-2024
+source: Terna S.p.A.
+source_url: https://www.terna.it/
+period: "2023–2024"
+last_modified: 2026-05-26
+dataset_slug: terna_capacita_rinnovabile
 ---
 
 # Capacità rinnovabile per regione
@@ -15,7 +20,7 @@ const data = await FileAttachment("../data/terna-fonti.json").json();
 
 ```js
 const anni = [...new Set(data.map(d => d.anno))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
+const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
@@ -115,8 +120,19 @@ Inputs.table(filtered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: il dataset copre solo il biennio 2023-2024. Non sono disponibili dati precedenti in questo dataset.
+- **Tipo capacità**: i dati si riferiscono alla potenza netta installata (tipo_capacita = 'Netta'). Non include capacità lorda o eventuale capacità autorizzata ma non ancora installata.
+- **Fonti**: la disaggregazione per fonte segue la classificazione Terna. La categoria "fonti" include tutte le rinnovabili; eventuali ibridi (es. termico con rinnovabile) sono classificati secondo la regola Terna.
+
+---
+
 ## Risorse
 
-- [Terna](https://www.terna.it/)
+- [Terna (fonte originale)](https://www.terna.it/)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/terna_capacita_rinnovabile/2024/terna_capacita_rinnovabile_2024_clean.parquet)
 - [Analisi](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/terna-electricity-by-source)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/terna-capacita-rinnovabile)

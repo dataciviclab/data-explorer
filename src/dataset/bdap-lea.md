@@ -1,8 +1,11 @@
 ---
 title: Spesa sanitaria regionale LEA
-description: Dati BDAP sui costi dei Livelli Essenziali di Assistenza per regione, macro-area e voce contabile
-source: BDAP — Banca Dati delle Amministrazioni Pubbliche
+description: Dati BDAP sui costi dei Livelli Essenziali di Assistenza per regione, macro-area e voce contabile, 2024
+source: BDAP — Banca Dati delle Amministrazioni Pubbliche (RGS MEF)
+source_url: https://bdap-opendata.rgs.mef.gov.it/
+period: "2024"
 last_modified: 2025-06-30
+dataset_slug: bdap_lea
 ---
 
 # Spesa sanitaria regionale LEA
@@ -22,13 +25,6 @@ const nRegioni = regioni.length;
 const mediaRegione = totSpesa / nRegioni;
 ```
 
-```js
-const totPrestazioni = d3.sum(regioni, d => d.prestazioni_sanitarie);
-const totDiretto = totSpesa - totPrestazioni;
-```
-
-> **Nota sul totale**: la spesa complessiva (~€${(totSpesa / 1e9).toFixed(0)} mld) include le **transazioni inter-ente** per mobilità sanitaria (prestazioni acquistate da altri enti SSN, ~€${(totPrestazioni / 1e9).toFixed(0)} mld). Ogni prestazione è contata sia dall'ente pagante sia dall'ente erogante. Escludendo questo effetto, il costo operativo diretto è circa €${(totDiretto / 1e9).toFixed(0)} mld.
-
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Spesa totale LEA</h3>
@@ -43,6 +39,54 @@ const totDiretto = totSpesa - totPrestazioni;
     <span class="big">${nRegioni}</span>
   </div>
 </div>
+
+---
+
+## Composizione della spesa per macro-area
+
+Come si distribuisce la spesa sanitaria tra le quattro macro-aree? L'assistenza distrettuale e ospedaliera assorbono la quasi totalità delle risorse, mentre prevenzione e ricerca pesano in misura marginale.
+
+```js
+const nazionaleMacro = Array.from(
+  d3.rollup(macro, v => d3.sum(v, d => d.importo_totale), d => d.descrizione_voce_contabile),
+  ([descrizione_voce_contabile, importo_totale]) => ({descrizione_voce_contabile, importo_totale})
+).sort((a, b) => b.importo_totale - a.importo_totale);
+const totMacro = d3.sum(nazionaleMacro, d => d.importo_totale);
+const macroConPct = nazionaleMacro.map(d => ({...d, pct: d.importo_totale / totMacro * 100}));
+```
+
+```js
+Plot.plot({
+  title: "Composizione della spesa LEA per macro-area — 2024",
+  width: 800,
+  height: 300,
+  marginLeft: 200,
+  y: {label: null, tickSize: 0},
+  x: {grid: true, label: "miliardi di €", tickFormat: d => (d / 1e9).toFixed(1)},
+  color: {scheme: "Set2"},
+  marks: [
+    Plot.barX(macroConPct, {
+      y: "descrizione_voce_contabile",
+      x: "importo_totale",
+      fill: "descrizione_voce_contabile",
+      sort: {y: "-x"},
+      tip: {format: {x: d => `€ ${(d / 1e9).toFixed(1)} mld`}}
+    }),
+    Plot.text(macroConPct, {
+      y: "descrizione_voce_contabile",
+      x: "importo_totale",
+      text: d => `${d.pct.toFixed(1)}%`,
+      dx: 6,
+      textAnchor: "start",
+      fill: "var(--theme-foreground-muted)",
+      fontSize: 12
+    }),
+    Plot.ruleX([0])
+  ]
+})
+```
+
+> **Nota sul totale**: la spesa complessiva (~€${(totSpesa / 1e9).toFixed(0)} mld) include le **transazioni inter-ente** per mobilità sanitaria (prestazioni acquistate da altri enti SSN). Ogni prestazione è contata sia dall'ente pagante sia dall'ente erogante. Escludendo questo effetto, il costo operativo diretto è circa €${((totSpesa - d3.sum(regioni, d => d.prestazioni_sanitarie)) / 1e9).toFixed(0)} mld.
 
 ---
 
@@ -72,47 +116,6 @@ Plot.plot({
       fill: "importo_totale",
       sort: {y: "-x"},
       tip: true
-    }),
-    Plot.ruleX([0])
-  ]
-})
-```
-
----
-
-## Composizione della spesa per macro-area
-
-Come si distribuisce la spesa tra le quattro macro-aree? In tutte le regioni l'assistenza distrettuale e ospedaliera assorbono la quasi totalità delle risorse, mentre prevenzione e ricerca pesano in misura marginale.
-
-```js
-const macroShort = macro.map(d => ({
-  ...d,
-  macro: d.descrizione_voce_contabile
-}));
-```
-
-```js
-// Top 5 regioni per spesa totale + composizione
-const top5 = ordinato.slice(0, 5).map(d => d.descrizione_regione);
-const macroTop5 = macroShort.filter(d => top5.includes(d.descrizione_regione));
-```
-
-```js
-Plot.plot({
-  title: "Composizione spesa LEA — top 5 regioni (2024)",
-  width: 800,
-  height: 350,
-  marginLeft: 120,
-  color: {legend: true, scheme: "Set2"},
-  y: {label: null, tickSize: 0},
-  x: {grid: true, label: "miliardi di €", tickFormat: d => (d / 1e9).toFixed(0)},
-  marks: [
-    Plot.barX(macroTop5, {
-      y: "descrizione_regione",
-      x: "importo_totale",
-      fill: "macro",
-      sort: {y: "-x"},
-      tip: {format: {x: d => `€ ${(d / 1e6).toFixed(0)} mln`}}
     }),
     Plot.ruleX([0])
   ]
@@ -158,8 +161,17 @@ Inputs.table(ordinato, {
 
 ---
 
+## Limiti
+
+- **Copertura**: il dataset copre il solo 2024. Non sono disponibili dati precedenti in questo dataset.
+- **Doppia contabilizzazione**: la spesa totale include le prestazioni sanitarie tra enti SSN (mobilità sanitaria), che vengono contate sia dall'ente pagante sia dall'ente erogante. Il costo operativo diretto è inferiore di circa il valore delle prestazioni.
+- **Enti esclusi**: le voci aggregate (codice ente '000' e '999') sono escluse dal dataset per evitare duplicazioni contabili.
+- **Pro capite**: il dato di spesa pro capite non è ancora disponibile in questo dataset.
+
+---
+
 ## Risorse
 
-- [BDAP — Open Data](https://bdap-opendata.rgs.mef.gov.it/)
+- [BDAP — Open Data (fonte originale)](https://bdap-opendata.rgs.mef.gov.it/)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_lea/2024/bdap_lea_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-lea)

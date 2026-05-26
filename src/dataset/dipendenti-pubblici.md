@@ -1,6 +1,11 @@
 ---
 title: Dipendenti pubblici per comparto
-description: Dati BDAP/RGS sul pubblico impiego, crescita e composizione dei comparti (2010-2023)
+description: Dati BDAP/RGS sul pubblico impiego per comparto, genere e orario di lavoro, 2010-2023
+source: MEF — RGS · BDAP
+source_url: https://www.rgs.mef.gov.it/
+period: "2010–2023"
+last_modified: 2026-05-26
+dataset_slug: dipendenti_pubblici
 ---
 
 # Dipendenti pubblici per comparto
@@ -60,6 +65,7 @@ Plot.plot({
   title: `Dipendenti ${compartoSel === "Tutti i comparti" ? "totali" : compartoSel}`,
   width: 800,
   height: 400,
+  x: {tickFormat: d => String(d)},
   y: {grid: true, tickFormat: "~s"},
   marks: [
     Plot.lineY(trendData, {x: "anno", y: "totale", tip: true}),
@@ -108,7 +114,7 @@ Plot.plot({
 Inputs.table(filtered, {
   columns: ["anno", "comparto", "donne", "uomini", "totale"],
   header: {comparto: "Comparto", donne: "Donne", uomini: "Uomini", totale: "Totale"},
-  format: {donne: x => x.toLocaleString("it-IT"), uomini: x => x.toLocaleString("it-IT"), totale: x => x.toLocaleString("it-IT")},
+  format: {anno: x => String(x), donne: x => x.toLocaleString("it-IT"), uomini: x => x.toLocaleString("it-IT"), totale: x => x.toLocaleString("it-IT")},
   rows: 20,
   width: "100%"
 })
@@ -116,8 +122,19 @@ Inputs.table(filtered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: i dati coprono il periodo 2010-2023. I dati 2024 non sono ancora disponibili.
+- **Genere**: il totale donne/uomini è calcolato sommando tempo pieno e part time (sopra e sotto 50%). Non include eventuali contratti atipici non ricompresi nelle categorie del dataset.
+- **Comparti**: la classificazione per comparto può variare nel periodo considerato a seguito di riforme del pubblico impiego.
+
+---
+
 ## Risorse
 
-- [MEF · RGS · BDAP](https://www.rgs.mef.gov.it/)
+- [MEF · RGS · BDAP (fonte originale)](https://www.rgs.mef.gov.it/)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2023/dipendenti_pubblici_2023_clean.parquet)
 - [Analisi](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/dipendenti-pubblici)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/dipendenti-pubblici)
