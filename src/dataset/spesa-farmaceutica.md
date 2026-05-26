@@ -1,6 +1,11 @@
 ---
 title: Spesa farmaceutica convenzionata
-description: Dati AIFA su spesa e consumo farmaceutico SSN per regione e classe terapeutica
+description: Dati AIFA su spesa e consumo farmaceutico convenzionato SSN per regione e classe terapeutica ATC, 2018-2024
+source: AIFA — Agenzia Italiana del Farmaco
+source_url: https://www.aifa.gov.it/open-data
+period: "2018–2024"
+last_modified: 2026-05-26
+dataset_slug: aifa_spesa_consumo
 ---
 
 # Spesa farmaceutica convenzionata
@@ -121,7 +126,18 @@ Inputs.table(perRegione, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: la serie storica copre 2018-2024. Dati precedenti non sono disponibili in questo dataset.
+- **Convenzionata**: i dati si riferiscono alla sola farmaceutica convenzionata SSN (farmaci rimborsati dal Servizio Sanitario Nazionale). Non include la spesa farmaceutica privata o ospedaliera.
+- **Classificazione ATC**: la disaggregazione per classe terapeutica segue la classificazione Anatomico Terapeutica Chimica (ATC) livello 1. Classificazioni più granulari (ATC2, ATC3) sono disponibili nel dato originale ma non in questa pagina.
+
+---
+
 ## Risorse
 
-- [AIFA — Open Data](https://www.aifa.gov.it/open-data)
+- [AIFA — Open Data (fonte originale)](https://www.aifa.gov.it/open-data)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2024/aifa_spesa_consumo_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/aifa-spesa-consumo)

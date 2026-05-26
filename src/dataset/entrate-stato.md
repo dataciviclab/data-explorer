@@ -1,6 +1,11 @@
 ---
 title: Entrate dello Stato
-description: Previsioni definitive di entrata dello Stato per titolo (BDAP — RGS MEF)
+description: Previsioni definitive di entrata dello Stato per titolo, natura e tipologia — BDAP RGS MEF, 2008-2024
+source: RGS · BDAP — Banca Dati delle Amministrazioni Pubbliche
+source_url: https://bdap.rgs.mef.gov.it/
+period: "2008–2024"
+last_modified: 2026-05-26
+dataset_slug: bdap_entrate_stato
 ---
 
 # Entrate dello Stato
@@ -103,7 +108,18 @@ Inputs.table(filtered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Previsioni**: i dati si riferiscono alle previsioni definitive di bilancio, non agli effettivi incassi. La differenza tra previsioni e consuntivo può essere significativa.
+- **Copertura**: la serie parte dal 2008, anno di introduzione della contabilità armonizzata per lo Stato. Anni precedenti non sono comparabili.
+- **Classificazione**: la disaggregazione per titolo segue la classificazione economica del bilancio dello Stato, che può variare tra esercizi finanziari.
+
+---
+
 ## Risorse
 
-- [RGS · BDAP](https://bdap.rgs.mef.gov.it/)
+- [RGS · BDAP (fonte originale)](https://bdap.rgs.mef.gov.it/)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_entrate_stato/2024/bdap_entrate_stato_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-entrate-stato)

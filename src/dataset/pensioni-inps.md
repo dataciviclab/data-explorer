@@ -1,6 +1,11 @@
 ---
 title: Pensioni INPS
-description: Numero di pensioni INPS per gestione previdenziale, area geografica e anno
+description: Numero di pensioni INPS per gestione previdenziale, area geografica e anno, 2020-2024
+source: INPS — Open Data
+source_url: https://www.inps.it/open-data
+period: "2020–2024"
+last_modified: 2026-05-26
+dataset_slug: inps_pensioni_trimestrale
 ---
 
 # Pensioni INPS
@@ -110,7 +115,19 @@ Inputs.table(perGestione, {
 
 ---
 
+---
+
+## Limiti
+
+- **Periodo**: il dato si riferisce al 2024 (ultimo anno disponibile). I dati precedenti (2020-2023) sono disponibili ma non ancora caricati in questa pagina.
+- **Cadenza trimestrale**: i dati sono pubblicati con cadenza trimestrale da INPS. Il totale mostrato è la somma dei trimestri dell'anno. Il numero di pensioni è uno **stock** (pensioni in essere alla fine del trimestre), non un flusso di nuove decorrenze: la somma annuale non va dunque interpretata come "nuove pensioni erogate nell'anno".
+- **Gestioni**: la disaggregazione per gestione segue la classificazione INPS. Alcune gestioni minori potrebbero essere aggregate in voci residuali.
+- **Aggiornamento**: il dataset viene aggiornato con cadenza trimestrale. L'ultimo aggiornamento disponibile è il quarto trimestre 2024.
+
+---
+
 ## Risorse
 
-- [INPS Open Data](https://www.inps.it/open-data)
+- [INPS Open Data (fonte originale)](https://www.inps.it/open-data)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/inps_pensioni_trimestrale/2024/inps_pensioni_trimestrale_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/inps-pensioni)

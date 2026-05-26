@@ -1,8 +1,11 @@
 ---
 title: Spesa sanitaria regionale LEA
-description: Dati BDAP sui costi dei Livelli Essenziali di Assistenza per regione, macro-area e voce contabile
-source: BDAP — Banca Dati delle Amministrazioni Pubbliche
+description: Dati BDAP sui costi dei Livelli Essenziali di Assistenza per regione, macro-area e voce contabile, 2024
+source: BDAP — Banca Dati delle Amministrazioni Pubbliche (RGS MEF)
+source_url: https://bdap-opendata.rgs.mef.gov.it/
+period: "2024"
 last_modified: 2025-06-30
+dataset_slug: bdap_lea
 ---
 
 # Spesa sanitaria regionale LEA
@@ -158,8 +161,19 @@ Inputs.table(ordinato, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: il dataset copre il solo 2024. Non sono disponibili dati precedenti in questo dataset.
+- **Doppia contabilizzazione**: la spesa totale include le prestazioni sanitarie tra enti SSN (mobilità sanitaria), che vengono contate sia dall'ente pagante sia dall'ente erogante. Il costo operativo diretto è inferiore di circa il valore delle prestazioni.
+- **Enti esclusi**: le voci aggregate (codice ente '000' e '999') sono escluse dal dataset per evitare duplicazioni contabili.
+- **Pro capite**: il dato di spesa pro capite non è ancora disponibile in questo dataset.
+
+---
+
 ## Risorse
 
-- [BDAP — Open Data](https://bdap-opendata.rgs.mef.gov.it/)
+- [BDAP — Open Data (fonte originale)](https://bdap-opendata.rgs.mef.gov.it/)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_lea/2024/bdap_lea_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-lea)

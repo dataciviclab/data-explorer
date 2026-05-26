@@ -1,6 +1,11 @@
 ---
 title: Rifiuti urbani nei comuni
-description: Dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per comune e regione
+description: Dati ISPRA su rifiuti urbani, raccolta differenziata e volumi per comune e regione, 2020-2024
+source: ISPRA
+source_url: https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani
+period: "2020–2024"
+last_modified: 2026-05-26
+dataset_slug: ispra_ru_base
 ---
 
 # Rifiuti urbani nei comuni
@@ -125,7 +130,18 @@ Inputs.table(regFiltered, {
 
 ---
 
+---
+
+## Limiti
+
+- **Copertura**: i dati coprono il periodo 2020-2024. I dati 2024 sono preliminari e potrebbero essere rivisti da ISPRA.
+- **Popolazione**: i dati comunali con popolazione ≥ 100.000 abitanti sono un sottoinsieme dei comuni italiani; non rappresentano l'intero territorio nazionale.
+- **Percentuale RD**: calcolata come rapporto tra totale RD e totale RU. Variazioni nella metodologia di calcolo ISPRA tra anni possono influenzare il dato.
+
+---
+
 ## Risorse
 
-- [ISPRA — Rifiuti Urbani](https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani)
+- [ISPRA — Rifiuti Urbani (fonte originale)](https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/ispra_ru_base/2024/ispra_ru_base_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/ispra-ru-base)
