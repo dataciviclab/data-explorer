@@ -50,7 +50,7 @@ const comuniFiltrati = comuni
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Rifiuti totali</h3>
-    <span class="big">${Math.round(totRU / 1000000).toLocaleString("it-IT")} <small style="opacity:0.6">t</small></span>
+    <span class="big">${Math.round(totRU).toLocaleString("it-IT")} <small style="opacity:0.6">t</small></span>
   </div>
   <div class="card">
     <h3>Quota RD</h3>
@@ -68,7 +68,7 @@ const comuniFiltrati = comuni
 
 ```js
 Plot.plot({
-  title: `Quota raccolta differenziata per regione — ${annoSel}`,
+  title: `Quota raccolta differenziata per regione — ${String(annoSel)}`,
   width: 800,
   height: 450,
   marginLeft: 120,
@@ -95,7 +95,7 @@ Plot.plot({
 
 ```js
 Plot.plot({
-  title: `Percentuale RD nei grandi comuni — ${annoSel}`,
+  title: `Percentuale RD nei grandi comuni — ${String(annoSel)}`,
   width: 800,
   height: 350,
   marginLeft: 120,
