@@ -9,6 +9,7 @@ export default {
       collapsible: false,
       pages: [
         { name: "IRPEF comunale", path: "/dataset/irpef-comunale" },
+        { name: "Indice prezzi IPAB", path: "/dataset/istat-ipab-aree" },
         { name: "Consumi Consip", path: "/dataset/consip-consumi-convenzione" },
         { name: "Spesa sanitaria LEA", path: "/dataset/bdap-lea" },
         { name: "Rifiuti urbani", path: "/dataset/rifiuti-urbani" },
