@@ -43,7 +43,7 @@ const sources = [...new Set(datasets.map(d => d.source))];
 ```js
 display(html`<div class="grid grid-cols-2">
   ${datasets.map(d => html`<div class="card">
-    <h3><a href="/dataset/${d.slug}">${d.name}</a></h3>
+    <h3><a href="/dataset/${d.url_slug}">${d.name}</a></h3>
     <p style="opacity:0.7; font-size:0.9em">${d.description}</p>
     <p style="font-size:0.85em">${d.years} · ${d.stage === "published" ? "✅ Pubblicato" : "🔬 Incubazione"}</p>
   </div>`)}
