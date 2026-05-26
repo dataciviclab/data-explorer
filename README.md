@@ -17,21 +17,12 @@ Apri http://localhost:3000
 ## Documentazione
 
 - [`docs/explorer-ready-checklist.md`](docs/explorer-ready-checklist.md) — criteri per pubblicare un dataset nel catalogo
-- [`docs/dataset-page-standard.md`](docs/dataset-page-standard.md) — struttura standard di una pagina dataset
+- [`docs/dataset-page-standard.md`](docs/dataset-page-standard.md) — principi guida di una pagina dataset
+- [`docs/TEMPLATE-dataset-page.md`](docs/TEMPLATE-dataset-page.md) — template operativo per nuove pagine
 
 ## Pagine
 
-| Pagina | Dataset |
-|---|---|
-| Home | Catalogo completo dei dataset |
-| IRPEF comunale | Capacità fiscale per comune e regione |
-| Rifiuti urbani | Produzione e raccolta differenziata |
-| Flussi giustizia civile | Sopravvenuti, definiti e pendenti |
-| Dipendenti pubblici | Pubblico impiego per comparto |
-| Capacità rinnovabile | Potenza installata Terna |
-| Spesa farmaceutica | AIFA spesa e consumo SSN |
-| Entrate dello Stato | Previsioni BDAP RGS |
-| Pensioni INPS | Numero pensioni per gestione |
+Il catalogo completo è sulla [home page live](https://explorer.dataciviclab.org), organizzato per temi e stato di pubblicazione.
 
 ## Data loader
 

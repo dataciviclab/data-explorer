@@ -35,18 +35,25 @@ Apri http://localhost:3000
    - il nome del file usa slug URL con trattini (es. `bdap-lea-regioni.json.py`)
    - lo slug DI (con underscore, es. `bdap_lea`) va come parametro `slug=` a `load_dataset()`
    - vedi `src/data/_util.py` e i loader esistenti come riferimento
-2. **Pagina**: crea `src/dataset/<slug-url>.md`
-   - segui la struttura definita in `docs/dataset-page-standard.md`
-   - i data loader sono referenziati come `FileAttachment("../data/<nome>.json")`
+2. **Pagina**: copia il [template `docs/TEMPLATE-dataset-page.md`](docs/TEMPLATE-dataset-page.md)
+   in `src/dataset/<slug-url>.md` e compila ogni sezione
+   - frontmatter obbligatorio: `title`, `description`, `source`, `source_url`, `period`,
+     `last_modified`, `dataset_slug`
+   - primo blocco: distribuzione o stock base, non ranking o delta
+   - sezione **Limiti** obbligatoria in fondo (copertura, granularità, note metodologiche)
+   - vedi `docs/dataset-page-standard.md` per i principi guida
 3. **Registra** la pagina in `observablehq.config.js` nella sezione `pages`
 4. **Tema**: se il dataset introduce un nuovo tema, aggiungilo in `src/data/themes.json.py`
 5. **Verifica** con `npm run dev` che la pagina sia navigabile e i dati si carichino
+6. **Checklist pre-pub** (nel template, in fondo): verificare slug, parquet, frontmatter,
+   leggibilità, link funzionanti
 
 ## Standard e criteri
 
 Prima di proporre una nuova pagina, controlla:
 - [`docs/explorer-ready-checklist.md`](docs/explorer-ready-checklist.md) — classi di readiness
-- [`docs/dataset-page-standard.md`](docs/dataset-page-standard.md) — struttura standard della pagina
+- [`docs/dataset-page-standard.md`](docs/dataset-page-standard.md) — principi guida della pagina
+- [`docs/TEMPLATE-dataset-page.md`](docs/TEMPLATE-dataset-page.md) — template operativo
 
 Il principio guida: *nel Data Explorer entrano prima i dataset che si leggono bene, non quelli semplicemente disponibili.*
 
