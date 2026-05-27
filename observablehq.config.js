@@ -16,6 +16,7 @@ export default {
         { name: "Flussi giustizia", path: "/dataset/flussi-giustizia-civile" },
         { name: "Dipendenti pubblici", path: "/dataset/dipendenti-pubblici" },
         { name: "Capacità rinnovabile", path: "/dataset/capacita-rinnovabile" },
+        { name: "Produzione elettrica", path: "/dataset/produzione-elettrica-fonti" },
         { name: "Spesa farmaceutica", path: "/dataset/spesa-farmaceutica" },
         { name: "Entrate dello Stato", path: "/dataset/entrate-stato" },
         { name: "Pensioni INPS", path: "/dataset/pensioni-inps" },
