@@ -10,7 +10,7 @@ dataset_slug: terna_electricity_by_source
 
 # Produzione elettrica per fonte
 
-Produzione netta di energia elettrica in GWh per fonte, regione e provincia. I dati mostrano come cambia il mix di generazione elettrica tra territori e fonti.
+Produzione netta di energia elettrica in GWh per fonte e regione. I dati mostrano come cambia il mix di generazione elettrica tra territori e fonti.
 
 **Fonte**: [Terna](https://www.terna.it/) · **Periodo**: 2023–2024
 
@@ -64,7 +64,7 @@ const nRegioni = perRegione.length;
 
 ## Produzione netta per fonte
 
-Come si distribuisce la produzione netta di energia elettrica tra le diverse fonti? Il termoelettrico e l'idroelettrico dominano il mix nazionale, mentre il fotovoltaico e l'eolico crescono progressivamente.
+Come si distribuisce la produzione netta di energia elettrica tra le diverse fonti? Il termoelettrico e l'idroelettrico dominano il mix nazionale, mentre il fotovoltaico è in crescita progressiva.
 
 ```js
 const totMix = d3.sum(perTipo, d => d.produzione_gwh);
