@@ -133,10 +133,18 @@ Plot.plot({
 ## Dettaglio per regione
 
 ```js
-Inputs.table(annoData, {
-  columns: ["regione", "gini"],
-  header: {regione: "Regione", gini: "Indice di Gini"},
-  format: {gini: x => x.toFixed(3)},
+const annoConDelta = annoData.map((d, i) => ({
+  ...d,
+  pos: i + 1,
+  diff_media: d.gini - mediaNazionale
+}));
+```
+
+```js
+Inputs.table(annoConDelta, {
+  columns: ["pos", "regione", "gini", "diff_media"],
+  header: {pos: "#", regione: "Regione", gini: "Gini", diff_media: "Δ media"},
+  format: {gini: x => x.toFixed(3), diff_media: x => (x > 0 ? "+" : "") + x.toFixed(3)},
   rows: 25,
   width: "100%"
 })
