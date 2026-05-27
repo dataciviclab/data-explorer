@@ -7,7 +7,7 @@ themes = [
         "slug": "territorio-ambiente",
         "name": "Territorio e ambiente",
         "description": "Trasformazioni territoriali, ambiente, energia e rifiuti",
-        "datasets": ["rifiuti-urbani", "capacita-rinnovabile"],
+        "datasets": ["rifiuti-urbani", "capacita-rinnovabile", "produzione-elettrica-fonti"],
     },
     {
         "slug": "finanza-pubblica",

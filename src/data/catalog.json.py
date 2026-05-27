@@ -11,6 +11,7 @@ SLUG_MAP = {
     "ispra_ru_base": "rifiuti-urbani",
     "civile_flussi": "flussi-giustizia-civile",
     "terna_capacita_rinnovabile": "capacita-rinnovabile",
+    "terna_electricity_by_source": "produzione-elettrica-fonti",
     "bdap_entrate_stato": "entrate-stato",
     "inps_pensioni_trimestrale": "pensioni-inps",
 }
