@@ -1,9 +1,9 @@
 ---
 title: Indice di Gini regionale
-description: Disuguaglianza del reddito netto per regione — indice di Gini ISTAT, 2003-2023
+description: Disuguaglianza del reddito netto per regione — indice di Gini ISTAT, 2003-2024
 source: ISTAT — Dataflow 32_221
 source_url: https://esploradati.istat.it/
-period: "2003–2023"
+period: "2003–2024"
 last_modified: 2026-05-27
 dataset_slug: istat_gini_regionale
 ---
@@ -12,7 +12,7 @@ dataset_slug: istat_gini_regionale
 
 Disuguaglianza del reddito netto per regione, misurata con l'indice di Gini. I dati permettono di confrontare il livello di disuguaglianza tra territori e la sua evoluzione nel tempo.
 
-**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2003–2023
+**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2003–2024
 
 ```js
 const data = await FileAttachment("../data/istat-gini-regionale.json").json();
@@ -47,7 +47,7 @@ const trendNazionale = Array.from(
 
 <div class="grid grid-cols-3">
   <div class="card">
-    <h3>Gini Italia</h3>
+    <h3>Media regionale</h3>
     <span class="big">${mediaNazionale.toFixed(3)}</span>
     <small style="opacity:0.6">${annoSel} ${conFitti ? "con" : "senza"} fitti imputati</small>
   </div>
@@ -65,7 +65,7 @@ const trendNazionale = Array.from(
 
 ## Disuguaglianza per regione
 
-Quali regioni hanno la distribuzione del reddito più diseguale? L'indice di Gini varia da 0 (uguaglianza perfetta) a 1 (massima disuguaglianza). La media nazionale è rappresentata dalla linea tratteggiata.
+Quali regioni hanno la distribuzione del reddito più diseguale? L'indice di Gini varia da 0 (uguaglianza perfetta) a 1 (massima disuguaglianza). La media regionale è rappresentata dalla linea tratteggiata.
 
 ```js
 Plot.plot({
@@ -95,13 +95,13 @@ Plot.plot({
 
 ---
 
-## Evoluzione nazionale
+## Evoluzione regionale
 
-L'indice di Gini nazionale mostra una leggera riduzione della disuguaglianza tra 2003 e metà anni 2000, seguita da una risalita graduale.
+La media regionale dell'indice di Gini mostra una leggera riduzione della disuguaglianza tra 2003 e metà anni 2000, seguita da una risalita graduale.
 
 ```js
 Plot.plot({
-  title: `Andamento Gini nazionale ${conFitti ? "con" : "senza"} fitti imputati`,
+  title: `Andamento media regionale ${conFitti ? "con" : "senza"} fitti imputati`,
   width: 800,
   height: 350,
   x: {tickFormat: d => String(d), label: null},
@@ -146,10 +146,10 @@ Inputs.table(annoData, {
 
 ## Limiti
 
-- **Copertura**: la serie copre il periodo 2003-2023. Dati 2024 non ancora disponibili al momento dell'ultimo aggiornamento.
+- **Copertura**: la serie copre il periodo 2003-2024. Dati 2025 non ancora disponibili al momento dell'ultimo aggiornamento.
 - **Fitti imputati**: il toggle "Includi fitti imputati" controlla se nel reddito è incluso il valore figurativo della proprietà dell'abitazione. Con i fitti imputati la disuguaglianza è sistematicamente più bassa (~0.03 punti) perché la proprietà della casa riduce la dispersione del reddito disponibile.
 - **Indice di Gini**: misura la disuguaglianza della distribuzione del reddito netto. Non cattura disuguaglianza di ricchezza, consumi o opportunità.
-- **Media nazionale**: calcolata come media semplice delle regioni, non ponderata per popolazione.
+- **Media regionale**: calcolata come media semplice delle regioni, non ponderata per popolazione.
 
 ---
 
