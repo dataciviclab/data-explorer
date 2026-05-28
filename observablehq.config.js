@@ -19,6 +19,7 @@ export default {
         { name: "Produzione elettrica", path: "/dataset/produzione-elettrica-fonti" },
         { name: "Spesa farmaceutica", path: "/dataset/spesa-farmaceutica" },
         { name: "Entrate dello Stato", path: "/dataset/entrate-stato" },
+        { name: "Indice di Gini regionale", path: "/dataset/istat-gini-regionale" },
         { name: "Pensioni INPS", path: "/dataset/pensioni-inps" },
       ],
     },
