@@ -12,7 +12,7 @@ themes = [
     {
         "slug": "finanza-pubblica",
         "name": "Finanza pubblica",
-        "description": "Entrate dello Stato, capacità fiscale, tributi locali e disuguaglianza del reddito",
+        "description": "Entrate dello Stato, capacità fiscale, tributi locali, FSC e disuguaglianza del reddito",
         "datasets": ["irpef-comunale", "entrate-stato", "consip-consumi-convenzione", "istat-gini-regionale", "opencivitas-fsc-2025"],
     },
     {
