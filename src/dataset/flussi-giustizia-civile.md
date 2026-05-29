@@ -56,31 +56,47 @@ const totPendenti = filtered.reduce((s, d) => s + d.pendenti_finali, 0);
 
 ---
 
-## Pendenti per distretto
+## Pendenti per distretto e anno
+
+La heatmap mostra in un colpo solo l'evoluzione dei pendenti in tutti i distretti dal 2014 al 2025. Ogni cella è un distretto in un anno: più scura è la cella, più alto è il carico pendente. Si vede immediatamente quali distretti hanno più arretrato e come cambia nel tempo.
+
+```js
+// Dati per heatmap: exclude rows with missing distretto, aggregate if needed
+const heatmapData = data
+  .filter(d => d.distretto)
+  .sort((a, b) => a.anno - b.anno);
+const distretti = [...new Set(heatmapData.map(d => d.distretto))].sort();
+```
 
 ```js
 Plot.plot({
-  title: `Pendenti finali per distretto — ${annoSel}`,
+  title: "Pendenti per distretto e anno — giustizia civile",
   width: 800,
-  height: 450,
+  height: Math.max(400, distretti.length * 22 + 40),
   marginLeft: 140,
+  marginTop: 30,
+  x: {label: null, tickFormat: d => String(d)},
   y: {label: null, tickSize: 0},
-  x: {grid: true, tickFormat: "~s"},
-  color: {scheme: "Reds"},
+  color: {scheme: "Reds", legend: true, type: "symlog"},
   marks: [
-    Plot.barX(filtered, {
+    Plot.cell(heatmapData, {
+      x: "anno",
       y: "distretto",
-      x: "pendenti_finali",
       fill: "pendenti_finali",
-      sort: {y: "-x"},
-      tip: true
+      tip: {format: {fill: d => d.toLocaleString("it-IT")}}
     }),
-    Plot.ruleX([0])
+    Plot.text(heatmapData, {
+      x: "anno",
+      y: "distretto",
+      text: d => (d.pendenti_finali / 1000).toFixed(0) + "k",
+      fill: d => d.pendenti_finali > 80000 ? "white" : "var(--theme-foreground-muted)",
+      fontSize: 9
+    })
   ]
 })
 ```
 
----
+Un rapporto > 1 significa che il distretto ha definito più cause di quante ne siano sopravvenute (smaltimento). &lt; 1 indica accumulo. I dettagli per anno selezionato sono nei blocchi seguenti.
 
 ## Rapporto definiti / sopravvenuti
 
@@ -90,7 +106,7 @@ const rapportoFiltered = [...filtered].sort((a, b) => a.rapporto_def_sop - b.rap
 
 ```js
 Plot.plot({
-  title: `Rapporto definiti / sopravvenuti per distretto — ${annoSel}`,
+  title: `Rapporto definiti / sopravvenuti per distretto — ${String(annoSel)}`,
   width: 800,
   height: 450,
   marginLeft: 140,
@@ -126,8 +142,6 @@ Inputs.table(filtered, {
   width: "100%"
 })
 ```
-
----
 
 ---
 
