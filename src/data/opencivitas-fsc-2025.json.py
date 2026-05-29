@@ -9,5 +9,5 @@ load_dataset(
     group_cols=["regione", "comune", "provincia", "popolazione"],
     metric_cols=["capacita_fiscale", "fondo_perequativo", "dotazione_finale_fsc",
                  "imu_tasi_standard", "totale_risorse_storiche"],
-    where="comune is not null and regione is not null",
+    where="regione != 'ITALIA' AND provincia IS NOT NULL AND provincia != ''",
 )
