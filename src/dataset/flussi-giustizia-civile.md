@@ -76,7 +76,7 @@ Plot.plot({
   height: Math.max(400, distretti.length * 22 + 40),
   marginLeft: 140,
   marginTop: 30,
-  x: {label: null},
+  x: {label: null, type: "band"},
   y: {label: null, tickSize: 0},
   color: {scheme: "Reds", legend: true, type: "symlog"},
   marks: [
