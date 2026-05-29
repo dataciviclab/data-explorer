@@ -64,6 +64,7 @@ La heatmap mostra in un colpo solo l'evoluzione dei pendenti in tutti i distrett
 // Dati per heatmap: exclude rows with missing distretto, aggregate if needed
 const heatmapData = data
   .filter(d => d.distretto)
+  .map(d => ({...d, anno_str: String(d.anno)}))
   .sort((a, b) => a.anno - b.anno);
 const distretti = [...new Set(heatmapData.map(d => d.distretto))].sort();
 ```
@@ -75,18 +76,18 @@ Plot.plot({
   height: Math.max(400, distretti.length * 22 + 40),
   marginLeft: 140,
   marginTop: 30,
-  x: {label: null, tickFormat: d => String(d)},
+  x: {label: null},
   y: {label: null, tickSize: 0},
   color: {scheme: "Reds", legend: true, type: "symlog"},
   marks: [
     Plot.cell(heatmapData, {
-      x: "anno",
+      x: "anno_str",
       y: "distretto",
       fill: "pendenti_finali",
       tip: {format: {fill: d => d.toLocaleString("it-IT")}}
     }),
     Plot.text(heatmapData, {
-      x: "anno",
+      x: "anno_str",
       y: "distretto",
       text: d => (d.pendenti_finali / 1000).toFixed(0) + "k",
       fill: d => d.pendenti_finali > 80000 ? "white" : "var(--theme-foreground-muted)",
