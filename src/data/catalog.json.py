@@ -12,6 +12,7 @@ SLUG_MAP = {
     "civile_flussi": "flussi-giustizia-civile",
     "terna_capacita_rinnovabile": "capacita-rinnovabile",
     "terna_electricity_by_source": "produzione-elettrica-fonti",
+    "camera_votazioni_sparql": "votazioni-camera",
     "bdap_entrate_stato": "entrate-stato",
     "inps_pensioni_trimestrale": "pensioni-inps",
 }
