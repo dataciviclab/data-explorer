@@ -5,7 +5,7 @@ description: Entrate dello Stato, capacità fiscale, tributi locali e acquisti i
 
 # Finanza pubblica
 
-IRPEF comunale, entrate dello Stato, consumi della PA in convenzione Consip e disuguaglianza del reddito per regione. I dataset di questo tema coprono la finanza pubblica italiana dal livello locale a quello centrale.
+IRPEF comunale, entrate dello Stato, consumi della PA in convenzione Consip, Fondo di Solidarietà Comunale e disuguaglianza del reddito per regione. I dataset di questo tema coprono la finanza pubblica italiana dal livello locale a quello centrale.
 
 ```js
 const catalog = await FileAttachment("../data/catalog.json").json();
