@@ -146,7 +146,22 @@ Plot.plot({
 ## Dettaglio votazioni
 
 ```js
-Inputs.table(filtered, {
+// Filtri aggiuntivi
+const esitoFilter = view(Inputs.select(["Tutte", "Approvate", "Respinte"], {label: "Esito"}));
+const fiduciaFilter = view(Inputs.checkbox(["Solo voti di fiducia"], {label: " "}));
+```
+
+```js
+const filtered2 = filtered.filter(d => {
+  if (esitoFilter === "Approvate" && !d.approvato) return false;
+  if (esitoFilter === "Respinte" && d.approvato) return false;
+  if (fiduciaFilter.length > 0 && !d.richiesta_fiducia) return false;
+  return true;
+});
+```
+
+```js
+Inputs.table(filtered2, {
   columns: ["data", "titolo", "favorevoli", "contrari", "astenuti", "votanti", "presenti", "approvato", "richiesta_fiducia"],
   header: {data: "Data", titolo: "Oggetto", favorevoli: "Fav", contrari: "Contr", astenuti: "Ast", votanti: "Votanti", presenti: "Presenti", approvato: "Esito", richiesta_fiducia: "Fiducia"},
   format: {
