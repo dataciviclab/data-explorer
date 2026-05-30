@@ -1,0 +1,21 @@
+name: Feature — Explorer
+description: Proposta di miglioramento per il data-explorer
+labels: [enhancement]
+body:
+  - type: textarea
+    id: desc
+    attributes:
+      label: Cosa vorresti vedere
+      description: Descrivi la funzionalità che manca
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Pagina dataset
+        - Navigazione / catalogo
+        - Tema / grafica
+        - Data loader
+        - Altro
