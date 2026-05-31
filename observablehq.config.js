@@ -22,6 +22,7 @@ export default {
         { name: "Fondo Solidarietà Comunale", path: "/dataset/opencivitas-fsc-2025" },
         { name: "Indice di Gini regionale", path: "/dataset/istat-gini-regionale" },
         { name: "Pensioni INPS", path: "/dataset/pensioni-inps" },
+        { name: "Votazioni Camera", path: "/dataset/votazioni-camera" },
       ],
     },
     {
