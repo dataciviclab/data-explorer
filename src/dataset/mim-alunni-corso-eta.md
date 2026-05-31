@@ -1,9 +1,9 @@
 ---
 title: Alunni per corso ed età
-description: Alunni delle scuole statali italiane per ordine, regione e anno scolastico — MIM, 2016-2025
+description: Alunni delle scuole statali italiane per ordine, regione e anno scolastico — MIM, 2015-2025
 source: MIM — Ministero dell'Istruzione e del Merito
 source_url: https://dati.istruzione.it/opendata/
-period: "2016–2025"
+period: "2015–2025"
 last_modified: 2026-05-31
 dataset_slug: mim_alunni_corso_eta
 ---
@@ -12,7 +12,7 @@ dataset_slug: mim_alunni_corso_eta
 
 Alunni delle scuole statali italiane per ordine scolastico (primaria, secondaria I e II grado), regione e anno scolastico. I dati mostrano l'evoluzione della popolazione scolastica e la distribuzione tra territori e gradi di istruzione.
 
-**Fonte**: [MIM](https://dati.istruzione.it/opendata/) · **Periodo**: 2016–2025
+**Fonte**: [MIM](https://dati.istruzione.it/opendata/) · **Periodo**: 2015–2025
 
 ```js
 const data = await FileAttachment("../data/mim-alunni-corso-eta.json").json();
@@ -163,7 +163,7 @@ Inputs.table(pivot, {
 
 ## Limiti
 
-- **Copertura**: la serie copre gli anni scolastici dal 2016/17 al 2025/26. Dati precedenti non sono disponibili in questo dataset.
+- **Copertura**: la serie copre gli anni scolastici dal 2015/16 al 2024/25. Dati precedenti non sono disponibili in questo dataset.
 - **Scuole statali**: i dati si riferiscono alle sole scuole statali. Non includono scuole paritarie, private o regionali.
 - **Anno scolastico**: l'anno mostrato è l'anno di inizio del ciclo scolastico (es. 2023 = anno scolastico 2023/24).
 - **Granularità**: i dati sono aggregati per regione e ordine scolastico. La disaggregazione per singola scuola è disponibile nel dataset originale.
