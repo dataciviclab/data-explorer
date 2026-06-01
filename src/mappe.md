@@ -40,9 +40,31 @@ Plot.plot({
 ## Mappa con dati — Gini regionale 2023
 
 ```js
+// Normalizza nomi regione per match con TopoJSON
+function normalizzaReg(nome) {
+  return nome
+    .toUpperCase()
+    .replace(/ \/ /g, '/')
+    .replace(/ /g, '-')
+    .replace(/PROVINCIA-AUTONOMA-(BOLZANO|TRENTO).*/, 'TRENTINO-ALTO ADIGE/SÜDTIROL')
+    .replace(/TRENTINO-ALTO-ADIGE/, 'TRENTINO-ALTO ADIGE');
+}
+
 const gini = await FileAttachment("./data/istat-gini-regionale.json").json();
 const gini2023 = gini.filter(d => d.anno === 2023 && d.pres_aff_imp === 1);
-const giniLookup = new Map(gini2023.map(d => [d.regione.toUpperCase(), d.gini]));
+const giniLookup = new Map();
+for (const d of gini2023) {
+  const key = normalizzaReg(d.regione);
+  if (key === 'TRENTINO-ALTO ADIGE/SÜDTIROL') {
+    const curr = giniLookup.get(key) || 0;
+    giniLookup.set(key, curr + d.gini);
+  } else {
+    giniLookup.set(key, d.gini);
+  }
+}
+if (giniLookup.has('TRENTINO-ALTO ADIGE/SÜDTIROL')) {
+  giniLookup.set('TRENTINO-ALTO ADIGE/SÜDTIROL', giniLookup.get('TRENTINO-ALTO ADIGE/SÜDTIROL') / 2);
+}
 ```
 
 ```js
@@ -53,7 +75,7 @@ Plot.plot({
   color: {scheme: "YlOrRd", legend: true, label: "Gini (2023)", type: "quantile"},
   marks: [
     Plot.geo(regioni, {
-      fill: d => giniLookup.get(d.properties.DEN_REG.toUpperCase()),
+      fill: d => giniLookup.get(normalizzaReg(d.properties.DEN_REG)),
       stroke: "#fff",
       strokeWidth: 0.25,
       tip: true

@@ -45,8 +45,32 @@ const annoData = filtered
 
 const mediaNazionale = d3.mean(annoData, d => d.gini);
 
+// Normalizza nomi regione per match con TopoJSON
+function normalizzaReg(nome) {
+  return nome
+    .toUpperCase()
+    .replace(/ \/ /g, '/')     // " / " → "/"
+    .replace(/ /g, '-')        // spazi → trattini
+    .replace(/PROVINCIA-AUTONOMA-(BOLZANO|TRENTO).*/, 'TRENTINO-ALTO ADIGE/SÜDTIROL')
+    .replace(/TRENTINO-ALTO-ADIGE/, 'TRENTINO-ALTO ADIGE');
+}
+
 // Lookup per mappa
-const giniLookup = new Map(annoData.map(d => [d.regione.toUpperCase(), d.gini]));
+const giniLookup = new Map();
+for (const d of annoData) {
+  const key = normalizzaReg(d.regione);
+  // Per Trentino, somma le due province
+  if (key === 'TRENTINO-ALTO ADIGE/SÜDTIROL') {
+    const curr = giniLookup.get(key) || 0;
+    giniLookup.set(key, curr + d.gini);
+  } else {
+    giniLookup.set(key, d.gini);
+  }
+}
+// Media per Trentino (due province sommate, dividi per 2)
+if (giniLookup.has('TRENTINO-ALTO ADIGE/SÜDTIROL')) {
+  giniLookup.set('TRENTINO-ALTO ADIGE/SÜDTIROL', giniLookup.get('TRENTINO-ALTO ADIGE/SÜDTIROL') / 2);
+}
 ```
 
 ```js
@@ -87,7 +111,7 @@ Plot.plot({
   color: {scheme: "YlOrRd", legend: true, label: "Gini", type: "quantile"},
   marks: [
     Plot.geo(regioniGeo, {
-      fill: d => giniLookup.get(d.properties.DEN_REG.toUpperCase()),
+      fill: d => giniLookup.get(normalizzaReg(d.properties.DEN_REG)),
       stroke: "#fff",
       strokeWidth: 0.25,
       tip: true
