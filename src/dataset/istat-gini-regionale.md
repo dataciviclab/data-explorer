@@ -15,6 +15,14 @@ Disuguaglianza del reddito netto per regione, misurata con l'indice di Gini. I d
 **Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2003–2024
 
 ```js
+import * as topojson from "npm:topojson-client";
+
+const regTopo = await FileAttachment("../data/regioni.topojson").json();
+const regioniGeo = topojson.feature(regTopo, regTopo.objects.regioni);
+const confiniReg = topojson.mesh(regTopo, regTopo.objects.regioni, (a, b) => a !== b);
+```
+
+```js
 const data = await FileAttachment("../data/istat-gini-regionale.json").json();
 ```
 
@@ -36,6 +44,9 @@ const annoData = filtered
   .sort((a, b) => b.gini - a.gini);
 
 const mediaNazionale = d3.mean(annoData, d => d.gini);
+
+// Lookup per mappa
+const giniLookup = new Map(annoData.map(d => [d.regione.toUpperCase(), d.gini]));
 ```
 
 ```js
@@ -65,33 +76,33 @@ const trendNazionale = Array.from(
 
 ## Disuguaglianza per regione
 
-Quali regioni hanno la distribuzione del reddito più diseguale? L'indice di Gini varia da 0 (uguaglianza perfetta) a 1 (massima disuguaglianza). La media regionale è rappresentata dalla linea tratteggiata.
+Quali regioni hanno la distribuzione del reddito più diseguale? L'indice di Gini varia da 0 (uguaglianza perfetta) a 1 (massima disuguaglianza). La mappa mostra la distribuzione geografica della disuguaglianza, con le regioni del Sud che presentano i valori più alti.
 
 ```js
 Plot.plot({
   title: `Indice di Gini per regione — ${String(annoSel)}`,
+  projection: {type: "mercator", domain: regioniGeo},
   width: 800,
-  height: 450,
-  marginLeft: 120,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, label: "Gini (0-1)", tickFormat: d => d.toFixed(2)},
-  color: {scheme: "RdYlGn"},
+  height: 600,
+  color: {scheme: "RdYlGn", legend: true, label: "Gini", type: "quantile"},
   marks: [
-    Plot.barX(annoData, {
-      y: "regione",
-      x: "gini",
-      fill: "gini",
-      sort: {y: "-x"},
+    Plot.geo(regioniGeo, {
+      fill: d => giniLookup.get(d.properties.DEN_REG.toUpperCase()),
+      stroke: "#fff",
+      strokeWidth: 0.25,
       tip: true
     }),
-    Plot.ruleX([mediaNazionale], {
-      stroke: "var(--theme-foreground-muted)",
-      strokeDasharray: "4,4"
-    }),
-    Plot.ruleX([0])
+    Plot.geo(confiniReg, {
+      stroke: "#fff",
+      strokeWidth: 0.7
+    })
   ]
 })
 ```
+
+Il Gini medio nazionale (linea tratteggiata) aiuta a confrontare le regioni: quelle sopra la media hanno maggiore disuguaglianza.
+
+> **Nota**: la legenda usa la scala `quantile` — ogni colore contiene lo stesso numero di regioni, indipendentemente dal valore effettivo del Gini. I valori precisi sono nella tabella sottostante.
 
 ---
 
