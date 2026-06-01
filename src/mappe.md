@@ -8,20 +8,28 @@ description: Prototipo mappa coropletica con Observable Plot
 Prototipo di mappa coropletica con Observable Plot. La mappa mostra i confini delle regioni italiane con colore basato sui dati.
 
 ```js
-const regioni = await FileAttachment("./data/regioni.topojson").json();
+import * as topojson from "npm:topojson-client";
+
+const regioniTopology = await FileAttachment("./data/regioni.topojson").json();
+const regioni = topojson.feature(regioniTopology, regioniTopology.objects.regioni);
+const confiniRegioni = topojson.mesh(regioniTopology, regioniTopology.objects.regioni, (a, b) => a !== b);
 ```
 
 ```js
-// Mostra la mappa base
+// Mappa base — proiezione auto
 Plot.plot({
   projection: {type: "mercator", domain: regioni},
   width: 800,
   height: 600,
   marks: [
     Plot.geo(regioni, {
-      fill: "#eee",
+      fill: "#4e79a7",
       stroke: "#fff",
-      strokeWidth: 0.5
+      strokeWidth: 0.25
+    }),
+    Plot.geo(confiniRegioni, {
+      stroke: "#fff",
+      strokeWidth: 0.7
     })
   ]
 })
@@ -47,8 +55,12 @@ Plot.plot({
     Plot.geo(regioni, {
       fill: d => giniLookup.get(d.properties.DEN_REG.toUpperCase()),
       stroke: "#fff",
-      strokeWidth: 0.5,
+      strokeWidth: 0.25,
       tip: true
+    }),
+    Plot.geo(confiniRegioni, {
+      stroke: "#fff",
+      strokeWidth: 0.7
     })
   ]
 })
@@ -58,9 +70,9 @@ Plot.plot({
 
 ## Note
 
-- **TopoJSON**: confini ISTAT regioni, 474KB, copia locale in `src/data/regioni.topojson`
+- **TopoJSON**: confini ISTAT regioni, copia locale in `src/data/regioni.topojson`, convertita con `topojson-client`
 - **Join**: `d.properties.DEN_REG.toUpperCase()` fa match con i nomi regione nei nostri dataset (tutti in maiuscolo)
-- **Proiezione**: `mercator` (default). Si può cambiare in `"identity"` per mantenere le proporzioni reali
+- **Proiezione**: `mercator` con dominio calcolato sulle geometrie italiane
 - **Scala colore**: `type: "quantile"` distribuisce i valori in classi equinumerose (evita squilibri)
 
 ### Passi successivi
