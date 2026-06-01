@@ -50,7 +50,7 @@ Plot.plot({
   projection: {type: "mercator", domain: regioni},
   width: 800,
   height: 600,
-  color: {scheme: "RdYlGn", legend: true, label: "Gini (2023)", type: "quantile"},
+  color: {scheme: "YlOrRd", legend: true, label: "Gini (2023)", type: "quantile"},
   marks: [
     Plot.geo(regioni, {
       fill: d => giniLookup.get(d.properties.DEN_REG.toUpperCase()),
