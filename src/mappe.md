@@ -8,7 +8,7 @@ description: Prototipo mappa coropletica con Observable Plot
 Prototipo di mappa coropletica con Observable Plot. La mappa mostra i confini delle regioni italiane con colore basato sui dati.
 
 ```js
-const regioni = await FileAttachment("../data/regioni.topojson").json();
+const regioni = await FileAttachment("./data/regioni.topojson").json();
 ```
 
 ```js
@@ -32,7 +32,7 @@ Plot.plot({
 ## Mappa con dati — Gini regionale 2023
 
 ```js
-const gini = await FileAttachment("../data/istat-gini-regionale.json").json();
+const gini = await FileAttachment("./data/istat-gini-regionale.json").json();
 const gini2023 = gini.filter(d => d.anno === 2023 && d.pres_aff_imp === 1);
 const giniLookup = new Map(gini2023.map(d => [d.regione.toUpperCase(), d.gini]));
 ```
