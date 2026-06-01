@@ -8,10 +8,7 @@ description: Prototipo mappa coropletica con Observable Plot
 Prototipo di mappa coropletica con Observable Plot. La mappa mostra i confini delle regioni italiane con colore basato sui dati.
 
 ```js
-import {feature} from "https://observablehq.com/framework/lib/topojson.js";
-
-const topo = await FileAttachment("./data/regioni.topojson").json();
-const regioni = feature(topo, topo.objects.regioni);
+const regioni = await FileAttachment("./data/regioni.topojson").json();
 ```
 
 ```js
