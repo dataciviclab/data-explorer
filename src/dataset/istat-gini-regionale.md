@@ -43,39 +43,24 @@ const annoData = filtered
   .filter(d => d.anno === annoSel)
   .sort((a, b) => b.gini - a.gini);
 
-const mediaNazionale = d3.mean(annoData, d => d.gini);
+// Dati per la mappa: esclude province autonome (20 regioni reali)
+const annoDataRegioni = annoData.filter(d => !d.regione.startsWith('Provincia Autonoma'));
+const mediaRegionale = d3.mean(annoDataRegioni, d => d.gini);
 
-// Normalizza nomi regione per match con TopoJSON
+// Lookup per mappa — chiave normalizzata per match TopoJSON
 function normalizzaReg(nome) {
   return nome
     .toUpperCase()
-    .replace(/ \/ /g, '/')     // " / " → "/"
-    .replace(/ /g, '-')        // spazi → trattini
-    .replace(/PROVINCIA-AUTONOMA-(BOLZANO|TRENTO).*/, 'TRENTINO-ALTO ADIGE/SÜDTIROL')
-    .replace(/TRENTINO-ALTO-ADIGE/, 'TRENTINO-ALTO ADIGE');
+    .replace(/ \/ /g, '/')
+    .replace(/ /g, '-');
 }
 
-// Lookup per mappa
-const giniLookup = new Map();
-for (const d of annoData) {
-  const key = normalizzaReg(d.regione);
-  // Per Trentino, somma le due province
-  if (key === 'TRENTINO-ALTO ADIGE/SÜDTIROL') {
-    const curr = giniLookup.get(key) || 0;
-    giniLookup.set(key, curr + d.gini);
-  } else {
-    giniLookup.set(key, d.gini);
-  }
-}
-// Media per Trentino (due province sommate, dividi per 2)
-if (giniLookup.has('TRENTINO-ALTO ADIGE/SÜDTIROL')) {
-  giniLookup.set('TRENTINO-ALTO ADIGE/SÜDTIROL', giniLookup.get('TRENTINO-ALTO ADIGE/SÜDTIROL') / 2);
-}
+const giniLookup = new Map(annoDataRegioni.map(d => [normalizzaReg(d.regione), d.gini]));
 ```
 
 ```js
 const trendNazionale = Array.from(
-  d3.rollup(filtered, v => d3.mean(v, d => d.gini), d => d.anno),
+  d3.rollup(filtered.filter(d => !d.regione.startsWith('Provincia Autonoma')), v => d3.mean(v, d => d.gini), d => d.anno),
   ([anno, gini]) => ({anno, gini})
 ).sort((a, b) => a.anno - b.anno);
 ```
@@ -83,16 +68,16 @@ const trendNazionale = Array.from(
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Media regionale</h3>
-    <span class="big">${mediaNazionale.toFixed(3)}</span>
+    <span class="big">${mediaRegionale.toFixed(3)}</span>
     <small style="opacity:0.6">${annoSel} ${conFitti ? "con" : "senza"} fitti imputati</small>
   </div>
   <div class="card">
     <h3>Regioni</h3>
-    <span class="big">${annoData.length}</span>
+    <span class="big">${annoDataRegioni.length}</span>
   </div>
   <div class="card">
     <h3>Min – Max</h3>
-    <span class="big">${d3.min(annoData, d => d.gini).toFixed(3)} – ${d3.max(annoData, d => d.gini).toFixed(3)}</span>
+    <span class="big">${d3.min(annoDataRegioni, d => d.gini).toFixed(3)} – ${d3.max(annoDataRegioni, d => d.gini).toFixed(3)}</span>
   </div>
 </div>
 
@@ -124,7 +109,7 @@ Plot.plot({
 })
 ```
 
-Il Gini medio nazionale (linea tratteggiata) aiuta a confrontare le regioni: quelle sopra la media hanno maggiore disuguaglianza.
+Trentino-Alto Adige e le due province autonome sono aggregate nel valore regionale. I dati precisi per ogni regione sono nella tabella sottostante.
 
 > **Nota**: la legenda usa la scala `quantile` — ogni colore contiene lo stesso numero di regioni, indipendentemente dal valore effettivo del Gini. I valori precisi sono nella tabella sottostante.
 
@@ -168,10 +153,10 @@ Plot.plot({
 ## Dettaglio per regione
 
 ```js
-const annoConDelta = annoData.map((d, i) => ({
+const annoConDelta = annoDataRegioni.map((d, i) => ({
   ...d,
   pos: i + 1,
-  diff_media: d.gini - mediaNazionale
+  diff_media: d.gini - mediaRegionale
 }));
 ```
 
