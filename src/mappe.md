@@ -8,15 +8,18 @@ description: Prototipo mappa coropletica con Observable Plot
 Prototipo di mappa coropletica con Observable Plot. La mappa mostra i confini delle regioni italiane con colore basato sui dati.
 
 ```js
-const regioni = await FileAttachment("./data/regioni.topojson").json();
+import {feature} from "https://observablehq.com/framework/lib/topojson.js";
+
+const topo = await FileAttachment("./data/regioni.topojson").json();
+const regioni = feature(topo, topo.objects.regioni);
 ```
 
 ```js
 // Mostra la mappa base
 Plot.plot({
-  projection: "mercator",
+  projection: {type: "mercator", domain: regioni},
   width: 800,
-  height: 800,
+  height: 600,
   marks: [
     Plot.geo(regioni, {
       fill: "#eee",
@@ -39,26 +42,16 @@ const giniLookup = new Map(gini2023.map(d => [d.regione.toUpperCase(), d.gini]))
 
 ```js
 Plot.plot({
-  projection: "mercator",
+  projection: {type: "mercator", domain: regioni},
   width: 800,
-  height: 800,
+  height: 600,
   color: {scheme: "RdYlGn", legend: true, label: "Gini (2023)", type: "quantile"},
   marks: [
     Plot.geo(regioni, {
-      fill: d => {
-        const nome = d.properties.DEN_REG.toUpperCase();
-        return giniLookup.get(nome);
-      },
+      fill: d => giniLookup.get(d.properties.DEN_REG.toUpperCase()),
       stroke: "#fff",
       strokeWidth: 0.5,
-      tip: true,
-      channels: {
-        regione: d => d.properties.DEN_REG,
-        gini: d => {
-          const nome = d.properties.DEN_REG.toUpperCase();
-          return giniLookup.get(nome)?.toFixed(3);
-        }
-      }
+      tip: true
     })
   ]
 })
