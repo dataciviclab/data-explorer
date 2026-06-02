@@ -30,6 +30,7 @@ const filtered = data.filter(d => d.anno === annoSel).sort((a, b) => {
 });
 
 const totale = d3.sum(filtered, d => d.popolazione_residente);
+const pctFemmine = d3.sum(filtered, d => d.totale_femmine) / totale * 100;
 const nFasce = filtered.length;
 ```
 
@@ -47,13 +48,13 @@ const trend = Array.from(
     <span class="big">${(totale / 1e6).toFixed(1)} <small style="opacity:0.6">mln</small></span>
   </div>
   <div class="card">
-    <h3>Fasce d'età</h3>
-    <span class="big">${nFasce}</span>
+    <h3>Femmine</h3>
+    <span class="big">${pctFemmine.toFixed(1)}%</span>
+    <small style="opacity:0.6">maschi ${(100 - pctFemmine).toFixed(1)}%</small>
   </div>
   <div class="card">
-    <h3>Serie storica</h3>
-    <span class="big">${anni.length}</span>
-    <small style="opacity:0.6">${Math.min(...anni)}–${Math.max(...anni)}</small>
+    <h3>Fasce d'età</h3>
+    <span class="big">${nFasce}</span>
   </div>
 </div>
 
