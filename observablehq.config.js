@@ -40,6 +40,7 @@ export default {
         { name: "Pensioni INPS", path: "/dataset/pensioni-inps" },
         { name: "Indice prezzi IPAB", path: "/dataset/istat-ipab-aree" },
         { name: "Alunni corso/età", path: "/dataset/mim-alunni-corso-eta" },
+        { name: "Popolazione per età", path: "/dataset/popolazione-istat" },
       ],
     },
     {
@@ -54,18 +55,6 @@ export default {
       collapsible: true,
       pages: [
         { name: "Votazioni Camera", path: "/dataset/votazioni-camera" },
-        { name: "Popolazione per età", path: "/dataset/popolazione-istat" },
-      ],
-    },
-    {
-      name: "Temi",
-      collapsible: false,
-      pages: [
-        { name: "Territorio e ambiente", path: "/temi/territorio-ambiente" },
-        { name: "Finanza pubblica", path: "/temi/finanza-pubblica" },
-        { name: "Sanità", path: "/temi/sanita" },
-        { name: "Welfare e lavoro", path: "/temi/welfare-lavoro" },
-        { name: "Giustizia", path: "/temi/giustizia" },
       ],
     },
   ],
