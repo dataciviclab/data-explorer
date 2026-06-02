@@ -97,12 +97,12 @@ Plot.plot({
   marks: [
     Plot.geo(regioniGeo, {
       fill: d => giniLookup.get(normalizzaReg(d.properties.DEN_REG)),
-      stroke: "#fff",
+      stroke: "#888",
       strokeWidth: 0.25,
       tip: true
     }),
     Plot.geo(confiniReg, {
-      stroke: "#fff",
+      stroke: "#888",
       strokeWidth: 0.7
     })
   ]
