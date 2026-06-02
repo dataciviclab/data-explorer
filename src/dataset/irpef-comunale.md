@@ -79,7 +79,27 @@ function normalizzaReg(nome) {
 }
 
 const totNazionale = d3.sum(regFiltered, d => d.reddito_imponibile_eur);
-const irpefLookup = new Map(regFiltered.map(d => [normalizzaReg(d.regione), d.reddito_imponibile_eur / totNazionale * 100]));
+// Costruisci lookup escludendo MANCANTE/ERRATA e aggregando Trentino
+const irpefLookup = new Map();
+const trentinoVal = {val: 0, cnt: 0};
+for (const d of regFiltered) {
+  const r = d.regione;
+  if (r === 'MANCANTE/ERRATA') continue;
+  if (r.includes('P.A.')) {
+    trentinoVal.val += d.reddito_imponibile_eur / totNazionale * 100;
+    trentinoVal.cnt++;
+    continue;
+  }
+  irpefLookup.set(normalizzaReg(r), d.reddito_imponibile_eur / totNazionale * 100);
+}
+// Trentino unificato
+const trentKey = normalizzaReg('Trentino-Alto Adige');
+irpefLookup.set(trentKey, trentinoVal.cnt > 0 ? trentinoVal.val : 0);
+irpefLookup.set(trentKey + '/SÜDTIROL', irpefLookup.get(trentKey));
+// Valle d'Aosta fallback
+if (irpefLookup.has("VALLE-D'AOSTA")) {
+  irpefLookup.set("VALLE-D'AOSTA/VALLÉE-D'AOSTE", irpefLookup.get("VALLE-D'AOSTA"));
+}
 ```
 
 ```js

@@ -81,6 +81,11 @@ function normalizzaReg(nome) {
 }
 
 const rdLookup = new Map(regFiltered.map(d => [normalizzaReg(d.regione), d.quota_rd]));
+// Fallback per nomi regione non standard (ISPRA vs TopoJSON)
+const rdFALLBACKS = {"VALLE-DAOSTA": "VALLE-D'AOSTA/VALLÉE-D'AOSTE", "TRENTINO-ALTO-ADIGE": "TRENTINO-ALTO-ADIGE/SÜDTIROL"};
+for (const [short, full] of Object.entries(rdFALLBACKS)) {
+  if (rdLookup.has(short) && !rdLookup.has(full)) rdLookup.set(full, rdLookup.get(short));
+}
 ```
 
 ```js
