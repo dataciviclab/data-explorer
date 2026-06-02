@@ -51,8 +51,9 @@ const trend = Array.from(
     <span class="big">${nFasce}</span>
   </div>
   <div class="card">
-    <h3>Anni</h3>
+    <h3>Serie storica</h3>
     <span class="big">${anni.length}</span>
+    <small style="opacity:0.6">${Math.min(...anni)}–${Math.max(...anni)}</small>
   </div>
 </div>
 
