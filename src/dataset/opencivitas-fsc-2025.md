@@ -15,6 +15,14 @@ Fondo di Solidarietà Comunale (FSC) 2025 per comune: capacità fiscale, fondo p
 **Fonte**: [OpenCivitas](https://www.opencivitas.it/) · **Periodo**: 2025
 
 ```js
+import * as topojson from "npm:topojson-client";
+
+const regTopo = await FileAttachment("../data/regioni.topojson").json();
+const regioniGeo = topojson.feature(regTopo, regTopo.objects.regioni);
+const confiniReg = topojson.mesh(regTopo, regTopo.objects.regioni, (a, b) => a !== b);
+```
+
+```js
 const data = await FileAttachment("../data/opencivitas-fsc-2025.json").json();
 ```
 
@@ -64,29 +72,46 @@ const percContribNetti = (contribNetti / nComuni * 100).toFixed(1);
 
 ## Dotazione FSC per regione
 
-Come si distribuisce il Fondo di Solidarietà tra le regioni? Lombardia, Campania e Sicilia guidano la classifica per volume totale di risorse.
+```js
+function normalizzaReg(nome) {
+  return nome.toUpperCase().replace(/ \/ /g, '/').replace(/ /g, '-');
+}
+
+const fscLookup = new Map(perRegione.map(d => [normalizzaReg(d.regione), d.fsc]));
+```
 
 ```js
 Plot.plot({
   title: "Dotazione FSC per regione — 2025",
+  projection: {type: "mercator", domain: regioniGeo},
   width: 800,
-  height: 450,
-  marginLeft: 120,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, tickFormat: "~s"},
-  color: {scheme: "Blues"},
+  height: 600,
+  color: {scheme: "Blues", legend: true, label: "Dotazione FSC (€)", type: "quantile"},
   marks: [
-    Plot.barX(perRegione, {
-      y: "regione",
-      x: "fsc",
-      fill: "fsc",
-      sort: {y: "-x"},
+    // RSO: colore per dotazione FSC
+    Plot.geo(regioniGeo, {
+      filter: d => fscLookup.has(normalizzaReg(d.properties.DEN_REG)),
+      fill: d => fscLookup.get(normalizzaReg(d.properties.DEN_REG)),
+      stroke: "#888",
+      strokeWidth: 0.25,
       tip: true
     }),
-    Plot.ruleX([0])
+    // Regioni a statuto speciale: grigio
+    Plot.geo(regioniGeo, {
+      filter: d => !fscLookup.has(normalizzaReg(d.properties.DEN_REG)),
+      fill: "#e0e0e0",
+      stroke: "#888",
+      strokeWidth: 0.25,
+      tip: {format: {fill: () => "Dato non disponibile (RSO)"}}
+    }),
+    Plot.geo(confiniReg, {
+      stroke: "#888",
+      strokeWidth: 0.7
+    })
   ]
 })
 ```
+> Il FSC copre solo le Regioni a Statuto Ordinario (RSO). Le regioni in grigio (Sicilia, Sardegna, Friuli-Venezia Giulia, Trentino-Alto Adige e Valle d'Aosta) non sono incluse nel dataset.
 
 ---
 

@@ -15,17 +15,25 @@ Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta d
 **Fonte**: ISPRA · **Periodo**: 2020–2024
 
 ```js
-const regioni = await FileAttachment("../data/ispra-regioni.json").json();
+import * as topojson from "npm:topojson-client";
+
+const regTopo = await FileAttachment("../data/regioni.topojson").json();
+const regioniGeo = topojson.feature(regTopo, regTopo.objects.regioni);
+const confiniReg = topojson.mesh(regTopo, regTopo.objects.regioni, (a, b) => a !== b);
+```
+
+```js
+const rifiutiData = await FileAttachment("../data/ispra-regioni.json").json();
 const comuni = await FileAttachment("../data/ispra-comuni.json").json();
 ```
 
 ```js
-const anni = [...new Set(regioni.map(d => d.anno))].sort((a, b) => b - a);
+const anni = [...new Set(rifiutiData.map(d => d.anno))].sort((a, b) => b - a);
 const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
-const regFiltered = regioni
+const regFiltered = rifiutiData
   .filter(d => d.anno === annoSel)
   .sort((a, b) => b.totale_ru_tonnellate - a.totale_ru_tonnellate)
   .map(d => ({
@@ -67,24 +75,37 @@ const comuniFiltrati = comuni
 ## Raccolta differenziata per regione
 
 ```js
+// Normalizzazione nomi regione
+function normalizzaReg(nome) {
+  return nome.toUpperCase().replace(/ \/ /g, '/').replace(/ /g, '-');
+}
+
+const rdLookup = new Map(regFiltered.map(d => [normalizzaReg(d.regione), d.quota_rd]));
+// Fallback per nomi regione non standard (ISPRA vs TopoJSON)
+const rdFALLBACKS = {"VALLE-DAOSTA": "VALLE-D'AOSTA/VALLÉE-D'AOSTE", "TRENTINO-ALTO-ADIGE": "TRENTINO-ALTO-ADIGE/SÜDTIROL"};
+for (const [short, full] of Object.entries(rdFALLBACKS)) {
+  if (rdLookup.has(short) && !rdLookup.has(full)) rdLookup.set(full, rdLookup.get(short));
+}
+```
+
+```js
 Plot.plot({
   title: `Quota raccolta differenziata per regione — ${String(annoSel)}`,
+  projection: {type: "mercator", domain: regioniGeo},
   width: 800,
-  height: 450,
-  marginLeft: 120,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, label: "% RD"},
-  color: {scheme: "RdYlGn"},
+  height: 600,
+  color: {scheme: "YlGn", legend: true, label: "% RD", type: "quantile"},
   marks: [
-    Plot.barX(regFiltered, {
-      y: "regione",
-      x: "quota_rd",
-      fill: "quota_rd",
-      sort: {y: "-x"},
+    Plot.geo(regioniGeo, {
+      fill: d => rdLookup.get(normalizzaReg(d.properties.DEN_REG)),
+      stroke: "#888",
+      strokeWidth: 0.25,
       tip: true
     }),
-    Plot.ruleX([0]),
-    Plot.ruleX([mediaRd], {stroke: "var(--theme-foreground-muted)", strokeDasharray: "4,4"})
+    Plot.geo(confiniReg, {
+      stroke: "#888",
+      strokeWidth: 0.7
+    })
   ]
 })
 ```

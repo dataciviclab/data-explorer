@@ -15,6 +15,14 @@ Contribuenti, reddito imponibile e imposta netta IRPEF per comune italiano. I da
 **Fonte**: [MEF — Dipartimento delle Finanze](https://www1.finanze.gov.it/) · **Periodo**: 2019–2023
 
 ```js
+import * as topojson from "npm:topojson-client";
+
+const regTopo = await FileAttachment("../data/regioni.topojson").json();
+const regioniGeo = topojson.feature(regTopo, regTopo.objects.regioni);
+const confiniReg = topojson.mesh(regTopo, regTopo.objects.regioni, (a, b) => a !== b);
+```
+
+```js
 const regioni = await FileAttachment("../data/irpef-regioni.json").json();
 const capoluoghi = await FileAttachment("../data/irpef-capoluoghi.json").json();
 ```
@@ -65,34 +73,53 @@ const nRegioni = new Set(regFiltered.map(d => d.regione)).size;
 
 ## Composizione del reddito per regione
 
-Come si distribuisce il reddito imponibile tra le regioni italiane? Il grafico mostra la quota di ciascuna regione sul totale nazionale: le regioni più popolose pesano di più, ma il dato pro capite — non ancora presente in questa pagina — darebbe un quadro più preciso della capacità fiscale reale.
-
 ```js
+function normalizzaReg(nome) {
+  return nome.toUpperCase().replace(/ \/ /g, '/').replace(/ /g, '-');
+}
+
 const totNazionale = d3.sum(regFiltered, d => d.reddito_imponibile_eur);
-const conQuota = regFiltered.map(d => ({
-  ...d,
-  quota_pct: d.reddito_imponibile_eur / totNazionale * 100
-})).sort((a, b) => b.quota_pct - a.quota_pct);
+// Costruisci lookup escludendo MANCANTE/ERRATA e aggregando Trentino
+const irpefLookup = new Map();
+const trentinoVal = {val: 0, cnt: 0};
+for (const d of regFiltered) {
+  const r = d.regione;
+  if (r === 'MANCANTE/ERRATA') continue;
+  if (r.includes('P.A.')) {
+    trentinoVal.val += d.reddito_imponibile_eur / totNazionale * 100;
+    trentinoVal.cnt++;
+    continue;
+  }
+  irpefLookup.set(normalizzaReg(r), d.reddito_imponibile_eur / totNazionale * 100);
+}
+// Trentino unificato
+const trentKey = normalizzaReg('Trentino-Alto Adige');
+irpefLookup.set(trentKey, trentinoVal.cnt > 0 ? trentinoVal.val : 0);
+irpefLookup.set(trentKey + '/SÜDTIROL', irpefLookup.get(trentKey));
+// Valle d'Aosta fallback
+if (irpefLookup.has("VALLE-D'AOSTA")) {
+  irpefLookup.set("VALLE-D'AOSTA/VALLÉE-D'AOSTE", irpefLookup.get("VALLE-D'AOSTA"));
+}
 ```
 
 ```js
 Plot.plot({
-  title: `Quota del reddito nazionale per regione — ${annoSel}`,
+  title: `Quota del reddito nazionale per regione — ${String(annoSel)}`,
+  projection: {type: "mercator", domain: regioniGeo},
   width: 800,
-  height: 450,
-  marginLeft: 120,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, label: "% del totale nazionale", tickFormat: d => d.toFixed(1) + "%"},
-  color: {scheme: "Blues"},
+  height: 600,
+  color: {scheme: "YlOrRd", legend: true, label: "% reddito nazionale", type: "quantile"},
   marks: [
-    Plot.barX(conQuota, {
-      y: "regione",
-      x: "quota_pct",
-      fill: "quota_pct",
-      sort: {y: "-x"},
-      tip: {format: {x: d => d.toFixed(1) + "%"}}
+    Plot.geo(regioniGeo, {
+      fill: d => irpefLookup.get(normalizzaReg(d.properties.DEN_REG)),
+      stroke: "#888",
+      strokeWidth: 0.25,
+      tip: true
     }),
-    Plot.ruleX([0])
+    Plot.geo(confiniReg, {
+      stroke: "#888",
+      strokeWidth: 0.7
+    })
   ]
 })
 ```
