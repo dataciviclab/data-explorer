@@ -112,12 +112,12 @@ Plot.plot({
   marks: [
     Plot.geo(regioniGeo, {
       fill: d => irpefLookup.get(normalizzaReg(d.properties.DEN_REG)),
-      stroke: "#fff",
+      stroke: "#666",
       strokeWidth: 0.25,
       tip: true
     }),
     Plot.geo(confiniReg, {
-      stroke: "#fff",
+      stroke: "#666",
       strokeWidth: 0.7
     })
   ]
