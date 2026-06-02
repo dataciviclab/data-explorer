@@ -88,11 +88,21 @@ Plot.plot({
   height: 600,
   color: {scheme: "Blues", legend: true, label: "Dotazione FSC (€)", type: "quantile"},
   marks: [
+    // RSO: colore per dotazione FSC
     Plot.geo(regioniGeo, {
+      filter: d => fscLookup.has(normalizzaReg(d.properties.DEN_REG)),
       fill: d => fscLookup.get(normalizzaReg(d.properties.DEN_REG)),
       stroke: "#888",
       strokeWidth: 0.25,
       tip: true
+    }),
+    // Regioni a statuto speciale: grigio
+    Plot.geo(regioniGeo, {
+      filter: d => !fscLookup.has(normalizzaReg(d.properties.DEN_REG)),
+      fill: "#e0e0e0",
+      stroke: "#888",
+      strokeWidth: 0.25,
+      tip: {format: {fill: () => "Dato non disponibile (RSO)"}}
     }),
     Plot.geo(confiniReg, {
       stroke: "#888",
@@ -101,6 +111,7 @@ Plot.plot({
   ]
 })
 ```
+> Il FSC copre solo le Regioni a Statuto Ordinario (RSO). Le regioni in grigio (Sicilia, Sardegna, Friuli-Venezia Giulia, Trentino-Alto Adige e Valle d'Aosta) non sono incluse nel dataset.
 
 ---
 
