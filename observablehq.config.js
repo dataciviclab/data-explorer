@@ -41,6 +41,7 @@ export default {
         { name: "Indice prezzi IPAB", path: "/dataset/istat-ipab-aree" },
         { name: "Alunni corso/età", path: "/dataset/mim-alunni-corso-eta" },
         { name: "Popolazione per età", path: "/dataset/popolazione-istat" },
+        { name: "Densità abitativa", path: "/dataset/housing-crowding" },
       ],
     },
     {
