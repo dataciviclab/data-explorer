@@ -127,5 +127,6 @@ Inputs.table(ultimiValori, {
 ## Risorse
 
 - [ISTAT — IPAB (fonte originale)](https://www.istat.it/it/archivio/16773)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/istat_ipab_aree/2024/istat_ipab_aree_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/istat-ipab-aree)

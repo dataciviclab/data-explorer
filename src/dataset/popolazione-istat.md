@@ -185,5 +185,6 @@ Inputs.table(filtered, {
 ## Risorse
 
 - [ISTAT — Esplora dati](https://esploradati.istat.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/popolazione_istat_comunale_2019_2025/2025/popolazione_istat_comunale_2019_2025_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/popolazione-istat-comunale-2019-2025)

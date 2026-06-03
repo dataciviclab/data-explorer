@@ -157,6 +157,7 @@ Inputs.table(filtered, {
 ## Risorse
 
 - [Terna (fonte originale)](https://www.terna.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/terna-electricity-by-source)
 <!-- - [Analisi](/analisi/terna-electricity-by-source) -->

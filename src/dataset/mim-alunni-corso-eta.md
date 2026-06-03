@@ -173,5 +173,6 @@ Inputs.table(pivot, {
 ## Risorse
 
 - [MIM — Dati istruzione](https://dati.istruzione.it/opendata/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/mim_alunni_corso_eta/2025/mim_alunni_corso_eta_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/mim-alunni-corso-eta)

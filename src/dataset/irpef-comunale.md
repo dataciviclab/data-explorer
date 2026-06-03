@@ -199,6 +199,7 @@ Inputs.table(capConMedia, {
 ## Risorse
 
 - [MEF — Dipartimento delle Finanze (fonte originale)](https://www1.finanze.gov.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/irpef_comunale/2023/irpef_comunale_2023_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/irpef-comunale)
 <!-- Analisi non ancora pubblicata. Quando sarà disponibile, aggiungere:
