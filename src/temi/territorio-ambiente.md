@@ -5,7 +5,7 @@ description: Trasformazioni territoriali, ambiente, energia e rifiuti
 
 # Territorio e ambiente
 
-Produzione e raccolta differenziata dei rifiuti urbani, capacità di generazione rinnovabile installata e incidentalità stradale per regione. I dataset di questo tema coprono le trasformazioni ambientali, il mix energetico e la sicurezza stradale in Italia.
+Produzione e raccolta differenziata dei rifiuti urbani, capacità di generazione rinnovabile installata e incidentalità stradale a livello nazionale. I dataset di questo tema coprono le trasformazioni ambientali, il mix energetico e la sicurezza stradale in Italia.
 
 ```js
 const catalog = await FileAttachment("../data/catalog.json").json();
