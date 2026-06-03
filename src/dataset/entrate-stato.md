@@ -122,5 +122,6 @@ Inputs.table(filtered, {
 ## Risorse
 
 - [RGS · BDAP (fonte originale)](https://bdap.rgs.mef.gov.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_entrate_stato/2024/bdap_entrate_stato_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-entrate-stato)

@@ -157,6 +157,7 @@ Inputs.table(filtered, {
 ## Risorse
 
 - [Ministero della Giustizia (fonte originale)](https://datiestatistiche.giustizia.it)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/civile_flussi/2025/civile_flussi_2025_clean.parquet)
 - [Analisi completa](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/civile-flussi)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/civile-flussi)

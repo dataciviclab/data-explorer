@@ -156,5 +156,6 @@ Inputs.table(perRegione, {
 ## Risorse
 
 - [AIFA — Open Data (fonte originale)](https://www.aifa.gov.it/open-data)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/aifa_spesa_consumo/2024/aifa_spesa_consumo_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/aifa-spesa-consumo)

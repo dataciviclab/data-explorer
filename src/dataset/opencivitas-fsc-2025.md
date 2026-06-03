@@ -183,5 +183,6 @@ Inputs.table(perRegione, {
 ## Risorse
 
 - [OpenCivitas (fonte originale)](https://www.opencivitas.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/opencivitas_fsc_2025_rso/2025/opencivitas_fsc_2025_rso_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/opencivitas-fsc-2025-rso)

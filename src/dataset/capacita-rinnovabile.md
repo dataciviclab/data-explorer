@@ -133,6 +133,7 @@ Inputs.table(filtered, {
 ## Risorse
 
 - [Terna (fonte originale)](https://www.terna.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/terna_capacita_rinnovabile/2024/terna_capacita_rinnovabile_2024_clean.parquet)
 - [Analisi](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/terna-electricity-by-source)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/terna-capacita-rinnovabile)

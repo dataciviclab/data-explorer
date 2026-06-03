@@ -188,5 +188,6 @@ Inputs.table(filtered2, {
 ## Risorse
 
 - [Camera dei Deputati — Dati aperti](https://dati.camera.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/camera_votazioni_sparql/2025/camera_votazioni_sparql_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/camera-votazioni-sparql)

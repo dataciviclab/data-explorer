@@ -149,5 +149,6 @@ Inputs.table(regFiltered, {
 ## Risorse
 
 - [Consip — Dati (fonte originale)](https://dati.consip.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/consip_consumi_convenzione/2025/consip_consumi_convenzione_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/consip-consumi-convenzione)

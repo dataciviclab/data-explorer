@@ -184,5 +184,6 @@ Inputs.table(annoConDelta, {
 ## Risorse
 
 - [ISTAT — Esplora dati](https://esploradati.istat.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/istat_gini_regionale/2023/istat_gini_regionale_2023_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/istat-gini-regionale)

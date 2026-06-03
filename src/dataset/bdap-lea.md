@@ -173,5 +173,6 @@ Inputs.table(ordinato, {
 ## Risorse
 
 - [BDAP — Open Data (fonte originale)](https://bdap-opendata.rgs.mef.gov.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_lea/2024/bdap_lea_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-lea)
