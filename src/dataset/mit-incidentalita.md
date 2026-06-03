@@ -81,12 +81,21 @@ Plot.plot({
 
 ---
 
-## Morti e feriti nel tempo
+## Calo percentuale dal 2001
 
-La riduzione dei morti è stata più rapida di quella dei feriti, segnalando un miglioramento della letalità degli incidenti oltre che della loro frequenza.
+Per confrontare la riduzione di morti e feriti — che hanno scale molto diverse — il grafico mostra la variazione percentuale rispetto al 2001 (base 100). Entrambi gli indicatori sono in forte calo, ma i morti sono diminuiti molto più rapidamente dei feriti (-58% contro -36% al 2018).
 
 ```js
-const mortiFeriti = annuale.flatMap(d => [
+const base2001 = annuale.find(d => d.anno === 2001);
+const indicizzato = annuale.map(d => ({
+  anno: d.anno,
+  incidenti: Math.round(d.incidenti / base2001.incidenti * 100),
+  morti: Math.round(d.morti / base2001.morti * 100),
+  feriti: Math.round(d.feriti / base2001.feriti * 100)
+}));
+
+const trendLines = indicizzato.flatMap(d => [
+  {anno: d.anno, tipo: "Incidenti", valore: d.incidenti},
   {anno: d.anno, tipo: "Morti", valore: d.morti},
   {anno: d.anno, tipo: "Feriti", valore: d.feriti}
 ]);
@@ -94,15 +103,16 @@ const mortiFeriti = annuale.flatMap(d => [
 
 ```js
 Plot.plot({
-  title: "Morti e feriti per anno",
+  title: "Incidenti, morti e feriti — base 2001 = 100",
   width: 800,
   height: 350,
   x: {tickFormat: d => String(d), label: null},
-  y: {grid: true, tickFormat: "~s"},
+  y: {grid: true, label: "% rispetto al 2001"},
   color: {legend: true, scheme: "Set1"},
   marks: [
-    Plot.line(mortiFeriti, {x: "anno", y: "valore", z: "tipo", stroke: "tipo", tip: true}),
-    Plot.dot(mortiFeriti, {x: "anno", y: "valore", z: "tipo", fill: "tipo", r: 1.5})
+    Plot.line(trendLines, {x: "anno", y: "valore", z: "tipo", stroke: "tipo", tip: true}),
+    Plot.dot(trendLines, {x: "anno", y: "valore", z: "tipo", fill: "tipo", r: 1.5}),
+    Plot.ruleY([100], {stroke: "var(--theme-foreground-muted)", strokeDasharray: "4,4"})
   ]
 })
 ```
