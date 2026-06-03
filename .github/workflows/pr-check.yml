@@ -4,6 +4,12 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'src/data/**'
+      - 'src/dataset/**'
+      - 'src/temi/**'
+      - 'observablehq.config.js'
+      - '.github/workflows/pr-check.yml'
 
 permissions:
   contents: read
@@ -27,6 +33,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+          cache: pip
 
       - run: npm ci --legacy-peer-deps
       - run: pip install -r requirements.txt
