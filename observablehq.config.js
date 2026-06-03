@@ -11,6 +11,7 @@ export default {
         { name: "Rifiuti urbani", path: "/dataset/rifiuti-urbani" },
         { name: "Capacità rinnovabile", path: "/dataset/capacita-rinnovabile" },
         { name: "Produzione elettrica", path: "/dataset/produzione-elettrica-fonti" },
+        { name: "Incidenti stradali", path: "/dataset/mit-incidentalita" },
       ],
     },
     {
