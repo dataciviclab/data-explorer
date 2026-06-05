@@ -34,11 +34,8 @@ jobs:
       - name: Install Node dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Install Python dependencies
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - run: pip install -r requirements.txt
+      - name: Python setup
+        uses: dataciviclab/.github/actions/python-setup@main
 
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
