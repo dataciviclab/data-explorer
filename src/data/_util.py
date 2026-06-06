@@ -24,7 +24,6 @@ def _parquet_exists(slug: str, year: int) -> bool:
     return object_exists(
         CLEAN_BUCKET,
         f"{slug}/{year}/{slug}_{year}_clean.parquet",
-        auth=False,
     )
 
 

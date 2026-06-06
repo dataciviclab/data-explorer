@@ -47,15 +47,16 @@ class TestParquetExists:
 
             assert _parquet_exists("test-slug", 2023) is False
 
-    def test_passes_auth_false(self):
-        """_parquet_exists chiama object_exists con auth=False."""
+    def test_passes_correct_bucket_and_key(self):
+        """_parquet_exists chiama object_exists con bucket e key corretti."""
         with patch("src.data._util.object_exists") as mock_exists:
             mock_exists.return_value = True
             from src.data._util import _parquet_exists
 
             _parquet_exists("test-slug", 2023)
-            _kwargs = mock_exists.call_args.kwargs
-            assert _kwargs.get("auth") is False
+            called_bucket, called_key = mock_exists.call_args[0]
+            assert called_bucket == CLEAN_BUCKET
+            assert called_key == "test-slug/2023/test-slug_2023_clean.parquet"
 
     def test_url_uses_path_contract(self):
         """Key passata a object_exists segue il path contract."""
