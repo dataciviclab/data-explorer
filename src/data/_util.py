@@ -10,9 +10,8 @@ Pattern usato: clean_parquet → {slug}/{year}/{slug}_{year}_clean.parquet
 import json
 import sys
 
-import duckdb
-import requests
-
+from lab_connectors.duckdb import safe_connect
+from lab_connectors.gcs import object_exists
 from lab_connectors.gcs.paths import CLEAN_BUCKET, https_url
 
 # GCS_BASE: backward compat per data loader che lo importano direttamente.
@@ -21,13 +20,11 @@ GCS_BASE = f"https://storage.googleapis.com/{CLEAN_BUCKET}"
 
 
 def _parquet_exists(slug: str, year: int) -> bool:
-    """Verifica se il parquet esiste su GCS (HEAD request)."""
-    url = https_url("clean", "clean_parquet", slug=slug, year=year)
-    try:
-        r = requests.head(url, timeout=5)
-        return r.status_code == 200
-    except Exception:
-        return False
+    """Verifica se il parquet esiste su GCS via object_exists()."""
+    return object_exists(
+        CLEAN_BUCKET,
+        f"{slug}/{year}/{slug}_{year}_clean.parquet",
+    )
 
 
 def load_dataset(
@@ -42,8 +39,6 @@ def load_dataset(
     somma metric_cols, output JSON su stdout.
     Salta gli anni in cui il parquet non esiste.
     """
-    con = duckdb.connect()
-
     valid_years = [y for y in years if _parquet_exists(slug, y)]
     if not valid_years:
         json.dump([], sys.stdout)
@@ -68,7 +63,9 @@ def load_dataset(
         ORDER BY {group_sql}
     """
 
-    rows = con.sql(query).fetchall()
+    with safe_connect() as con:
+        rows = con.sql(query).fetchall()
+
     columns = group_cols + metric_cols
     data = [
         dict(zip(columns, [int(v) if isinstance(v, float) and v == v and v == int(v) else v for v in row]))
