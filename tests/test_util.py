@@ -2,7 +2,7 @@
 Test per _util.py — data loader condiviso per Observable Framework.
 
 Contratto:
-  - _parquet_exists(): verifica esistenza parquet su GCS via HEAD
+  - _parquet_exists(): verifica esistenza parquet su GCS via object_exists()
   - load_dataset(): produce JSON valido su stdout con aggregazioni corrette,
     salta anni senza parquet, gestisce where clause
 
@@ -16,53 +16,58 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from lab_connectors.gcs.paths import CLEAN_BUCKET
+
 
 # ── _parquet_exists ──────────────────────────────────────────────────────────
 
 
 class TestParquetExists:
-    """Contratto: _parquet_exists fa HEAD request e torna bool."""
+    """Contratto: _parquet_exists usa object_exists() e torna bool."""
 
     def test_exists_returns_true_on_200(self):
-        """HEAD 200 → esiste."""
-        with patch("src.data._util.requests.head") as mock_head:
-            mock_head.return_value.status_code = 200
+        """object_exists True → esiste."""
+        with patch("src.data._util.object_exists") as mock_exists:
+            mock_exists.return_value = True
             from src.data._util import _parquet_exists
 
             result = _parquet_exists("test-slug", 2023)
             assert result is True
-            # Verifica URL corretto
-            called_url = mock_head.call_args[0][0]
-            assert "test-slug" in called_url
-            assert "2023" in called_url
+            # Verifica parametri corretti
+            called_bucket, called_key = mock_exists.call_args[0]
+            assert called_bucket == CLEAN_BUCKET
+            assert "test-slug" in called_key
+            assert "2023" in called_key
 
     def test_missing_returns_false_on_404(self):
-        """HEAD 404 → non esiste."""
-        with patch("src.data._util.requests.head") as mock_head:
-            mock_head.return_value.status_code = 404
+        """object_exists False → non esiste."""
+        with patch("src.data._util.object_exists") as mock_exists:
+            mock_exists.return_value = False
             from src.data._util import _parquet_exists
 
             assert _parquet_exists("test-slug", 2023) is False
 
-    def test_error_returns_false_on_exception(self):
-        """HEAD con eccezione (timeout, connection error) → non esiste."""
-        with patch("src.data._util.requests.head") as mock_head:
-            mock_head.side_effect = Exception("connection timeout")
+    def test_passes_auth_false(self):
+        """_parquet_exists chiama object_exists con auth=False."""
+        with patch("src.data._util.object_exists") as mock_exists:
+            mock_exists.return_value = True
             from src.data._util import _parquet_exists
 
-            assert _parquet_exists("test-slug", 2023) is False
+            _parquet_exists("test-slug", 2023)
+            _kwargs = mock_exists.call_args.kwargs
+            assert _kwargs.get("auth") is False
 
     def test_url_uses_path_contract(self):
-        """URL generata segue il path contract: {slug}/{year}/{slug}_{year}_clean.parquet."""
-        with patch("src.data._util.requests.head") as mock_head:
-            mock_head.return_value.status_code = 200
+        """Key passata a object_exists segue il path contract."""
+        with patch("src.data._util.object_exists") as mock_exists:
+            mock_exists.return_value = True
             from src.data._util import _parquet_exists
 
             _parquet_exists("mio-slug", 2024)
-            url = mock_head.call_args[0][0]
-            assert "mio-slug" in url
-            assert "2024" in url
-            assert "clean.parquet" in url
+            called_key = mock_exists.call_args[0][1]
+            assert "mio-slug" in called_key
+            assert "2024" in called_key
+            assert "clean.parquet" in called_key
 
 
 # ── load_dataset ─────────────────────────────────────────────────────────────
@@ -89,11 +94,11 @@ class TestLoadDataset:
     def teardown_method(self):
         sys.stdout = self._saved_stdout
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=True)
-    def test_loads_all_valid_years(self, mock_exists, mock_connect, mock_con):
+    def test_loads_all_valid_years(self, mock_exists, mock_safe_connect, mock_con):
         """Tutti gli anni validi → DuckDB query con UNION ALL."""
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
         buf = io.StringIO()
@@ -117,11 +122,11 @@ class TestLoadDataset:
         assert "UNION ALL" in sql_call
         assert "test-slug" in sql_call
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", side_effect=lambda s, y: y == 2021)
-    def test_skips_missing_years(self, mock_exists, mock_connect, mock_con):
+    def test_skips_missing_years(self, mock_exists, mock_safe_connect, mock_con):
         """Anno senza parquet → saltato, no errore."""
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
         # mock_con ha solo 2020 e 2021, ma _parquet_exists torna True solo per 2021
@@ -144,11 +149,11 @@ class TestLoadDataset:
         assert len(output) == 1
         assert output[0]["anno"] == "2021"
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=False)
-    def test_empty_when_no_valid_years(self, mock_exists, mock_connect, mock_con):
+    def test_empty_when_no_valid_years(self, mock_exists, mock_safe_connect, mock_con):
         """Nessun anno valido → array JSON vuoto."""
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
         buf = io.StringIO()
@@ -166,11 +171,11 @@ class TestLoadDataset:
         # DuckDB non deve essere chiamata
         mock_con.sql.assert_not_called()
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=True)
-    def test_applies_where_clause(self, mock_exists, mock_connect, mock_con):
+    def test_applies_where_clause(self, mock_exists, mock_safe_connect, mock_con):
         """Where clause → filtrata nella query SQL."""
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
         buf = io.StringIO()
@@ -188,15 +193,15 @@ class TestLoadDataset:
         assert "WHERE" in sql_call
         assert "regione = 'Lombardia'" in sql_call
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=True)
-    def test_converts_float_to_int_when_whole(self, mock_exists, mock_connect, mock_con):
+    def test_converts_float_to_int_when_whole(self, mock_exists, mock_safe_connect, mock_con):
         """Float interi (es. 100.0) → convertiti a int nel JSON."""
         mock_con.sql.return_value.fetchall.return_value = [
             ("cat1", 100.0),
             ("cat2", 200.0),
         ]
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
         buf = io.StringIO()
@@ -213,15 +218,15 @@ class TestLoadDataset:
         assert output[0]["valore"] == 100  # int, non 100.0
         assert isinstance(output[0]["valore"], int)
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=True)
-    def test_preserves_float_when_not_whole(self, mock_exists, mock_connect, mock_con):
+    def test_preserves_float_when_not_whole(self, mock_exists, mock_safe_connect, mock_con):
         """Float non interi (es. 100.5) → restano float, non troncati."""
         mock_con.sql.return_value.fetchall.return_value = [
             ("cat1", 100.5),
             ("cat2", 200.7),
         ]
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
         buf = io.StringIO()
@@ -240,9 +245,9 @@ class TestLoadDataset:
         assert output[1]["valore"] == 200.7
         assert isinstance(output[1]["valore"], float)
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=True)
-    def test_handles_nan_values(self, mock_exists, mock_connect, mock_con):
+    def test_handles_nan_values(self, mock_exists, mock_safe_connect, mock_con):
         """NaN in DuckDB → resta NaN nel JSON (v == v è False, skip conversione).
 
         json.dump serializza NaN come NaN (non JSON standard). Il valore NaN
@@ -252,7 +257,7 @@ class TestLoadDataset:
             ("cat1", float("nan")),
             ("cat2", 50.0),
         ]
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
         buf = io.StringIO()
@@ -275,13 +280,13 @@ class TestLoadDataset:
         assert output[1]["categoria"] == "cat2"
         assert output[1]["valore"] == 50
 
-    @patch("src.data._util.duckdb.connect")
+    @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=True)
     def test_query_includes_group_and_metric_columns(
-        self, mock_exists, mock_connect, mock_con
+        self, mock_exists, mock_safe_connect, mock_con
     ):
         """La query SQL include SELECT con group e SUM(metric)."""
-        mock_connect.return_value = mock_con
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
         mock_con.sql.return_value.fetchall.return_value = []
         from src.data._util import load_dataset
 
