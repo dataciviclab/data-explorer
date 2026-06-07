@@ -120,7 +120,7 @@ Come cambia la popolazione nelle diverse fasce d'età? I giovani (0-14 e 15-29) 
 
 ```js
 const trendOrder = ["0-14", "15-29", "30-44", "45-59", "60-74", "75+"];
-const trendLong = trend.flatMap(d => 
+const trendLong = trend.flatMap(d =>
   trendOrder.map(f => ({anno: d.anno, fascia: f, pop: d[f] || 0}))
 );
 ```
