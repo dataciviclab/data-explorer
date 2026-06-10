@@ -15,7 +15,7 @@ Disuguaglianza del reddito netto per regione, misurata con l'indice di Gini. I d
 **Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2003–2024
 
 ```js
-import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { numFix, tableFormat } from "../import/format-utils.js";
 ```
 
@@ -50,7 +50,7 @@ const annoDataRegioni = annoData.filter(d => !d.regione.startsWith('Provincia Au
 const mediaRegionale = d3.mean(annoDataRegioni, d => d.gini);
 
 // Lookup per mappa con normalizzazione automatica
-const giniLookup = buildRegLookup(annoDataRegioni, "regione", "gini");
+const giniLookup = buildMapLookup(annoDataRegioni, regioniGeo, "regione", "gini");
 ```
 
 ```js

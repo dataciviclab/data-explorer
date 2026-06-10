@@ -66,27 +66,48 @@ export async function loadItalianRegions(regTopo) {
 }
 
 /**
- * Costruisce una lookup table regione→valore, normalizzando i nomi
- * e applicando fallback per regioni con nomi non standard.
+ * Tokenizza un nome regione per fuzzy matching: toglie punti, slash,
+ * apostrofi e parole comuni, restituisce un set di token significativi.
+ *
+ * @param {string} nome — Nome regione (es. "F.-V. GIULIA")
+ * @returns {string[]} Token significativi (es. ["F", "V", "GIULIA"])
+ */
+function tokenizeReg(nome) {
+  return nome
+    .toUpperCase()
+    .replace(/[.\/']/g, " ")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter((t) => t.length >= 3 && !STOP_WORDS.has(t));
+}
+
+/** Parole troppo generiche per il matching. */
+const STOP_WORDS = new Set([
+  "ALTO", "ALTA", "ALTI", "BASSO", "BASSA",
+  "DELL", "DELLA", "DELLE", "DEGLI", "DEL", "DEI",
+  "SÜDTIROL", "VALLÉE",
+  "PROVINCIA", "AUTONOMA", "PROV",
+]);
+
+/**
+ * Costruisce una lookup table regione→valore, normalizzando i nomi,
+ * applicando fallback per nomi non standard e fuzzy matching opzionale.
  *
  * @param {Array} data — Array di oggetti con campo regione e campo valore
  * @param {string} keyField — Nome del campo "regione" (default: "regione")
- * @param {string} valueField — Nome del campo valore (default: usato se omitValue è false)
+ * @param {string} valueField — Nome del campo valore
  * @param {Function} [transformValue] — Trasformazione opzionale del valore
- *        Es: d => d.reddito_imponibile_eur / totNazionale * 100
  * @param {Object} [extraFallbacks] — Fallback aggiuntivi oltre a REG_FALLBACKS
+ * @param {string[]} [topoKeys] — Se fornito, attiva il terzo passaggio fuzzy:
+ *        cerca per token comune tra chiavi dataset e nomi TopoJSON non matchati.
  * @returns {Map<string, any>} lookup table
  *
  * @example
- * // Semplice: regione → metrica
- * const lookup = buildRegLookup(dataFiltrati, "regione", "quota_rd");
- *
- * // Con trasformazione: regione → % del totale nazionale
- * const tot = d3.sum(data, d => d.reddito);
- * const lookup = buildRegLookup(data, "regione", null, d => d.reddito / tot * 100);
- *
- * // Con fallback extra
- * const lookup = buildRegLookup(data, "regione", "valore", null, {"P.A. TRENTO": "TRENTINO-ALTO-ADIGE/SÜDTIROL"});
+ * // Con fuzzy matching:
+ * const topoNomi = regioniGeo.features.map(d => d.properties.DEN_REG);
+ * const lookup = buildRegLookup(data, "regione", "valore", null, {}, topoNomi);
  */
 export function buildRegLookup(
   data,
@@ -94,6 +115,7 @@ export function buildRegLookup(
   valueField,
   transformValue,
   extraFallbacks = {},
+  topoKeys = null,
 ) {
   const allFallbacks = { ...REG_FALLBACKS, ...extraFallbacks };
   const lookup = new Map();
@@ -113,13 +135,74 @@ export function buildRegLookup(
     if (lookup.has(shortKey) && !lookup.has(fullKey)) {
       lookup.set(fullKey, lookup.get(shortKey));
     }
-    // Se il dato ha il nome lungo ma shortKey non esiste, copia comunque
     if (lookup.has(fullKey) && !lookup.has(shortKey)) {
       lookup.set(shortKey, lookup.get(fullKey));
     }
   }
 
+  // Terzo pass (opzionale): fuzzy matching per topoKeys ancora senza valore
+  if (topoKeys && topoKeys.length > 0) {
+    // Costruisce un indice tokens→chiavi dataset
+    const tokenIndex = new Map(); // token → [dataKey, ...]
+    for (const dataKey of lookup.keys()) {
+      for (const token of tokenizeReg(dataKey)) {
+        if (!tokenIndex.has(token)) tokenIndex.set(token, []);
+        tokenIndex.get(token).push(dataKey);
+      }
+    }
+
+    for (const topoName of topoKeys) {
+      const topoKey = normalizzaReg(topoName);
+      if (lookup.has(topoKey)) continue; // già matchato
+
+      // Cerca token comuni tra topoName e le chiavi dataset
+      const topoTokens = tokenizeReg(topoName);
+      const candidates = new Set();
+      for (const token of topoTokens) {
+        const matches = tokenIndex.get(token) || [];
+        for (const dk of matches) candidates.add(dk);
+      }
+
+      if (candidates.size === 1) {
+        // Match univoco: assegna il valore
+        const [dataKey] = candidates;
+        lookup.set(topoKey, lookup.get(dataKey));
+      }
+      // Se 0 o più di 1 candidati, non si può determinare — skip
+    }
+  }
+
   return lookup;
+}
+
+/**
+ * buildMapLookup — wrapper standard per mappe coropletiche.
+ * Equivalente a buildRegLookup con topoKeys automatico da regioniGeo.
+ * Elimina il boilerplate: normalizzaReg, features.map, topoKeys manuale.
+ *
+ * @param {Array} data — dati con campo regione
+ * @param {Object} regioniGeo — GeoJSON FeatureCollection (da loadItalianRegions)
+ * @param {string} [keyField="regione"] — campo regione nei dati
+ * @param {string} [valueField] — campo valore
+ * @param {Function} [transformValue] — trasformazione opzionale del valore
+ * @param {Object} [extraFallbacks] — fallback aggiuntivi oltre a REG_FALLBACKS
+ * @returns {Map<string, any>}
+ *
+ * @example
+ * const { regioniGeo } = await loadItalianRegions(regTopo);
+ * const lookup = buildMapLookup(data, regioniGeo, "regione", "valore");
+ * // poi: Plot.geo(regioniGeo, { fill: d => lookup.get(normalizzaReg(d.properties.DEN_REG)) })
+ */
+export function buildMapLookup(
+  data,
+  regioniGeo,
+  keyField = "regione",
+  valueField,
+  transformValue,
+  extraFallbacks = {},
+) {
+  const topoKeys = regioniGeo.features.map((d) => d.properties.DEN_REG);
+  return buildRegLookup(data, keyField, valueField, transformValue, extraFallbacks, topoKeys);
 }
 
 /**

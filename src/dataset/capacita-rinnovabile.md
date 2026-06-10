@@ -15,7 +15,7 @@ Dati Terna sulla capacità di generazione rinnovabile installata per regione e f
 **Fonte**: [Terna](https://www.terna.it/) · **Periodo**: 2015–2024
 
 ```js
-import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { num, unit } from "../import/format-utils.js";
 ```
 
@@ -58,7 +58,7 @@ const perRegione = Array.from(
   d3.rollup(filtered, v => d3.sum(v, d => d.potenza_mw), d => d.regione),
   ([regione, potenza_mw]) => ({regione, potenza_mw})
 ).sort((a, b) => b.potenza_mw - a.potenza_mw);
-const regLookup = buildRegLookup(perRegione, "regione", "potenza_mw");
+const regLookup = buildMapLookup(perRegione, regioniGeo, "regione", "potenza_mw");
 ```
 
 ```js

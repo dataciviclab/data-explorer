@@ -15,7 +15,7 @@ I costi sostenuti dalle regioni italiane per garantire i Livelli Essenziali di A
 **Fonte**: [BDAP](https://bdap-opendata.rgs.mef.gov.it/) · **Periodo**: 2019–2024
 
 ```js
-import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { num, euroCompact, tableFormat } from "../import/format-utils.js";
 ```
 
@@ -42,7 +42,7 @@ const totSpesa = d3.sum(regFiltered, d => d.importo_totale);
 const nRegioni = regFiltered.length;
 
 // Per la mappa
-const regLookup = buildRegLookup(regFiltered, "descrizione_regione", "importo_totale");
+const regLookup = buildMapLookup(regFiltered, regioniGeo, "descrizione_regione", "importo_totale");
 
 // Trend spesa totale 2019-2024
 const trend = Array.from(

@@ -15,7 +15,7 @@ Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta d
 **Fonte**: ISPRA · **Periodo**: 2020–2024
 
 ```js
-import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { num, pct, unit, tableFormat } from "../import/format-utils.js";
 ```
 
@@ -77,7 +77,7 @@ const comuniFiltrati = comuni
 ## Raccolta differenziata per regione
 
 ```js
-const rdLookup = buildRegLookup(regFiltered, "regione", "quota_rd");
+const rdLookup = buildMapLookup(regFiltered, regioniGeo, "regione", "quota_rd");
 ```
 
 ```js

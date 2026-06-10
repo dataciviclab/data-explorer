@@ -16,6 +16,12 @@ Spesa e consumo della farmaceutica convenzionata SSN, disaggregati per regione, 
 
 ```js
 import { num, euro, tableFormat } from "../import/format-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
+```
+
+```js
+const regTopo = await FileAttachment("../data/regioni.topojson").json();
+const { regioniGeo, confiniReg } = await loadItalianRegions(regTopo);
 ```
 
 ```js
@@ -36,6 +42,7 @@ const perRegione = Array.from(d3.rollup(filtered, v => ({
   spesa: d3.sum(v, d => d.spesa_convenzionata),
   confezioni: d3.sum(v, d => d.numero_confezioni_convenzionata)
 }), d => d.regione), ([regione, v]) => ({regione, ...v})).sort((a,b) => b.spesa - a.spesa);
+const lookup = buildMapLookup(perRegione, regioniGeo, "regione", "spesa");
 ```
 
 ```js
@@ -114,21 +121,21 @@ Come si distribuisce la spesa farmaceutica tra le regioni? Le regioni più popol
 ```js
 Plot.plot({
   title: `Spesa convenzionata per regione — ${annoSel}`,
+  projection: {type: "mercator", domain: regioniGeo},
   width: 800,
-  height: 400,
-  marginLeft: 120,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, tickFormat: "~s"},
-  color: {scheme: "Oranges"},
+  height: 600,
+  color: {scheme: "Blues", legend: true, label: "Spesa (€)", type: "quantile"},
   marks: [
-    Plot.barX(perRegione, {
-      y: "regione",
-      x: "spesa",
-      fill: "spesa",
-      sort: {y: "-x"},
-      tip: true
+    Plot.geo(regioniGeo, {
+      fill: d => lookup.get(normalizzaReg(d.properties.DEN_REG)),
+      stroke: "#888",
+      strokeWidth: 0.25,
+      tip: {format: {fill: d => euro(d)}}
     }),
-    Plot.ruleX([0])
+    Plot.geo(confiniReg, {
+      stroke: "#888",
+      strokeWidth: 0.7
+    })
   ]
 })
 ```

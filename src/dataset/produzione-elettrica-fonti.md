@@ -15,7 +15,7 @@ Produzione netta di energia elettrica in GWh per fonte e regione. La produzione 
 **Fonte**: [Terna](https://www.terna.it/) · **Periodo**: 2015–2024
 
 ```js
-import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { num, unit } from "../import/format-utils.js";
 ```
 
@@ -63,7 +63,7 @@ const trendFonti = Array.from(
 ).flat().sort((a, b) => a.anno - b.anno);
 
 // Lookup per mappa
-const regLookup = buildRegLookup(perRegione, "regione", "produzione_gwh");
+const regLookup = buildMapLookup(perRegione, regioniGeo, "regione", "produzione_gwh");
 ```
 
 ```js
