@@ -5,7 +5,7 @@ from _util import load_dataset
 
 load_dataset(
     slug="terna_electricity_by_source",
-    years=list(range(2023, 2025)),
+    years=list(range(2015, 2025)),
     group_cols=["anno", "fonte", "regione"],
     metric_cols=["produzione_gwh"],
     where="tipo_produzione = 'Netta'",
