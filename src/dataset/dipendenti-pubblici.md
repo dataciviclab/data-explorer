@@ -122,6 +122,9 @@ const { header, format } = tableFormat({
   uomini: { label: "Uomini", fmt: "num" },
   totale: { label: "Totale", fmt: "num" },
 });
+```
+
+```js
 Inputs.table(filtered, {
   columns: ["anno", "comparto", "donne", "uomini", "totale"],
   header,

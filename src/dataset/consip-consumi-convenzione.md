@@ -134,6 +134,9 @@ const { header, format } = tableFormat({
   valore_economico_consumi: { label: "Spesa (€)", fmt: "euro" },
   numero_ordini_con_consumi: { label: "Ordini", fmt: "num" },
 });
+```
+
+```js
 Inputs.table(regFiltered, {
   columns: ["regione_pa", "valore_economico_consumi", "numero_ordini_con_consumi"],
   header,

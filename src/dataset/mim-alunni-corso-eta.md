@@ -163,6 +163,9 @@ const { header, format } = tableFormat({
   "SCUOLA SECONDARIA I GRADO": { label: "Secondaria I", fmt: "num" },
   "SCUOLA SECONDARIA II GRADO": { label: "Secondaria II", fmt: "num" },
 });
+```
+
+```js
 Inputs.table(pivot, {
   columns: ["regione", "SCUOLA PRIMARIA", "SCUOLA SECONDARIA I GRADO", "SCUOLA SECONDARIA II GRADO"],
   header,

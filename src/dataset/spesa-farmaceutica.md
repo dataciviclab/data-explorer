@@ -150,6 +150,9 @@ const { header, format } = tableFormat({
   spesa: { label: "Spesa (€)", fmt: "euro" },
   confezioni: { label: "Confezioni", fmt: "num" },
 });
+```
+
+```js
 Inputs.table(perRegione, {
   columns: ["regione", "spesa", "confezioni"],
   header,
