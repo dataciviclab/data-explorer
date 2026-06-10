@@ -15,7 +15,7 @@ Fondo di Solidarietà Comunale (FSC) 2025 per comune: capacità fiscale, fondo p
 **Fonte**: [OpenCivitas](https://www.opencivitas.it/) · **Periodo**: 2025
 
 ```js
-import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { num, euroCompact, tableFormat } from "../import/format-utils.js";
 ```
 
@@ -75,7 +75,7 @@ const percContribNetti = (contribNetti / nComuni * 100).toFixed(1);
 ## Dotazione FSC per regione
 
 ```js
-const fscLookup = buildRegLookup(perRegione, "regione", "fsc");
+const fscLookup = buildMapLookup(perRegione, regioniGeo, "regione", "fsc");
 ```
 
 ```js

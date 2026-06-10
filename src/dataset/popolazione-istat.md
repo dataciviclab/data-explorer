@@ -167,6 +167,9 @@ const { header, format } = tableFormat({
   totale_maschi: { label: "Maschi", fmt: "num" },
   totale_femmine: { label: "Femmine", fmt: "num" },
 });
+```
+
+```js
 Inputs.table(filtered, {
   columns: ["fascia_eta", "popolazione_residente", "totale_maschi", "totale_femmine"],
   header,

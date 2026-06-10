@@ -16,6 +16,12 @@ Alunni delle scuole statali italiane per ordine scolastico (primaria, secondaria
 
 ```js
 import { num, tableFormat } from "../import/format-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
+```
+
+```js
+const regTopo = await FileAttachment("../data/regioni.topojson").json();
+const { regioniGeo, confiniReg } = await loadItalianRegions(regTopo);
 ```
 
 ```js
@@ -47,6 +53,7 @@ const perRegione = Array.from(
   d3.rollup(filtered, v => d3.sum(v, d => d.alunni), d => d.regione),
   ([regione, alunni]) => ({regione, alunni})
 ).sort((a, b) => b.alunni - a.alunni);
+const lookup = buildMapLookup(perRegione, regioniGeo, "regione", "alunni");
 ```
 
 <div class="grid grid-cols-3">
@@ -115,21 +122,21 @@ Quali regioni hanno più studenti? La classifica segue la popolazione residente,
 ```js
 Plot.plot({
   title: `Alunni per regione — anno ${String(annoSel)}/${String(annoSel+1)}`,
+  projection: {type: "mercator", domain: regioniGeo},
   width: 800,
-  height: 450,
-  marginLeft: 120,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, tickFormat: "~s"},
-  color: {scheme: "Blues"},
+  height: 600,
+  color: {scheme: "Blues", legend: true, label: "Alunni", type: "quantile"},
   marks: [
-    Plot.barX(perRegione, {
-      y: "regione",
-      x: "alunni",
-      fill: "alunni",
-      sort: {y: "-x"},
-      tip: true
+    Plot.geo(regioniGeo, {
+      fill: d => lookup.get(normalizzaReg(d.properties.DEN_REG)),
+      stroke: "#888",
+      strokeWidth: 0.25,
+      tip: {format: {fill: d => num(d)}}
     }),
-    Plot.ruleX([0])
+    Plot.geo(confiniReg, {
+      stroke: "#888",
+      strokeWidth: 0.7
+    })
   ]
 })
 ```
@@ -156,6 +163,9 @@ const { header, format } = tableFormat({
   "SCUOLA SECONDARIA I GRADO": { label: "Secondaria I", fmt: "num" },
   "SCUOLA SECONDARIA II GRADO": { label: "Secondaria II", fmt: "num" },
 });
+```
+
+```js
 Inputs.table(pivot, {
   columns: ["regione", "SCUOLA PRIMARIA", "SCUOLA SECONDARIA I GRADO", "SCUOLA SECONDARIA II GRADO"],
   header,

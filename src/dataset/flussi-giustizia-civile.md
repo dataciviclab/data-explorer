@@ -146,6 +146,9 @@ const { header, format } = tableFormat({
   pendenti_finali: { label: "Pendenti", fmt: "num" },
   rapporto_def_sop: { label: "Rapporto D/S", fmt: "string" },
 });
+```
+
+```js
 Inputs.table(filtered, {
   columns: ["distretto", "sopravvenuti", "definiti_totale", "pendenti_finali", "rapporto_def_sop"],
   header,

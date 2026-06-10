@@ -16,6 +16,12 @@ La spesa della Pubblica Amministrazione per beni e servizi acquistati attraverso
 
 ```js
 import { num, euro, tableFormat } from "../import/format-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
+```
+
+```js
+const regTopo = await FileAttachment("../data/regioni.topojson").json();
+const { regioniGeo, confiniReg } = await loadItalianRegions(regTopo);
 ```
 
 ```js
@@ -58,26 +64,27 @@ Quali regioni concentrano la spesa in convenzione? Il Lazio e la Lombardia guida
 const regFiltered = regioni
   .filter(d => d.anno_riferimento === annoSel)
   .sort((a, b) => b.valore_economico_consumi - a.valore_economico_consumi);
+const lookup = buildMapLookup(regFiltered, regioniGeo, "regione_pa", "valore_economico_consumi");
 ```
 
 ```js
 Plot.plot({
   title: `Spesa Consip per regione della PA — ${annoSel}`,
+  projection: {type: "mercator", domain: regioniGeo},
   width: 800,
-  height: 420,
-  marginLeft: 140,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, label: "milioni di €", tickFormat: d => (d / 1e6).toFixed(0)},
-  color: {scheme: "Oranges"},
+  height: 600,
+  color: {scheme: "Blues", legend: true, label: "Spesa (€)", type: "quantile"},
   marks: [
-    Plot.barX(regFiltered, {
-      y: "regione_pa",
-      x: "valore_economico_consumi",
-      fill: "valore_economico_consumi",
-      sort: {y: "-x"},
-      tip: true
+    Plot.geo(regioniGeo, {
+      fill: d => lookup.get(normalizzaReg(d.properties.DEN_REG)),
+      stroke: "#888",
+      strokeWidth: 0.25,
+      tip: {format: {fill: d => euro(d)}}
     }),
-    Plot.ruleX([0])
+    Plot.geo(confiniReg, {
+      stroke: "#888",
+      strokeWidth: 0.7
+    })
   ]
 })
 ```
@@ -127,6 +134,9 @@ const { header, format } = tableFormat({
   valore_economico_consumi: { label: "Spesa (€)", fmt: "euro" },
   numero_ordini_con_consumi: { label: "Ordini", fmt: "num" },
 });
+```
+
+```js
 Inputs.table(regFiltered, {
   columns: ["regione_pa", "valore_economico_consumi", "numero_ordini_con_consumi"],
   header,

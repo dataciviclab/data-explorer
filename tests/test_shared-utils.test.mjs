@@ -263,4 +263,42 @@ describe("buildRegLookup()", () => {
     assert.ok(lookup.has("TRENTINO-ALTO-ADIGE/SÜDTIROL"));
     assert.equal(lookup.get("TRENTINO-ALTO-ADIGE/SÜDTIROL"), 50);
   });
+
+  it("fuzzy matching: matcha F.-V. GIULIA a FRIULI-VENEZIA-GIULIA", async () => {
+    const { buildRegLookup } = await import("../src/import/geo-utils.js");
+    const data = [{ regione: "F.-V. GIULIA", valore: 100 }];
+    // Simula topoKeys (TopoJSON DEN_REG)
+    const topoKeys = ["Friuli-Venezia Giulia"];
+    const lookup = buildRegLookup(data, "regione", "valore", null, {}, topoKeys);
+    assert.ok(lookup.has("FRIULI-VENEZIA-GIULIA"), "deve matchare Friuli via token GIULIA");
+    assert.equal(lookup.get("FRIULI-VENEZIA-GIULIA"), 100);
+  });
+
+  it("fuzzy matching: non matcha nomi senza token comune", async () => {
+    const { buildRegLookup } = await import("../src/import/geo-utils.js");
+    // "XYZ" non ha token comune con nessuna regione TopoJSON
+    const data = [{ regione: "Regione XYZ", valore: 99 }];
+    const topoKeys = ["Lombardia", "Veneto"];
+    const lookup = buildRegLookup(data, "regione", "valore", null, {}, topoKeys);
+    assert.ok(!lookup.has("LOMBARDIA"), "non deve matchare Lombardia");
+    assert.ok(!lookup.has("VENETO"), "non deve matchare Veneto");
+  });
+
+  it("fuzzy matching: P.A. Trento via fallback funziona ancora", async () => {
+    const { buildRegLookup } = await import("../src/import/geo-utils.js");
+    const data = [{ regione: "P. A. TRENTO", valore: 50 }];
+    const topoKeys = ["Trentino-Alto Adige/Südtirol"];
+    // Con REG_FALLBACKS gia' in buildRegLookup, P. A. TRENTO viene mappato
+    const lookup = buildRegLookup(data, "regione", "valore", null, {}, topoKeys);
+    assert.ok(lookup.has("TRENTINO-ALTO-ADIGE/SÜDTIROL"),
+      "P.A. Trento deve matchare Trentino via REG_FALLBACKS");
+  });
+
+  it("fuzzy matching: non inventa match per nomi senza token comune", async () => {
+    const { buildRegLookup } = await import("../src/import/geo-utils.js");
+    const data = [{ regione: "Sconosciuta", valore: 99 }];
+    const topoKeys = ["Lombardia"];
+    const lookup = buildRegLookup(data, "regione", "valore", null, {}, topoKeys);
+    assert.ok(!lookup.has("LOMBARDIA"), "non deve matchare senza token comune");
+  });
 });
