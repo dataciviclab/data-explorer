@@ -63,6 +63,7 @@ jobs:
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
 
       - name: Build
-        run: npx observable build
-        # Se la cache OF ha fatto match, i data loader vengono saltati
-        # e il build usa solo i JSON in cache + bundle JS (~30s).
+        run: npm run build
+        # generate-config.mjs (prebuild) genera la sidebar da themes.json + catalog.json
+        # Poi observable build esegue i data loader e produce l'output statico.
+        # Se la cache OF ha fatto match, i loader vengono saltati (~30s).

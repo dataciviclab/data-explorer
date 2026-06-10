@@ -45,11 +45,16 @@ Apri http://localhost:3000
    - primo blocco: distribuzione o stock base, non ranking o delta
    - sezione **Limiti** obbligatoria in fondo (copertura, granularità, note metodologiche)
    - vedi `docs/dataset-page-standard.md` per i principi guida
-3. **Registra** la pagina in `observablehq.config.js` nella sezione `pages`
-4. **Tema**: se il dataset introduce un nuovo tema, aggiungilo in `src/data/themes.json.py`
-5. **Verifica** con `npm run dev` che la pagina sia navigabile e i dati si carichino
-6. **Checklist pre-pub** (nel template, in fondo): verificare slug, parquet, frontmatter,
+3. **Tema**: assegna il dataset a un tema in `src/data/themes.json.py` (o creane uno nuovo).
+    La sidebar (`observablehq.config.js`) si auto-genera da `themes.json` a build time
+    tramite `scripts/generate-config.mjs` — non serve modificarla a mano.
+4. **Verifica** con `npm run dev` che la pagina sia navigabile e i dati si carichino
+5. **Checklist pre-pub** (nel template, in fondo): verificare slug, parquet, frontmatter,
    uso moduli condivisi, leggibilità, link funzionanti
+
+> **Nota**: un dataset pubblicato nel catalogo DI ma senza tema e senza pagina `.md`
+> in explorer viene ignorato dalla sidebar con un warning in console. Appena crei
+> la pagina e la aggiungi al tema, compare automaticamente al prossimo build.
 
 ### Moduli condivisi (`src/import/`)
 
