@@ -16,8 +16,9 @@
     "test:unit": "node --test tests/",
     "coverage:js": "node --test --experimental-test-coverage tests/*.test.mjs",
     "coverage:py": "python3 -m pytest tests/ -q --tb=short --cov=src.data --cov-report=term-missing",
-    "lint": "eslint scripts/ tests/ eslint.config.js",
-    "lint:fix": "eslint scripts/ tests/ eslint.config.js --fix"
+    "lint": "eslint scripts/ tests/ eslint.config.js && node scripts/lint-standards.mjs",
+    "lint:fix": "eslint scripts/ tests/ eslint.config.js --fix",
+    "lint:standards": "node scripts/lint-standards.mjs"
   },
   "engines": {
     "npm": ">=7.0.0",

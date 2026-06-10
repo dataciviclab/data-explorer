@@ -30,48 +30,51 @@ Apri http://localhost:3000
 
 ## Aggiungere una pagina dataset
 
-1. **Data loader**: crea `src/data/<slug>.json.py` con la logica di aggregazione per la tua pagina
-   - usa `load_dataset()` da `src/data/_util.py` per leggere i parquet GCS
+1. **Data loader**: crea `src/data/<slug>.json.py` con la logica di aggregazione
+   - usa `load_dataset()` da `src/data/_util.py` (o `safe_connect()` per query custom)
+   - **non usare** `duckdb.connect()` diretto — preferisci `safe_connect()`
    - il nome del file usa slug URL con trattini (es. `bdap-lea-regioni.json.py`)
-   - lo slug DI (con underscore, es. `bdap_lea`) va come parametro `slug=` a `load_dataset()`
-   - vedi `src/data/_util.py` e i loader esistenti come riferimento
+   - lo slug DI (con underscore) va come parametro `slug=` a `load_dataset()`
 2. **Pagina**: copia il [template `docs/TEMPLATE-dataset-page.md`](docs/TEMPLATE-dataset-page.md)
    in `src/dataset/<slug-url>.md` e compila ogni sezione
+   - **formattazione**: usa `num()`, `euro()`, `pct()` da `format-utils.js` — **mai `toLocaleString`**
+   - **mappe**: usa `buildMapLookup()` con `loadItalianRegions()` — **mai `buildRegLookup` diretto**
+   - **tabelle**: `tableFormat` e `Inputs.table` in **celle separate** (bug noto OF altrimenti)
    - frontmatter obbligatorio: `title`, `description`, `source`, `source_url`, `period`,
      `last_modified`, `dataset_slug`
-   - usa i **moduli condivisi** in `src/import/` per non replicare boilerplate:
-     - `geo-utils.js` per mappe, normalizzazione regioni e lookup geografici
-     - `format-utils.js` per formattazione numeri, valute, percentuali e tabelle
    - primo blocco: distribuzione o stock base, non ranking o delta
-   - sezione **Limiti** obbligatoria in fondo (copertura, granularità, note metodologiche)
-   - vedi `docs/dataset-page-standard.md` per i principi guida
+   - sezione **Limiti** obbligatoria in fondo
 3. **Tema**: assegna il dataset a un tema in `src/data/themes.json.py` (o creane uno nuovo).
-    La sidebar (`observablehq.config.js`) si auto-genera da `themes.json` a build time
-    tramite `scripts/generate-config.mjs` — non serve modificarla a mano.
-4. **Verifica** con `npm run dev` che la pagina sia navigabile e i dati si carichino
-5. **Checklist pre-pub** (nel template, in fondo): verificare slug, parquet, frontmatter,
-   uso moduli condivisi, leggibilità, link funzionanti
+   La sidebar si auto-genera — **non modificare** `observablehq.config.js` a mano.
+4. **Verifica**: `npm run lint && npm test && npm run build`
+5. **Checklist pre-pub** nel template PR: verificare slug, parquet, frontmatter,
+   moduli condivisi, `tableFormat` in cella separata.
 
-> **Nota**: un dataset pubblicato nel catalogo DI ma senza tema e senza pagina `.md`
-> in explorer viene ignorato dalla sidebar con un warning in console. Appena crei
-> la pagina e la aggiungi al tema, compare automaticamente al prossimo build.
+### Standard verificati automaticamente
+
+`npm run lint` include `node scripts/lint-standards.mjs` che controlla:
+
+| Controllo | Cosa blocca |
+|-----------|-------------|
+| `toLocaleString` | Uso diretto di formattazione locale (usare `format-utils.js`) |
+| `tableFormat` + `Inputs.table` stessa cella | Tabella non renderizzata per bug OF |
+| `buildRegLookup` in pagine con mappa | Usare `buildMapLookup()` che include fuzzy matching |
+| `duckdb.connect()` nei loader | Usare `safe_connect()` da lab-connectors |
 
 ### Moduli condivisi (`src/import/`)
 
-I moduli in `src/import/` centralizzano boilerplate che altrimenti andrebbe riscritto in ogni pagina:
-
 | Modulo | Funzioni principali | Quando usarlo |
 |--------|-------------------|---------------|
-| `geo-utils.js` | `normalizzaReg()`, `loadItalianRegions()`, `buildRegLookup()`, `buildRegLookupWithTrentino()` | Pagine con mappe coropletiche (dimensione geografica) |
-| `format-utils.js` | `num()`, `euro()`, `euroCompact()`, `pct()`, `unit()`, `numFix()`, `tableFormat()` | Qualsiasi pagina (formattazione numeri e tabelle) |
+| `geo-utils.js` | `normalizzaReg()`, `loadItalianRegions()`, `buildMapLookup()`, `buildRegLookupWithTrentino()` | Pagine con mappe coropletiche |
+| `format-utils.js` | `num()`, `euro()`, `euroCompact()`, `pct()`, `unit()`, `numFix()`, `tableFormat()` | Qualsiasi pagina (formattazione) |
 
-Esempio di import in una pagina:
+Esempio:
 ```js
-import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { num, euro, pct, tableFormat } from "../import/format-utils.js";
 ```
 
-Vedi le pagine esistenti (`src/dataset/rifiuti-urbani.md`, `irpef-comunale.md`) come riferimento.
+Vedi `src/dataset/rifiuti-urbani.md` come riferimento completo.
 
 ## Standard e criteri
 

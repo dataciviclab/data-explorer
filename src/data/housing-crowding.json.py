@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """Data loader: ISTAT Housing Crowding — densità abitativa per anno e titolo godimento."""
-import duckdb, json, sys
+import json, sys
 sys.path.insert(0, "src/data")
-from _util import GCS_BASE
+from lab_connectors.duckdb import safe_connect
+from lab_connectors.gcs.paths import https_url
 
 slug = "istat_housing_crowding"
-url = f"{GCS_BASE}/{slug}/2024/{slug}_2024_clean.parquet"
+url = https_url("clean", "clean_parquet", slug=slug, year=2024)
 
-con = duckdb.connect()
-rows = con.sql(f"""
-    SELECT anno, titolo_godimento,
-           AVG(componenti_per_100mq) AS componenti_per_100mq
-    FROM read_parquet('{url}')
-    WHERE titolo_godimento IS NOT NULL
-    GROUP BY anno, titolo_godimento
-    ORDER BY anno, titolo_godimento
-""").fetchall()
+with safe_connect() as con:
+    rows = con.sql(f"""
+        SELECT anno, titolo_godimento,
+               AVG(componenti_per_100mq) AS componenti_per_100mq
+        FROM read_parquet('{url}')
+        WHERE titolo_godimento IS NOT NULL
+        GROUP BY anno, titolo_godimento
+        ORDER BY anno, titolo_godimento
+    """).fetchall()
 
 data = [
     {"anno": int(r[0]), "titolo_godimento": r[1],

@@ -1,4 +1,4 @@
-name: PR Check
+name: PR Check (lint + test)
 
 on:
   pull_request:
@@ -10,23 +10,19 @@ on:
       - 'src/temi/**'
       - 'src/import/**'
       - 'tests/**'
+      - 'scripts/**'
       - 'observablehq.config.js'
       - '.github/workflows/pr-check.yml'
 
 permissions:
   contents: read
-  pull-requests: write
 
 concurrency:
   group: pr-check-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-env:
-  # Disabilita telemetry OF in CI
-  OBSERVABLE_TELEMETRY_DISABLED: 1
-
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -43,16 +39,6 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
-      # Cache OF data loader output: se i .json.py non cambiano,
-      # OF usa la cache invece di rieseguire i loader (DuckDB + GCS).
-      # Chiave: hash dei file .json.py in src/data/.
-      - name: Cache Observable Framework build
-        id: cache-of
-        uses: actions/cache@v4
-        with:
-          path: src/.observablehq/cache
-          key: of-cache-${{ hashFiles('src/data/*.json.py', 'src/data/_util.py', 'src/data/catalog.json.py', 'src/data/themes.json.py') }}
-
       - name: Lint
         run: npm run lint
 
@@ -61,9 +47,3 @@ jobs:
 
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
-
-      - name: Build
-        run: npm run build
-        # generate-config.mjs (prebuild) genera la sidebar da themes.json + catalog.json
-        # Poi observable build esegue i data loader e produce l'output statico.
-        # Se la cache OF ha fatto match, i loader vengono saltati (~30s).

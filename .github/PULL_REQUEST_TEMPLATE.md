@@ -19,26 +19,34 @@ Closes #
 
 Se la PR aggiunge un nuovo dataset in explorer:
 
-- [ ] **Data loader**: `src/data/<slug-url>.json.py` creato
-- [ ] **Pagina**: `src/dataset/<slug-url>.md` creata
-- [ ] **Registrazione**: voce aggiunta in `observablehq.config.js` sezione `pages`
-- [ ] **Tema**: aggiornato `src/data/themes.json.py` (se nuovo tema)
-- [ ] **Verifica locale**: `npm run dev` — pagina navigabile, dati caricati
-- [ ] **Slug consistenti**: slug URL (trattini) e slug DI (underscore) allineati
-- [ ] **Leggibilità**: pagina leggibile da un utente non tecnico
-- [ ] **Clean catalog**: il dataset è presente in `clean_catalog.json` DI
+- [ ] **Data loader**: `src/data/<slug-url>.json.py` — usa `safe_connect()` (non `duckdb.connect()`)
+- [ ] **Pagina**: `src/dataset/<slug-url>.md` — usa moduli condivisi (`format-utils.js`, `geo-utils.js`)
+- [ ] **Tema**: aggiornato `src/data/themes.json.py` (sidebar auto-generata, non toccare `observablehq.config.js`)
+- [ ] **Frontmatter**: `title`, `description`, `source`, `source_url`, `period`, `last_modified`, `dataset_slug`
+- [ ] **Sezione Limiti** obbligatoria (copertura, note metodologiche)
+- [ ] **Verifica**: `npm run lint` e `npm test` passano
+
+## Standard check
+
+Prima della review, verificare:
+
+- [ ] **Niente `toLocaleString`** — usare `num()`, `euro()`, `pct()` da `format-utils.js`
+- [ ] **`tableFormat` e `Inputs.table` in celle separate** (bug noto OF)
+- [ ] **Mappe**: usare `buildMapLookup()` (non `buildRegLookup` diretto)
+- [ ] **Niente `duckdb.connect()`** — usare `safe_connect()`
+- [ ] **Sidebar**: auto-generata da `themes.json.py` — non modificare `observablehq.config.js`
 
 ## Verifica
 
-Spiega come hai verificato il cambiamento.
-
 ```bash
-npm run dev
+npm run lint
+npm test
+npm run build
 ```
 
-- [ ] `npm run dev` produce output sensati
-- [ ] Data loader non solleva errori
-- [ ] Pagina si carica senza warning in console
+- [ ] `npm run lint` — nessun errore
+- [ ] `npm test` — test passano
+- [ ] `npm run build` — build completato, 0 errori
 
 ## Checklist PR
 
