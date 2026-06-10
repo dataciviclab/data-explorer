@@ -60,6 +60,42 @@ describe("unit()", () => {
   });
 });
 
+describe("euroCompact()", () => {
+  it("formatta valori in miliardi", async () => {
+    const { euroCompact } = await import("../src/import/format-utils.js");
+    assert.equal(euroCompact(1_234_567_890), "\u20AC 1,2 Mld");
+    assert.equal(euroCompact(2_000_000_000), "\u20AC 2,0 Mld");
+  });
+
+  it("formatta valori in milioni", async () => {
+    const { euroCompact } = await import("../src/import/format-utils.js");
+    assert.equal(euroCompact(1_234_567), "\u20AC 1,2 Mln");
+    assert.equal(euroCompact(500_000_000), "\u20AC 500,0 Mln");
+  });
+
+  it("formatta valori piccoli in euro interi", async () => {
+    const { euroCompact } = await import("../src/import/format-utils.js");
+    assert.equal(euroCompact(123_456), "\u20AC 123.456");
+    assert.equal(euroCompact(0), "\u20AC 0");
+  });
+
+  it("e' esportato come named export", async () => {
+    // Regression: euroCompact deve essere esportato direttamente
+    // (non solo usato internamente da tableFormat).
+    const mod = await import("../src/import/format-utils.js");
+    assert.equal(typeof mod.euroCompact, "function");
+    assert.equal(mod.euroCompact(1e9).includes("Mld"), true);
+  });
+
+  it("gestisce null/undefined/NaN", async () => {
+    const { euroCompact } = await import("../src/import/format-utils.js");
+    assert.equal(euroCompact(null), "\u2014");
+    assert.equal(euroCompact(undefined), "\u2014");
+    assert.equal(euroCompact(NaN), "\u2014");
+    assert.equal(euroCompact(Infinity), "\u2014");
+  });
+});
+
 describe("tableFormat()", () => {
   it("genera header e format da spec tipizzata", async () => {
     const { tableFormat } = await import("../src/import/format-utils.js");
@@ -67,15 +103,18 @@ describe("tableFormat()", () => {
       regione: { label: "Regione", fmt: "string" },
       valore: "num",
       prezzo: "euro",
+      budget: "euroCompact",
     });
     assert.equal(header.regione, "Regione");
     assert.equal(header.valore, "valore"); // label default = nome colonna
     assert.equal(typeof format.regione, "function");
     assert.equal(typeof format.valore, "function");
     assert.equal(typeof format.prezzo, "function");
+    assert.equal(typeof format.budget, "function");
     assert.equal(format.regione(123), "123"); // string formatter
     assert.equal(format.valore(1234567), "1.234.567"); // num formatter
     assert.equal(format.prezzo(1234567), "\u20AC 1.234.567"); // euro formatter
+    assert.equal(format.budget(1_234_567_890), "\u20AC 1,2 Mld"); // euroCompact
   });
 });
 

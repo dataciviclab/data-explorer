@@ -5,7 +5,7 @@
  * Pensate per template literal JS in Observable.
  *
  * Uso:
- *   import { num, euro, pct, unit, tableFormat } from "../import/format-utils.js";
+ *   import { num, euro, euroCompact, pct, unit, tableFormat } from "../import/format-utils.js";
  */
 
 /** Formatta un numero intero con separatore migliaia italiano. */
@@ -78,8 +78,9 @@ const FORMATTERS = {
   string: (x) => (x != null ? String(x) : "\u2014"),
 };
 
-// Necessario per euroCompact
-function euroCompact(x) {
+/** Formatta un importo in euro con arrotondamento compatto (Mln/Mld). */
+export function euroCompact(x) {
+  if (x == null || (typeof x === "number" && !isFinite(x))) return "\u2014";
   if (x >= 1e9) return "\u20AC " + numFix(x / 1e9, 1) + " Mld";
   if (x >= 1e6) return "\u20AC " + numFix(x / 1e6, 1) + " Mln";
   return "\u20AC " + num(x);
