@@ -41,7 +41,7 @@ jobs:
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
 
       - name: Build Observable Framework
-        run: npx observable build
+        run: npm run build
 
       - name: Copy CNAME for custom domain
         run: cp static/CNAME dist/observable/

@@ -35,6 +35,10 @@ display(html`<div class="grid grid-cols-2">
 ## Tutti i dataset
 
 ```js
+const searchQuery = view(Inputs.search(catalog.datasets, {label: "Cerca per nome, descrizione o fonte…"}));
+```
+
+```js
 const stageFilter = view(Inputs.select(
   ["Tutti", "published", "incubating"],
   {label: "Filtra per stato", value: "Tutti"}
@@ -42,9 +46,7 @@ const stageFilter = view(Inputs.select(
 ```
 
 ```js
-const filtered = stageFilter === "Tutti"
-  ? catalog.datasets
-  : catalog.datasets.filter(d => d.stage === stageFilter);
+const filtered = searchQuery.filter(d => stageFilter === "Tutti" || d.stage === stageFilter);
 ```
 
 ```js
