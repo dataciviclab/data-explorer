@@ -23,37 +23,37 @@ const data = await FileAttachment("../data/bdap-spese-stato.json").json();
 ```
 
 ```js
-const anni = [...new Set(data.map(d => d.esercizio_finanziario))].sort((a, b) => b - a);
+const anni = [...new Set(data.map(d => d.anno))].sort((a, b) => b - a);
 const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
 ```
 
 ```js
-const filtered = data.filter(d => d.esercizio_finanziario === annoSel);
-const totSpesa = d3.sum(filtered, d => d.previsioni_definitive_cp);
+const filtered = data.filter(d => d.anno === annoSel);
+const totSpesa = d3.sum(filtered, d => d.spesa_cp);
 const nAmm = new Set(filtered.map(d => d.amministrazione)).size;
 const nMissioni = new Set(filtered.map(d => d.missione)).size;
 
 // Spesa per amministrazione
 const perAmm = Array.from(
-  d3.rollup(filtered, v => d3.sum(v, d => d.previsioni_definitive_cp), d => d.amministrazione),
+  d3.rollup(filtered, v => d3.sum(v, d => d.spesa_cp), d => d.amministrazione),
   ([amministrazione, spesa]) => ({amministrazione, spesa})
 ).sort((a, b) => b.spesa - a.spesa);
 
 // Spesa per missione
 const perMissione = Array.from(
-  d3.rollup(filtered, v => d3.sum(v, d => d.previsioni_definitive_cp), d => d.missione),
+  d3.rollup(filtered, v => d3.sum(v, d => d.spesa_cp), d => d.missione),
   ([missione, spesa]) => ({missione, spesa})
 ).sort((a, b) => b.spesa - a.spesa).slice(0, 15);
 
 // Trend totale
 const trend = Array.from(
-  d3.rollup(data, v => d3.sum(v, d => d.previsioni_definitive_cp), d => d.esercizio_finanziario),
-  ([esercizio_finanziario, spesa]) => ({esercizio_finanziario, spesa})
-).sort((a, b) => a.esercizio_finanziario - b.esercizio_finanziario);
+  d3.rollup(data, v => d3.sum(v, d => d.spesa_cp), d => d.anno),
+  ([anno, spesa]) => ({anno, spesa})
+).sort((a, b) => a.anno - b.anno);
 
 // Delta 2008→2024
-const spesa2008 = trend.find(d => d.esercizio_finanziario === 2008)?.spesa || 0;
-const spesa2024 = trend.find(d => d.esercizio_finanziario === 2024)?.spesa || 0;
+const spesa2008 = trend.find(d => d.anno === 2008)?.spesa || 0;
+const spesa2024 = trend.find(d => d.anno === 2024)?.spesa || 0;
 const deltaPct = spesa2008 ? Math.round((spesa2024 - spesa2008) / spesa2008 * 1000) / 10 : 0;
 ```
 
@@ -87,9 +87,9 @@ Plot.plot({
   x: {tickFormat: d => String(d), label: null},
   y: {grid: true, tickFormat: "~s", label: "Spesa (€)"},
   marks: [
-    Plot.lineY(trend, {x: "esercizio_finanziario", y: "spesa", tip: {format: {y: d => euroCompact(d)}}}),
-    Plot.dot(trend, {x: "esercizio_finanziario", y: "spesa", fill: "steelblue", r: 3}),
-    Plot.areaY(trend, {x: "esercizio_finanziario", y: "spesa", fill: "steelblue", fillOpacity: 0.05}),
+    Plot.lineY(trend, {x: "anno", y: "spesa", tip: {format: {y: d => euroCompact(d)}}}),
+    Plot.dot(trend, {x: "anno", y: "spesa", fill: "steelblue", r: 3}),
+    Plot.areaY(trend, {x: "anno", y: "spesa", fill: "steelblue", fillOpacity: 0.05}),
     Plot.ruleY([0])
   ]
 })
@@ -155,14 +155,14 @@ Plot.plot({
 const { header, format } = tableFormat({
   amministrazione: { label: "Amministrazione", fmt: "string" },
   missione: { label: "Missione", fmt: "string" },
-  previsioni_definitive_cp: { label: "Spesa (cp)", fmt: "euroCompact" },
-  previsioni_definitive_cs: { label: "Spesa (cs)", fmt: "euroCompact" },
+  spesa_cp: { label: "Spesa (cp)", fmt: "euroCompact" },
+  spesa_cs: { label: "Spesa (cs)", fmt: "euroCompact" },
 });
 ```
 
 ```js
 Inputs.table(filtered, {
-  columns: ["amministrazione", "missione", "previsioni_definitive_cp", "previsioni_definitive_cs"],
+  columns: ["amministrazione", "missione", "spesa_cp", "spesa_cs"],
   header,
   format,
   rows: 20,
