@@ -15,11 +15,13 @@ Disuguaglianza del reddito netto per regione, misurata con l'indice di Gini. I d
 **Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2003–2024
 
 ```js
-import * as topojson from "npm:topojson-client";
+import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { numFix, tableFormat } from "../import/format-utils.js";
+```
 
+```js
 const regTopo = await FileAttachment("../data/regioni.topojson").json();
-const regioniGeo = topojson.feature(regTopo, regTopo.objects.regioni);
-const confiniReg = topojson.mesh(regTopo, regTopo.objects.regioni, (a, b) => a !== b);
+const { regioniGeo, confiniReg } = await loadItalianRegions(regTopo);
 ```
 
 ```js
@@ -47,15 +49,8 @@ const annoData = filtered
 const annoDataRegioni = annoData.filter(d => !d.regione.startsWith('Provincia Autonoma'));
 const mediaRegionale = d3.mean(annoDataRegioni, d => d.gini);
 
-// Lookup per mappa — chiave normalizzata per match TopoJSON
-function normalizzaReg(nome) {
-  return nome
-    .toUpperCase()
-    .replace(/ \/ /g, '/')
-    .replace(/ /g, '-');
-}
-
-const giniLookup = new Map(annoDataRegioni.map(d => [normalizzaReg(d.regione), d.gini]));
+// Lookup per mappa con normalizzazione automatica
+const giniLookup = buildRegLookup(annoDataRegioni, "regione", "gini");
 ```
 
 ```js
@@ -164,7 +159,10 @@ const annoConDelta = annoDataRegioni.map((d, i) => ({
 Inputs.table(annoConDelta, {
   columns: ["pos", "regione", "gini", "diff_media"],
   header: {pos: "#", regione: "Regione", gini: "Gini", diff_media: "Δ media"},
-  format: {gini: x => x.toFixed(3), diff_media: x => (x > 0 ? "+" : "") + x.toFixed(3)},
+  format: {
+    gini: x => numFix(x, 3),
+    diff_media: x => (x > 0 ? "+" : "") + numFix(x, 3)
+  },
   rows: 25,
   width: "100%"
 })

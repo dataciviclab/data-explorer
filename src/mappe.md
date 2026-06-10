@@ -8,11 +8,12 @@ description: Prototipo mappa coropletica con Observable Plot
 Prototipo di mappa coropletica con Observable Plot. La mappa mostra i confini delle regioni italiane con colore basato sui dati.
 
 ```js
-import * as topojson from "npm:topojson-client";
+import { normalizzaReg, loadItalianRegions, buildRegLookup } from "./import/geo-utils.js";
+```
 
-const regioniTopology = await FileAttachment("./data/regioni.topojson").json();
-const regioni = topojson.feature(regioniTopology, regioniTopology.objects.regioni);
-const confiniRegioni = topojson.mesh(regioniTopology, regioniTopology.objects.regioni, (a, b) => a !== b);
+```js
+const regTopo = await FileAttachment("./data/regioni.topojson").json();
+const { regioniGeo: regioni, confiniReg: confiniRegioni } = await loadItalianRegions(regTopo);
 ```
 
 ```js
@@ -40,31 +41,16 @@ Plot.plot({
 ## Mappa con dati — Gini regionale 2023
 
 ```js
-// Normalizza nomi regione per match con TopoJSON
-function normalizzaReg(nome) {
-  return nome
-    .toUpperCase()
-    .replace(/ \/ /g, '/')
-    .replace(/ /g, '-')
-    .replace(/PROVINCIA-AUTONOMA-(BOLZANO|TRENTO).*/, 'TRENTINO-ALTO ADIGE/SÜDTIROL')
-    .replace(/TRENTINO-ALTO-ADIGE/, 'TRENTINO-ALTO ADIGE');
-}
-
-const gini = await FileAttachment("./data/istat-gini-regionale.json").json();
-const gini2023 = gini.filter(d => d.anno === 2023 && d.pres_aff_imp === 1);
-const giniLookup = new Map();
-for (const d of gini2023) {
-  const key = normalizzaReg(d.regione);
-  if (key === 'TRENTINO-ALTO ADIGE/SÜDTIROL') {
-    const curr = giniLookup.get(key) || 0;
-    giniLookup.set(key, curr + d.gini);
-  } else {
-    giniLookup.set(key, d.gini);
-  }
-}
-if (giniLookup.has('TRENTINO-ALTO ADIGE/SÜDTIROL')) {
-  giniLookup.set('TRENTINO-ALTO ADIGE/SÜDTIROL', giniLookup.get('TRENTINO-ALTO ADIGE/SÜDTIROL') / 2);
-}
+const giniData = await FileAttachment("./data/istat-gini-regionale.json").json();
+const gini2023 = giniData.filter(d => d.anno === 2023 && d.pres_aff_imp === 1);
+// Usa buildRegLookupWithTrentino per aggregare P.A. Trentino
+import { buildRegLookupWithTrentino } from "./import/geo-utils.js";
+const giniLookup = buildRegLookupWithTrentino(
+  gini2023,
+  "regione",
+  (items) => d3.mean(items, d => d.gini),
+  "Provincia Autonoma",
+);
 ```
 
 ```js

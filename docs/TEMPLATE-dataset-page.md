@@ -36,6 +36,27 @@ const data = await FileAttachment("../data/{slug-url}.json").json();
 // const secondData = await FileAttachment("../data/{slug-url}-second.json").json();
 ```
 
+<!--
+  MODULI CONDIVISI
+  Usa geo-utils.js per mappe e lookup geografici,
+  format-utils.js per formattazione numeri e tabelle.
+  Vedi src/import/ per API completa.
+-->
+```js
+import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { num, euro, pct, unit, tableFormat } from "../import/format-utils.js";
+```
+
+<!--
+  MAPPA (solo se il dataset ha dimensione geografica)
+  Carica regioni.topojson con FileAttachment (nella pagina, non nel modulo)
+  e passa il dato a loadItalianRegions().
+-->
+```js
+// const regTopo = await FileAttachment("../data/regioni.topojson").json();
+// const { regioniGeo, confiniReg } = await loadItalianRegions(regTopo);
+```
+
 ```js
 // Filtri standard
 const anni = [...new Set(data.map(d => d.anno))].sort((a, b) => b - a);
@@ -45,17 +66,25 @@ const annoSel = view(Inputs.select(anni, {label: "Anno", value: anni[0]}));
 ```js
 // Preparazione dati filtrati
 const filtered = data.filter(d => d.anno === annoSel);
-// + metriche riassuntive
+// + metriche riassuntive (usa d3.sum, d3.mean)
+```
+
+```js
+// Crea lookup per mappa coropletica
+// const lookup = buildRegLookup(filtered, "regione", "nome_metrica");
+// Se il dataset ha P.A. Trentino da aggregare:
+//   import { buildRegLookupWithTrentino } from "../import/geo-utils.js";
+//   const lookup = buildRegLookupWithTrentino(filtered, "regione", aggFn);
 ```
 
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Metrica 1</h3>
-    <span class="big">{valore}</span>
+    <span class="big">${num(valore)}</span>
   </div>
   <div class="card">
     <h3>Metrica 2</h3>
-    <span class="big">{valore}</span>
+    <span class="big">${euro(valore)}</span>
   </div>
   <div class="card">
     <h3>Metrica 3</h3>
@@ -77,9 +106,25 @@ const filtered = data.filter(d => d.anno === annoSel);
 Breve nota di lettura (max 2 righe). Cosa mostra questo grafico? Come leggerlo?
 
 ```js
-Plot.plot({
-  // grafico: barre, mappa o charts che mostrano la distribuzione base
-})
+// Mappa coropletica:
+// Plot.plot({
+//   projection: {type: "mercator", domain: regioniGeo},
+//   ...
+//   marks: [
+//     Plot.geo(regioniGeo, {
+//       fill: d => lookup.get(normalizzaReg(d.properties.DEN_REG)),
+//       ...
+//     }),
+//     Plot.geo(confiniReg, ...)
+//   ]
+// })
+
+// Bar chart:
+// Plot.plot({
+//   marks: [
+//     Plot.barX(filtered, { y: "categoria", x: "metrica", sort: {y: "-x"} })
+//   ]
+// })
 ```
 
 > **Nota**: se serve, nota breve su perimetro o metrica.
@@ -96,9 +141,7 @@ Plot.plot({
 Breve nota su cosa mostra questo secondo blocco.
 
 ```js
-Plot.plot({
-  // secondo grafico o tabella
-})
+// secondo grafico o tabella
 ```
 
 ---
@@ -107,14 +150,22 @@ Plot.plot({
 
 <!--
   TABELLA FINALE: vista completa, ricercabile e scaricabile.
-  Default consigliato per v0.
+  Default consigliato per v0. Usa tableFormat() per header/format standardizzati.
 -->
+
+```js
+const { header, format } = tableFormat({
+  col1: { label: "Nome leggibile", fmt: "num" },
+  col2: { label: "Nome leggibile", fmt: "euro" },
+  col3: { label: "Nome leggibile", fmt: "pct" },
+});
+```
 
 ```js
 Inputs.table(filtered, {
   columns: ["col1", "col2", "col3"],
-  header: {col1: "Nome leggibile", col2: "Nome leggibile", col3: "Nome leggibile"},
-  format: { /* formattazione valori */ },
+  header,
+  format,
   rows: 20,
   width: "100%"
 })
@@ -144,11 +195,12 @@ Inputs.table(filtered, {
 
 <!--
   CHECKLIST PRE-PUBBLICAZIONE
-  [ ] Slug DE e slug DI coincidono
+  [ ] Slug DE e slug DI coincidono (vedi URL_SLUG_OVERRIDES in catalog.json.py)
   [ ] Clean parquet pubblico esiste su GCS
   [ ] Data loader funziona (npm run dev)
   [ ] Frontmatter completo (title, description, source, source_url, period, last_modified, dataset_slug)
   [ ] Primo blocco mostra stock/distribuzione base, non delta o trend
+  [ ] Usa moduli condivisi da src/import/ (geo-utils.js, format-utils.js)
   [ ] Sezione Limiti compilata
   [ ] Link a fonte originale e parquet funzionanti
   [ ] Pagina leggibile da un utente non tecnico

@@ -39,6 +39,9 @@ Apri http://localhost:3000
    in `src/dataset/<slug-url>.md` e compila ogni sezione
    - frontmatter obbligatorio: `title`, `description`, `source`, `source_url`, `period`,
      `last_modified`, `dataset_slug`
+   - usa i **moduli condivisi** in `src/import/` per non replicare boilerplate:
+     - `geo-utils.js` per mappe, normalizzazione regioni e lookup geografici
+     - `format-utils.js` per formattazione numeri, valute, percentuali e tabelle
    - primo blocco: distribuzione o stock base, non ranking o delta
    - sezione **Limiti** obbligatoria in fondo (copertura, granularità, note metodologiche)
    - vedi `docs/dataset-page-standard.md` per i principi guida
@@ -46,7 +49,24 @@ Apri http://localhost:3000
 4. **Tema**: se il dataset introduce un nuovo tema, aggiungilo in `src/data/themes.json.py`
 5. **Verifica** con `npm run dev` che la pagina sia navigabile e i dati si carichino
 6. **Checklist pre-pub** (nel template, in fondo): verificare slug, parquet, frontmatter,
-   leggibilità, link funzionanti
+   uso moduli condivisi, leggibilità, link funzionanti
+
+### Moduli condivisi (`src/import/`)
+
+I moduli in `src/import/` centralizzano boilerplate che altrimenti andrebbe riscritto in ogni pagina:
+
+| Modulo | Funzioni principali | Quando usarlo |
+|--------|-------------------|---------------|
+| `geo-utils.js` | `normalizzaReg()`, `loadItalianRegions()`, `buildRegLookup()`, `buildRegLookupWithTrentino()` | Pagine con mappe coropletiche (dimensione geografica) |
+| `format-utils.js` | `num()`, `euro()`, `euroCompact()`, `pct()`, `unit()`, `numFix()`, `tableFormat()` | Qualsiasi pagina (formattazione numeri e tabelle) |
+
+Esempio di import in una pagina:
+```js
+import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { num, euro, pct, tableFormat } from "../import/format-utils.js";
+```
+
+Vedi le pagine esistenti (`src/dataset/rifiuti-urbani.md`, `irpef-comunale.md`) come riferimento.
 
 ## Standard e criteri
 
