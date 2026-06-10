@@ -178,10 +178,13 @@ describe("normalizzaReg()", () => {
 });
 
 describe("REG_FALLBACKS", () => {
-  it("contiene fallback Valle d'Aosta e Trentino", async () => {
+  it("contiene fallback noti", async () => {
     const { REG_FALLBACKS } = await import("../src/import/geo-utils.js");
     assert.ok("VALLE-DAOSTA" in REG_FALLBACKS);
     assert.ok("TRENTINO-ALTO-ADIGE" in REG_FALLBACKS);
+    assert.ok("F.-V. GIULIA" in REG_FALLBACKS);
+    assert.ok("P. A. BOLZANO" in REG_FALLBACKS);
+    assert.ok("P. A. TRENTO" in REG_FALLBACKS);
   });
 
   it("fallback Valle d'Aosta punta a nome TopoJSON", async () => {
@@ -189,6 +192,23 @@ describe("REG_FALLBACKS", () => {
     assert.equal(
       REG_FALLBACKS["VALLE-DAOSTA"],
       "VALLE-D'AOSTA/VALLÉE-D'AOSTE",
+    );
+  });
+
+  it("fallback BDAP Friuli punta a nome TopoJSON", async () => {
+    const { REG_FALLBACKS } = await import("../src/import/geo-utils.js");
+    assert.equal(REG_FALLBACKS["F.-V. GIULIA"], "FRIULI-VENEZIA-GIULIA");
+  });
+
+  it("fallback BDAP P.A. punta a Trentino TopoJSON", async () => {
+    const { REG_FALLBACKS } = await import("../src/import/geo-utils.js");
+    assert.equal(
+      REG_FALLBACKS["P. A. BOLZANO"],
+      "TRENTINO-ALTO-ADIGE/SÜDTIROL",
+    );
+    assert.equal(
+      REG_FALLBACKS["P. A. TRENTO"],
+      "TRENTINO-ALTO-ADIGE/SÜDTIROL",
     );
   });
 });
