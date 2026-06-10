@@ -6,8 +6,8 @@ themes = [
     {
         "slug": "territorio-ambiente",
         "name": "Territorio e ambiente",
-        "description": "Trasformazioni territoriali, ambiente, energia, rifiuti e sicurezza stradale",
-        "datasets": ["rifiuti-urbani", "capacita-rinnovabile", "produzione-elettrica-fonti", "mit-incidentalita"],
+        "description": "Trasformazioni territoriali, ambiente, energia, rifiuti, consumo di suolo e sicurezza stradale",
+        "datasets": ["rifiuti-urbani", "capacita-rinnovabile", "produzione-elettrica-fonti", "mit-incidentalita", "consumo-suolo"],
     },
     {
         "slug": "finanza-pubblica",
