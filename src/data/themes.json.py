@@ -12,8 +12,8 @@ themes = [
     {
         "slug": "finanza-pubblica",
         "name": "Finanza pubblica",
-        "description": "Entrate dello Stato, capacità fiscale, tributi locali, FSC e disuguaglianza del reddito",
-        "datasets": ["irpef-comunale", "entrate-stato", "consip-consumi-convenzione", "istat-gini-regionale", "opencivitas-fsc-2025"],
+        "description": "Entrate dello Stato, capacità fiscale, tributi locali, FSC, partecipazioni PA e disuguaglianza del reddito",
+        "datasets": ["irpef-comunale", "entrate-stato", "consip-consumi-convenzione", "istat-gini-regionale", "opencivitas-fsc-2025", "mef-partecipazioni"],
     },
     {
         "slug": "sanita",
