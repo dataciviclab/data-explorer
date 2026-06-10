@@ -15,11 +15,13 @@ Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta d
 **Fonte**: ISPRA · **Periodo**: 2020–2024
 
 ```js
-import * as topojson from "npm:topojson-client";
+import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { num, pct, unit, tableFormat } from "../import/format-utils.js";
+```
 
+```js
 const regTopo = await FileAttachment("../data/regioni.topojson").json();
-const regioniGeo = topojson.feature(regTopo, regTopo.objects.regioni);
-const confiniReg = topojson.mesh(regTopo, regTopo.objects.regioni, (a, b) => a !== b);
+const { regioniGeo, confiniReg } = await loadItalianRegions(regTopo);
 ```
 
 ```js
@@ -58,11 +60,11 @@ const comuniFiltrati = comuni
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Rifiuti totali</h3>
-    <span class="big">${Math.round(totRU).toLocaleString("it-IT")} <small style="opacity:0.6">t</small></span>
+    <span class="big">${unit(totRU, "t")}</span>
   </div>
   <div class="card">
     <h3>Quota RD</h3>
-    <span class="big">${mediaRd}%</span>
+    <span class="big">${pct(mediaRd, 1)}</span>
   </div>
   <div class="card">
     <h3>Regioni</h3>
@@ -75,17 +77,7 @@ const comuniFiltrati = comuni
 ## Raccolta differenziata per regione
 
 ```js
-// Normalizzazione nomi regione
-function normalizzaReg(nome) {
-  return nome.toUpperCase().replace(/ \/ /g, '/').replace(/ /g, '-');
-}
-
-const rdLookup = new Map(regFiltered.map(d => [normalizzaReg(d.regione), d.quota_rd]));
-// Fallback per nomi regione non standard (ISPRA vs TopoJSON)
-const rdFALLBACKS = {"VALLE-DAOSTA": "VALLE-D'AOSTA/VALLÉE-D'AOSTE", "TRENTINO-ALTO-ADIGE": "TRENTINO-ALTO-ADIGE/SÜDTIROL"};
-for (const [short, full] of Object.entries(rdFALLBACKS)) {
-  if (rdLookup.has(short) && !rdLookup.has(full)) rdLookup.set(full, rdLookup.get(short));
-}
+const rdLookup = buildRegLookup(regFiltered, "regione", "quota_rd");
 ```
 
 ```js
@@ -141,10 +133,19 @@ Plot.plot({
 ## Regioni — dettaglio
 
 ```js
+const { header, format } = tableFormat({
+  regione: { label: "Regione", fmt: "string" },
+  totale_ru_tonnellate: { label: "RU totali (t)", fmt: "num" },
+  totale_rd_tonnellate: { label: "RD totale (t)", fmt: "num" },
+  quota_rd: { label: "% RD", fmt: "pct" },
+});
+```
+
+```js
 Inputs.table(regFiltered, {
   columns: ["regione", "totale_ru_tonnellate", "totale_rd_tonnellate", "quota_rd"],
-  header: {regione: "Regione", totale_ru_tonnellate: "RU totali (t)", totale_rd_tonnellate: "RD totale (t)", quota_rd: "% RD"},
-  format: {totale_ru_tonnellate: x => Math.round(x).toLocaleString("it-IT"), totale_rd_tonnellate: x => Math.round(x).toLocaleString("it-IT"), quota_rd: x => `${x}%`},
+  header,
+  format,
   rows: 25, width: "100%"
 })
 ```

@@ -6,6 +6,11 @@ Legge clean parquet da GCS via DuckDB e produce JSON per il frontend.
 I path GCS seguono il path contract canonico definito in:
     lab-connectors/lab_connectors/gcs/paths.py  (paths.json)
 Pattern usato: clean_parquet → {slug}/{year}/{slug}_{year}_clean.parquet
+
+OUTPUT: array JSON di righe aggregate (v1 contract, backward compat).
+  Le pagine consumano direttamente l'array.
+  TODO (Fase 3): aggiungere metadata years_available/missing in un campo _meta
+  senza rompere il contratto array.
 """
 import json
 import sys
@@ -38,6 +43,8 @@ def load_dataset(
     Legge parquet GCS per un dataset, raggruppa per group_cols,
     somma metric_cols, output JSON su stdout.
     Salta gli anni in cui il parquet non esiste.
+
+    Output: array JSON di righe aggregate (v1 contract).
     """
     valid_years = [y for y in years if _parquet_exists(slug, y)]
     if not valid_years:

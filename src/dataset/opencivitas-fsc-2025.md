@@ -15,11 +15,13 @@ Fondo di Solidarietà Comunale (FSC) 2025 per comune: capacità fiscale, fondo p
 **Fonte**: [OpenCivitas](https://www.opencivitas.it/) · **Periodo**: 2025
 
 ```js
-import * as topojson from "npm:topojson-client";
+import { normalizzaReg, loadItalianRegions, buildRegLookup } from "../import/geo-utils.js";
+import { num, euroCompact, tableFormat } from "../import/format-utils.js";
+```
 
+```js
 const regTopo = await FileAttachment("../data/regioni.topojson").json();
-const regioniGeo = topojson.feature(regTopo, regTopo.objects.regioni);
-const confiniReg = topojson.mesh(regTopo, regTopo.objects.regioni, (a, b) => a !== b);
+const { regioniGeo, confiniReg } = await loadItalianRegions(regTopo);
 ```
 
 ```js
@@ -56,11 +58,11 @@ const percContribNetti = (contribNetti / nComuni * 100).toFixed(1);
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Dotazione FSC</h3>
-    <span class="big">€ ${(totaleFsc / 1e9).toFixed(1)} <small style="opacity:0.6">mld</small></span>
+    <span class="big">${euroCompact(totaleFsc)}</span>
   </div>
   <div class="card">
     <h3>Comuni</h3>
-    <span class="big">${nComuni.toLocaleString("it-IT")}</span>
+    <span class="big">${num(nComuni)}</span>
   </div>
   <div class="card">
     <h3>Popolazione</h3>
@@ -73,11 +75,7 @@ const percContribNetti = (contribNetti / nComuni * 100).toFixed(1);
 ## Dotazione FSC per regione
 
 ```js
-function normalizzaReg(nome) {
-  return nome.toUpperCase().replace(/ \/ /g, '/').replace(/ /g, '-');
-}
-
-const fscLookup = new Map(perRegione.map(d => [normalizzaReg(d.regione), d.fsc]));
+const fscLookup = buildRegLookup(perRegione, "regione", "fsc");
 ```
 
 ```js
@@ -159,10 +157,10 @@ Inputs.table(perRegione, {
   columns: ["regione", "comuni", "popolazione", "fsc", "perequativo", "capacita"],
   header: {regione: "Regione", comuni: "Comuni", popolazione: "Popolazione", fsc: "Dotazione FSC (€)", perequativo: "Perequativo (€)", capacita: "Capacità fiscale (€)"},
   format: {
-    popolazione: x => Math.round(x).toLocaleString("it-IT"),
-    fsc: x => `€ ${(x / 1e6).toFixed(0)} mln`,
-    perequativo: x => `€ ${(x / 1e6).toFixed(0)} mln`,
-    capacita: x => `€ ${(x / 1e6).toFixed(0)} mln`
+    popolazione: x => num(x),
+    fsc: x => euroCompact(x),
+    perequativo: x => euroCompact(x),
+    capacita: x => euroCompact(x)
   },
   rows: 25,
   width: "100%"
