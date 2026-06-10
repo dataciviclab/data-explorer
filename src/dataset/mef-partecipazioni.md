@@ -189,6 +189,9 @@ const { header, format } = tableFormat({
   addetti: { label: "Addetti", fmt: "num" },
   quota_media: { label: "Quota media", fmt: "pct" },
 });
+```
+
+```js
 Inputs.table(perCategoria, {
   columns: ["categoria", "num", "oneri", "addetti", "quota_media"],
   header,
