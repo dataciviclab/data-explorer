@@ -15,6 +15,10 @@ Dati Terna sulla capacità di generazione rinnovabile installata per regione e f
 **Fonte**: Terna · **Periodo**: 2023–2024
 
 ```js
+import { num, unit } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/terna-fonti.json").json();
 ```
 
@@ -36,7 +40,7 @@ const nRegioni = new Set(filtered.map(d => d.regione)).size;
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Potenza totale</h3>
-    <span class="big">${Math.round(totNazionale).toLocaleString("it-IT")} <small style="opacity:0.6">MW</small></span>
+    <span class="big">${unit(totNazionale, "MW")}</span>
   </div>
   <div class="card">
     <h3>Fonti</h3>
@@ -112,7 +116,7 @@ Plot.plot({
 Inputs.table(filtered, {
   columns: ["regione", "fonti", "potenza_mw"],
   header: {regione: "Regione", fonti: "Fonte", potenza_mw: "Potenza (MW)"},
-  format: {potenza_mw: x => `${Math.round(x).toLocaleString("it-IT")} MW`},
+  format: {potenza_mw: x => unit(x, "MW")},
   rows: 30,
   width: "100%"
 })

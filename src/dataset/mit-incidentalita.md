@@ -15,6 +15,10 @@ Serie mensile di incidenti stradali, morti e feriti in Italia. I dati mostrano l
 **Fonte**: [MIT](https://www.mit.gov.it/) · **Periodo**: 2001–2018 · Dati mensili
 
 ```js
+import { num, numFix } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/mit-incidentalita.json").json();
 ```
 
@@ -45,16 +49,16 @@ const annuale = Array.from(
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Incidenti</h3>
-    <span class="big">${totIncidenti.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totIncidenti)}</span>
     <small style="opacity:0.6">${String(annoSel)}</small>
   </div>
   <div class="card">
     <h3>Morti</h3>
-    <span class="big">${totMorti.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totMorti)}</span>
   </div>
   <div class="card">
     <h3>Feriti</h3>
-    <span class="big">${totFeriti.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totFeriti)}</span>
   </div>
 </div>
 
@@ -126,11 +130,11 @@ Inputs.table(filtered, {
   columns: ["mese", "incidenti", "morti", "feriti", "indice_mortalita", "indice_gravita"],
   header: {mese: "Mese", incidenti: "Incidenti", morti: "Morti", feriti: "Feriti", indice_mortalita: "Mort.%", indice_gravita: "Grav.%"},
   format: {
-    incidenti: x => x.toLocaleString("it-IT"),
-    morti: x => x.toLocaleString("it-IT"),
-    feriti: x => x.toLocaleString("it-IT"),
-    indice_mortalita: x => x.toFixed(2) + "%",
-    indice_gravita: x => x.toFixed(2) + "%"
+    incidenti: x => num(x),
+    morti: x => num(x),
+    feriti: x => num(x),
+    indice_mortalita: x => numFix(x, 2) + "%",
+    indice_gravita: x => numFix(x, 2) + "%"
   },
   rows: 15,
   width: "100%"

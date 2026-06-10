@@ -15,6 +15,10 @@ Dati del Ministero della Giustizia sui flussi civili nei tribunali distrettuali 
 **Fonte**: Ministero della Giustizia · **Periodo**: 2014–2025
 
 ```js
+import { num, tableFormat } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/civile-flussi.json").json();
 ```
 
@@ -42,15 +46,15 @@ const totPendenti = filtered.reduce((s, d) => s + d.pendenti_finali, 0);
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Sopravvenuti</h3>
-    <span class="big">${totSopravvenuti.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totSopravvenuti)}</span>
   </div>
   <div class="card">
     <h3>Definiti</h3>
-    <span class="big">${totDefiniti.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totDefiniti)}</span>
   </div>
   <div class="card">
     <h3>Pendenti finali</h3>
-    <span class="big">${totPendenti.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totPendenti)}</span>
   </div>
 </div>
 
@@ -84,7 +88,7 @@ Plot.plot({
       x: "anno_str",
       y: "distretto",
       fill: "pendenti_finali",
-      tip: {format: {fill: d => d.toLocaleString("it-IT")}}
+      tip: {format: {fill: d => num(d)}}
     }),
     Plot.text(heatmapData, {
       x: "anno_str",
@@ -135,10 +139,17 @@ Plot.plot({
 ## Dettaglio per distretto
 
 ```js
+const { header, format } = tableFormat({
+  distretto: { label: "Distretto", fmt: "string" },
+  sopravvenuti: { label: "Sopravvenuti", fmt: "num" },
+  definiti_totale: { label: "Definiti", fmt: "num" },
+  pendenti_finali: { label: "Pendenti", fmt: "num" },
+  rapporto_def_sop: { label: "Rapporto D/S", fmt: "string" },
+});
 Inputs.table(filtered, {
   columns: ["distretto", "sopravvenuti", "definiti_totale", "pendenti_finali", "rapporto_def_sop"],
-  header: {distretto: "Distretto", sopravvenuti: "Sopravvenuti", definiti_totale: "Definiti", pendenti_finali: "Pendenti", rapporto_def_sop: "Rapporto D/S"},
-  format: {sopravvenuti: x => x.toLocaleString("it-IT"), definiti_totale: x => x.toLocaleString("it-IT"), pendenti_finali: x => x.toLocaleString("it-IT")},
+  header,
+  format,
   rows: 30,
   width: "100%"
 })

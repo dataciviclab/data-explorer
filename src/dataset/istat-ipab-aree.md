@@ -15,6 +15,10 @@ L'indice dei prezzi delle abitazioni (IPAB) misura l'evoluzione dei prezzi delle
 **Fonte**: ISTAT · **Periodo**: 2010–2025 · Dati trimestrali
 
 ```js
+import { numFix } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/istat-ipab-aree.json").json();
 ```
 
@@ -104,7 +108,7 @@ Plot.plot({
 Inputs.table(ultimiValori, {
   columns: ["area", "indice_prezzi"],
   header: {area: "Area", indice_prezzi: "Indice prezzi"},
-  format: {indice_prezzi: x => x.toFixed(1)},
+  format: {indice_prezzi: x => numFix(x, 1)},
   sort: "area",
   rows: 10,
   width: "100%"

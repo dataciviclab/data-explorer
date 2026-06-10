@@ -15,6 +15,10 @@ Popolazione residente italiana per fascia d'età, sesso e anno. I dati mostrano 
 **Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2019–2025
 
 ```js
+import { num, pct, tableFormat } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/popolazione-istat.json").json();
 ```
 
@@ -49,8 +53,8 @@ const trend = Array.from(
   </div>
   <div class="card">
     <h3>Femmine</h3>
-    <span class="big">${pctFemmine.toFixed(1)}%</span>
-    <small style="opacity:0.6">maschi ${(100 - pctFemmine).toFixed(1)}%</small>
+    <span class="big">${pct(pctFemmine, 1)}</span>
+    <small style="opacity:0.6">maschi ${pct(100 - pctFemmine, 1)}</small>
   </div>
   <div class="card">
     <h3>Fasce d'età</h3>
@@ -157,14 +161,16 @@ Plot.plot({
 ## Dettaglio per fascia
 
 ```js
+const { header, format } = tableFormat({
+  fascia_eta: { label: "Fascia d'età", fmt: "string" },
+  popolazione_residente: { label: "Totale", fmt: "num" },
+  totale_maschi: { label: "Maschi", fmt: "num" },
+  totale_femmine: { label: "Femmine", fmt: "num" },
+});
 Inputs.table(filtered, {
   columns: ["fascia_eta", "popolazione_residente", "totale_maschi", "totale_femmine"],
-  header: {fascia_eta: "Fascia d'età", popolazione_residente: "Totale", totale_maschi: "Maschi", totale_femmine: "Femmine"},
-  format: {
-    popolazione_residente: x => x.toLocaleString("it-IT"),
-    totale_maschi: x => x.toLocaleString("it-IT"),
-    totale_femmine: x => x.toLocaleString("it-IT")
-  },
+  header,
+  format,
   rows: 10,
   width: "100%"
 })

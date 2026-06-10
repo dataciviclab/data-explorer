@@ -15,6 +15,10 @@ I costi sostenuti dalle regioni italiane per garantire i Livelli Essenziali di A
 **Fonte**: BDAP — Banca Dati delle Amministrazioni Pubbliche · **Periodo**: 2024
 
 ```js
+import { pct } from "../import/format-utils.js";
+```
+
+```js
 const regioni = await FileAttachment("../data/bdap-lea-regioni.json").json();
 const macro = await FileAttachment("../data/bdap-lea-macro.json").json();
 ```
@@ -75,7 +79,7 @@ Plot.plot({
     Plot.text(macroConPct, {
       y: "descrizione_voce_contabile",
       x: "importo_totale",
-      text: d => `${d.pct.toFixed(1)}%`,
+      text: d => pct(d.pct, 1),
       dx: 6,
       textAnchor: "start",
       fill: "var(--theme-foreground-muted)",
