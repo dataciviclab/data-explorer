@@ -69,7 +69,7 @@ const deltaPct = spesaMin ? Math.round((spesaMax - spesaMin) / spesaMin * 1000) 
   </div>
   <div class="card">
     <h3>Variazione dal ${String(annoMin)}</h3>
-    <span class="big">+${deltaPct}%</span>
+    <span class="big">${deltaPct > 0 ? "+" : ""}${deltaPct}%</span>
   </div>
 </div>
 

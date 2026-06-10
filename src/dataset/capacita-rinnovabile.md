@@ -53,12 +53,6 @@ const trendFonti = Array.from(
   ([anno, fonti]) => Array.from(fonti, ([fonti, potenza_mw]) => ({anno, fonti, potenza_mw}))
 ).flat().sort((a, b) => a.anno - b.anno);
 
-// Top fonti per la legenda del trend
-const topFonti = Array.from(
-  d3.rollup(data, v => d3.sum(v, d => d.potenza_mw), d => d.fonti),
-  ([fonti, potenza_mw]) => ({fonti, potenza_mw})
-).sort((a, b) => b.potenza_mw - a.potenza_mw).map(d => d.fonti);
-
 // Capacità per regione (per la mappa)
 const perRegione = Array.from(
   d3.rollup(filtered, v => d3.sum(v, d => d.potenza_mw), d => d.regione),
