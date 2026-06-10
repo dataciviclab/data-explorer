@@ -8,6 +8,8 @@ on:
       - 'src/data/**'
       - 'src/dataset/**'
       - 'src/temi/**'
+      - 'src/import/**'
+      - 'tests/**'
       - 'observablehq.config.js'
       - '.github/workflows/pr-check.yml'
 
@@ -18,6 +20,10 @@ permissions:
 concurrency:
   group: pr-check-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+
+env:
+  # Disabilita telemetry OF in CI
+  OBSERVABLE_TELEMETRY_DISABLED: 1
 
 jobs:
   test:
@@ -37,6 +43,16 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
+      # Cache OF data loader output: se i .json.py non cambiano,
+      # OF usa la cache invece di rieseguire i loader (DuckDB + GCS).
+      # Chiave: hash dei file .json.py in src/data/.
+      - name: Cache Observable Framework build
+        id: cache-of
+        uses: actions/cache@v4
+        with:
+          path: src/.observablehq/cache
+          key: of-cache-${{ hashFiles('src/data/*.json.py', 'src/data/_util.py', 'src/data/catalog.json.py', 'src/data/themes.json.py') }}
+
       - name: Lint
         run: npm run lint
 
@@ -48,3 +64,5 @@ jobs:
 
       - name: Build
         run: npx observable build
+        # Se la cache OF ha fatto match, i data loader vengono saltati
+        # e il build usa solo i JSON in cache + bundle JS (~30s).
