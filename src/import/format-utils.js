@@ -78,10 +78,13 @@ const FORMATTERS = {
   string: (x) => (x != null ? String(x) : "\u2014"),
 };
 
-/** Formatta un importo in euro con arrotondamento compatto (Mln/Mld). */
+/** Formatta un importo in euro con arrotondamento compatto (Mln/Mld).
+ * Supporta valori negativi: la soglia Mln/Mld usa il valore assoluto,
+ * il segno viene preservato nella formattazione del numero (toLocaleString). */
 export function euroCompact(x) {
   if (x == null || (typeof x === "number" && !isFinite(x))) return "\u2014";
-  if (x >= 1e9) return "\u20AC " + numFix(x / 1e9, 1) + " Mld";
-  if (x >= 1e6) return "\u20AC " + numFix(x / 1e6, 1) + " Mln";
+  const abs = Math.abs(x);
+  if (abs >= 1e9) return "\u20AC " + numFix(x / 1e9, 1) + " Mld";
+  if (abs >= 1e6) return "\u20AC " + numFix(x / 1e6, 1) + " Mln";
   return "\u20AC " + num(x);
 }

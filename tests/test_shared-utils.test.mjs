@@ -61,22 +61,39 @@ describe("unit()", () => {
 });
 
 describe("euroCompact()", () => {
-  it("formatta valori in miliardi", async () => {
+  it("formatta valori positivi in miliardi", async () => {
     const { euroCompact } = await import("../src/import/format-utils.js");
     assert.equal(euroCompact(1_234_567_890), "\u20AC 1,2 Mld");
     assert.equal(euroCompact(2_000_000_000), "\u20AC 2,0 Mld");
   });
 
-  it("formatta valori in milioni", async () => {
+  it("formatta valori negativi in miliardi", async () => {
+    const { euroCompact } = await import("../src/import/format-utils.js");
+    assert.equal(euroCompact(-1_234_567_890), "\u20AC -1,2 Mld");
+    assert.equal(euroCompact(-2_000_000_000), "\u20AC -2,0 Mld");
+  });
+
+  it("formatta valori positivi in milioni", async () => {
     const { euroCompact } = await import("../src/import/format-utils.js");
     assert.equal(euroCompact(1_234_567), "\u20AC 1,2 Mln");
     assert.equal(euroCompact(500_000_000), "\u20AC 500,0 Mln");
+  });
+
+  it("formatta valori negativi in milioni", async () => {
+    const { euroCompact } = await import("../src/import/format-utils.js");
+    assert.equal(euroCompact(-1_234_567), "\u20AC -1,2 Mln");
+    assert.equal(euroCompact(-266_302_122), "\u20AC -266,3 Mln");
   });
 
   it("formatta valori piccoli in euro interi", async () => {
     const { euroCompact } = await import("../src/import/format-utils.js");
     assert.equal(euroCompact(123_456), "\u20AC 123.456");
     assert.equal(euroCompact(0), "\u20AC 0");
+  });
+
+  it("formatta valori negativi piccoli in euro interi", async () => {
+    const { euroCompact } = await import("../src/import/format-utils.js");
+    assert.equal(euroCompact(-123_456), "\u20AC -123.456");
   });
 
   it("e' esportato come named export", async () => {
