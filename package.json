@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/generate-config.mjs && observable build",
-    "dev": "observable preview",
-    "preview": "observable preview",
+    "dev": "node scripts/generate-config.mjs && observable preview",
+    "preview": "node scripts/generate-config.mjs && observable preview",
     "generate:catalog": "node scripts/generate_catalog.mjs",
     "generate:config": "node scripts/generate-config.mjs",
 
