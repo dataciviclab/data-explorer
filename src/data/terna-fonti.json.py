@@ -5,7 +5,7 @@ from _util import load_dataset
 
 load_dataset(
     slug="terna_capacita_rinnovabile",
-    years=[2023, 2024],
+    years=list(range(2015, 2025)),
     group_cols=["anno", "fonti", "regione"],
     metric_cols=["potenza_mw"],
     where="tipo_capacita = 'Netta'",

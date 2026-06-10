@@ -5,8 +5,8 @@ from _util import load_dataset
 
 load_dataset(
     slug="bdap_lea",
-    years=[2024],
-    group_cols=["descrizione_regione"],
+    years=list(range(2019, 2025)),
+    group_cols=["anno_riferimento", "descrizione_regione"],
     metric_cols=[
         "importo_totale",
         "prestazioni_sanitarie",
