@@ -11,9 +11,10 @@
  * Integrato in: npm run lint
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT = resolve(import.meta.dirname, "..");
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const errors = [];
 const warnings = [];
 
