@@ -15,6 +15,10 @@ Indice di densità abitativa (componenti per 100 mq) per titolo di godimento. I 
 **Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2004–2025
 
 ```js
+import { numFix } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/housing-crowding.json").json();
 ```
 
@@ -31,7 +35,7 @@ const totale = d3.mean(filtered, d => d.componenti_per_100mq);
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Densità media</h3>
-    <span class="big">${totale.toFixed(1)}</span>
+    <span class="big">${numFix(totale, 1)}</span>
     <small style="opacity:0.6">componenti/100mq</small>
   </div>
   <div class="card">
@@ -40,7 +44,7 @@ const totale = d3.mean(filtered, d => d.componenti_per_100mq);
   </div>
   <div class="card">
     <h3>Min – Max</h3>
-    <span class="big">${d3.min(filtered, d => d.componenti_per_100mq).toFixed(1)} – ${d3.max(filtered, d => d.componenti_per_100mq).toFixed(1)}</span>
+    <span class="big">${numFix(d3.min(filtered, d => d.componenti_per_100mq), 1)} – ${numFix(d3.max(filtered, d => d.componenti_per_100mq), 1)}</span>
   </div>
 </div>
 
@@ -117,7 +121,7 @@ Plot.plot({
 Inputs.table(trend, {
   columns: ["anno", "titolo_godimento", "componenti_per_100mq"],
   header: {anno: "Anno", titolo_godimento: "Titolo godimento", componenti_per_100mq: "Comp./100mq"},
-  format: {componenti_per_100mq: x => x.toFixed(2)},
+  format: {componenti_per_100mq: x => numFix(x, 2)},
   rows: 25,
   width: "100%"
 })

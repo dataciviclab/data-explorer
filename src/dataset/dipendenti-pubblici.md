@@ -15,6 +15,10 @@ Dati BDAP/RGS sui dipendenti pubblici italiani per comparto nel periodo 2010-202
 **Fonte**: MEF · RGS · BDAP · **Periodo**: 2010–2023
 
 ```js
+import { num, tableFormat } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/dipendenti-pubblici.json").json();
 ```
 
@@ -38,11 +42,11 @@ const pctDonne2023 = Math.round(data.filter(d => d.anno === 2023).reduce((s, d) 
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Dipendenti 2023</h3>
-    <span class="big">${tot2023.toLocaleString("it-IT")}</span>
+    <span class="big">${num(tot2023)}</span>
   </div>
   <div class="card">
     <h3>Variazione 2010→2023</h3>
-    <span class="big">${(delta > 0 ? "+" : "")}${delta.toLocaleString("it-IT")}</span>
+    <span class="big">${(delta > 0 ? "+" : "")}${num(delta)}</span>
   </div>
   <div class="card">
     <h3>Donne %</h3>
@@ -111,10 +115,17 @@ Plot.plot({
 ## Tabella per comparto
 
 ```js
+const { header, format } = tableFormat({
+  anno: { label: "Anno", fmt: "string" },
+  comparto: { label: "Comparto", fmt: "string" },
+  donne: { label: "Donne", fmt: "num" },
+  uomini: { label: "Uomini", fmt: "num" },
+  totale: { label: "Totale", fmt: "num" },
+});
 Inputs.table(filtered, {
   columns: ["anno", "comparto", "donne", "uomini", "totale"],
-  header: {comparto: "Comparto", donne: "Donne", uomini: "Uomini", totale: "Totale"},
-  format: {anno: x => String(x), donne: x => x.toLocaleString("it-IT"), uomini: x => x.toLocaleString("it-IT"), totale: x => x.toLocaleString("it-IT")},
+  header,
+  format,
   rows: 20,
   width: "100%"
 })

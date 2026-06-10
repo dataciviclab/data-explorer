@@ -15,6 +15,10 @@ Alunni delle scuole statali italiane per ordine scolastico (primaria, secondaria
 **Fonte**: [MIM](https://dati.istruzione.it/opendata/) · **Periodo**: 2015–2025
 
 ```js
+import { num, tableFormat } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/mim-alunni-corso-eta.json").json();
 ```
 
@@ -146,14 +150,16 @@ const pivot = Array.from(
 ```
 
 ```js
+const { header, format } = tableFormat({
+  regione: { label: "Regione", fmt: "string" },
+  "SCUOLA PRIMARIA": { label: "Primaria", fmt: "num" },
+  "SCUOLA SECONDARIA I GRADO": { label: "Secondaria I", fmt: "num" },
+  "SCUOLA SECONDARIA II GRADO": { label: "Secondaria II", fmt: "num" },
+});
 Inputs.table(pivot, {
   columns: ["regione", "SCUOLA PRIMARIA", "SCUOLA SECONDARIA I GRADO", "SCUOLA SECONDARIA II GRADO"],
-  header: {regione: "Regione", "SCUOLA PRIMARIA": "Primaria", "SCUOLA SECONDARIA I GRADO": "Secondaria I", "SCUOLA SECONDARIA II GRADO": "Secondaria II"},
-  format: {
-    "SCUOLA PRIMARIA": x => (x || 0).toLocaleString("it-IT"),
-    "SCUOLA SECONDARIA I GRADO": x => (x || 0).toLocaleString("it-IT"),
-    "SCUOLA SECONDARIA II GRADO": x => (x || 0).toLocaleString("it-IT")
-  },
+  header,
+  format,
   rows: 25,
   width: "100%"
 })

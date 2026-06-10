@@ -15,6 +15,10 @@ La spesa della Pubblica Amministrazione per beni e servizi acquistati attraverso
 **Fonte**: Consip · **Periodo**: 2023–2025
 
 ```js
+import { num, euro, tableFormat } from "../import/format-utils.js";
+```
+
+```js
 const regioni = await FileAttachment("../data/consip-consumi-convenzione-regioni.json").json();
 const tipologie = await FileAttachment("../data/consip-consumi-convenzione-tipologie.json").json();
 ```
@@ -40,7 +44,7 @@ const totOrdini = regioni
   </div>
   <div class="card">
     <h3>Ordini</h3>
-    <span class="big">${totOrdini.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totOrdini)}</span>
   </div>
 </div>
 
@@ -118,17 +122,15 @@ Plot.plot({
 ## Dettaglio regioni
 
 ```js
+const { header, format } = tableFormat({
+  regione_pa: { label: "Regione PA", fmt: "string" },
+  valore_economico_consumi: { label: "Spesa (€)", fmt: "euro" },
+  numero_ordini_con_consumi: { label: "Ordini", fmt: "num" },
+});
 Inputs.table(regFiltered, {
   columns: ["regione_pa", "valore_economico_consumi", "numero_ordini_con_consumi"],
-  header: {
-    regione_pa: "Regione PA",
-    valore_economico_consumi: "Spesa (€)",
-    numero_ordini_con_consumi: "Ordini"
-  },
-  format: {
-    valore_economico_consumi: x => `€ ${Math.round(x).toLocaleString("it-IT")}`,
-    numero_ordini_con_consumi: x => x.toLocaleString("it-IT")
-  },
+  header,
+  format,
   rows: 25,
   width: "100%"
 })

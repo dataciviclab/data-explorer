@@ -15,6 +15,10 @@ Esito, conteggi e indicatori (favorevoli, contrari, astenuti, presenti, fiducia)
 **Fonte**: [Camera dei Deputati](https://dati.camera.it/) · **Periodo**: 2018–2025
 
 ```js
+import { num, pct } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/votazioni-camera.json").json();
 
 // Estrai anno dalla data
@@ -41,12 +45,12 @@ const pctApprovati = totVoti > 0 ? Math.round(approvati / totVoti * 1000) / 10 :
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Votazioni</h3>
-    <span class="big">${totVoti.toLocaleString("it-IT")}</span>
+    <span class="big">${num(totVoti)}</span>
   </div>
   <div class="card">
     <h3>Approvati</h3>
-    <span class="big">${pctApprovati}%</span>
-    <small style="opacity:0.6">${approvati.toLocaleString("it-IT")} su ${totVoti.toLocaleString("it-IT")}</small>
+    <span class="big">${pct(pctApprovati, 1)}</span>
+    <small style="opacity:0.6">${num(approvati)} su ${num(totVoti)}</small>
   </div>
   <div class="card">
     <h3>Fiducia</h3>
@@ -86,7 +90,7 @@ Plot.plot({
       x: "anno",
       y: "tot",
       fill: "#4e79a7",
-      tip: {format: {y: d => d.toLocaleString("it-IT")}}
+      tip: {format: {y: d => num(d)}}
     }),
     Plot.barY(perAnno, {
       x: "anno",

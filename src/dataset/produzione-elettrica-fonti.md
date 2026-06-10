@@ -15,6 +15,10 @@ Produzione netta di energia elettrica in GWh per fonte e regione. I dati mostran
 **Fonte**: [Terna](https://www.terna.it/) · **Periodo**: 2023–2024
 
 ```js
+import { num, unit } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/produzione-elettrica-fonti.json").json();
 ```
 
@@ -48,7 +52,7 @@ const nRegioni = perRegione.length;
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Produzione totale</h3>
-    <span class="big">${Math.round(totaleGWh).toLocaleString("it-IT")} <small style="opacity:0.6">GWh</small></span>
+    <span class="big">${unit(totaleGWh, "GWh")}</span>
   </div>
   <div class="card">
     <h3>Fonti</h3>
@@ -138,7 +142,7 @@ Plot.plot({
 Inputs.table(filtered, {
   columns: ["regione", "fonte", "produzione_gwh"],
   header: {regione: "Regione", fonte: "Fonte", produzione_gwh: "Produzione (GWh)"},
-  format: {produzione_gwh: x => `${Math.round(x).toLocaleString("it-IT")} GWh`},
+  format: {produzione_gwh: x => unit(x, "GWh")},
   rows: 30,
   width: "100%"
 })

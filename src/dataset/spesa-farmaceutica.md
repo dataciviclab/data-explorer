@@ -15,6 +15,10 @@ Spesa e consumo della farmaceutica convenzionata SSN, disaggregati per regione, 
 **Fonte**: AIFA · **Periodo**: 2018–2024
 
 ```js
+import { num, euro, tableFormat } from "../import/format-utils.js";
+```
+
+```js
 const data = await FileAttachment("../data/aifa-spesa.json").json();
 ```
 
@@ -134,10 +138,15 @@ Plot.plot({
 ## Dettaglio regioni
 
 ```js
+const { header, format } = tableFormat({
+  regione: { label: "Regione", fmt: "string" },
+  spesa: { label: "Spesa (€)", fmt: "euro" },
+  confezioni: { label: "Confezioni", fmt: "num" },
+});
 Inputs.table(perRegione, {
   columns: ["regione", "spesa", "confezioni"],
-  header: {regione: "Regione", spesa: "Spesa (€)", confezioni: "Confezioni"},
-  format: {spesa: x => `€ ${Math.round(x).toLocaleString("it-IT")}`, confezioni: x => Math.round(x).toLocaleString("it-IT")},
+  header,
+  format,
   rows: 25,
   width: "100%"
 })
