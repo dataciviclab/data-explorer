@@ -49,6 +49,14 @@ export default {
       {
         "name": "Fondo di Solidarietà Comunale 2025",
         "path": "/dataset/opencivitas-fsc-2025"
+      },
+      {
+        "name": "Partecipazioni pubbliche",
+        "path": "/dataset/mef-partecipazioni"
+      },
+      {
+        "name": "Spese dello Stato",
+        "path": "/dataset/bdap-spese-stato"
       }
     ]
   },
