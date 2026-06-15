@@ -1,18 +1,18 @@
 ---
 title: OpenCoesione — Progetti delle politiche di coesione
-description: Progetti finanziati da fondi UE e FSC (2007-2027) - risorse assegnate, impegnate e pagate per ciclo, territorio e tema
+description: Progetti finanziati da fondi UE e FSC (2000-2027) - risorse assegnate, impegnate e pagate per ciclo, territorio e tema
 source: Presidenza del Consiglio dei Ministri — OpenCoesione
 source_url: https://opencoesione.gov.it/
-period: "2007–2027"
+period: "2000–2027"
 last_modified: 2026-06-04
 dataset_slug: opencoesione_progetti
 ---
 
 # OpenCoesione — Progetti delle politiche di coesione
 
-Tutti i progetti finanziati dalle politiche di coesione italiane — fondi europei (FESR, FSE, FEASR, FEAMP) e Fondo per lo Sviluppo e la Coesione (FSC) — dal ciclo 2007-2013 al 2021-2027. I dati coprono finanziamento totale, impegni e pagamenti, con dettaglio per macroarea geografica e tema.
+Tutti i progetti finanziati dalle politiche di coesione italiane — fondi europei (FESR, FSE, FEASR, FEAMP) e Fondo per lo Sviluppo e la Coesione (FSC) — dal ciclo 2000-2006 al 2021-2027. I dati coprono finanziamento totale, impegni e pagamenti, con dettaglio per macroarea geografica e tema.
 
-**Fonte**: [OpenCoesione](https://opencoesione.gov.it/) · **Periodo**: 2007–2027
+**Fonte**: [OpenCoesione](https://opencoesione.gov.it/) · **Periodo**: 2000–2027
 
 ```js
 import { num, euro, euroCompact, pct, tableFormat } from "../import/format-utils.js";
@@ -40,7 +40,7 @@ const cicloData = data.filter(d => d.OC_DESCR_CICLO === cicloSel);
 // Metriche riassuntive
 const totFinanziato = d3.sum(cicloData, d => d.FINANZ_TOTALE_PUBBLICO);
 const totPagato = d3.sum(cicloData, d => d.TOT_PAGAMENTI);
-const tassoPagamento = totFinanziato > 0 ? totPagato / totFinanziato : 0;
+const tassoPagamento = totFinanziato > 0 ? (totPagato / totFinanziato) * 100 : 0;
 ```
 
 <div class="grid grid-cols-3">
@@ -153,7 +153,7 @@ const perMacroareaCiclo = d3.rollups(
     finanziato: d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO),
     pagato: d3.sum(v, d => d.TOT_PAGAMENTI),
     tasso: (d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO) > 0
-      ? d3.sum(v, d => d.TOT_PAGAMENTI) / d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO)
+      ? (d3.sum(v, d => d.TOT_PAGAMENTI) / d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO)) * 100
       : 0)
   }),
   d => d.OC_DESCR_CICLO,
@@ -204,4 +204,4 @@ Inputs.table(perMacroareaCiclo, {
 - [OpenCoesione (fonte originale)](https://opencoesione.gov.it/)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/opencoesione_progetti/2026/opencoesione_progetti_2026_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/opencoesione-progetti)
-- [dati.gov.it — Dataset originale](https://dati.gov.it/opendata/dataset/opencoesione_progetti)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
