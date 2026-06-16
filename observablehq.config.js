@@ -51,6 +51,10 @@ export default {
         "path": "/dataset/opencivitas-fsc-2025"
       },
       {
+        "name": "OpenCoesione — Progetti delle politiche di coesione",
+        "path": "/dataset/opencoesione-progetti"
+      },
+      {
         "name": "Partecipazioni pubbliche",
         "path": "/dataset/mef-partecipazioni"
       },
@@ -85,6 +89,10 @@ export default {
       {
         "name": "Pensioni INPS",
         "path": "/dataset/pensioni-inps"
+      },
+      {
+        "name": "Pensioni Pubblica Amministrazione — DAG",
+        "path": "/dataset/pensioni-pa-dag"
       },
       {
         "name": "Indice prezzi abitazioni (IPAB) per area",
