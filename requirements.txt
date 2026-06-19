@@ -4,4 +4,4 @@ pyyaml>=6.0
 
 # Infrastruttura condivisa Lab: HTTP, GCS, DuckDB
 # Vedi lab-connectors/lab_connectors/gcs/paths.py per path contract GCS
-lab-connectors @ git+https://github.com/dataciviclab/lab-connectors.git@v0.15.0
+lab-connectors @ git+https://github.com/dataciviclab/lab-connectors.git
