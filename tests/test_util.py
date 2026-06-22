@@ -2,7 +2,8 @@
 Test per _util.py — data loader condiviso per Observable Framework.
 
 Contratto:
-  - _parquet_exists(): verifica esistenza parquet su GCS via object_exists()
+  - _parquet_exists(): verifica esistenza parquet su GCS via gcs_manifest.json
+    con fallback a object_exists() (HEAD) se manifest non disponibile
   - load_dataset(): produce JSON valido su stdout con aggregazioni corrette,
     salta anni senza parquet, gestisce where clause
 
@@ -18,57 +19,75 @@ import pytest
 
 from lab_connectors.gcs.paths import CLEAN_BUCKET
 
-
 # ── _parquet_exists ──────────────────────────────────────────────────────────
 
 
+def _make_manifest(paths: list[str]) -> dict:
+    """Crea un manifest finto con i path indicati."""
+    return {
+        "files": [
+            {"bucket": CLEAN_BUCKET, "path": p}
+            for p in paths
+        ]
+    }
+
+
 class TestParquetExists:
-    """Contratto: _parquet_exists usa object_exists() e torna bool."""
+    """Contratto: _parquet_exists usa gcs_manifest.json o fallback object_exists."""
 
-    def test_exists_returns_true_on_200(self):
-        """object_exists True → esiste."""
-        with patch("src.data._util.object_exists") as mock_exists:
+    def _patch_manifest(self, manifest: dict):
+        """Patch _load_manifest per restituire un manifest controllato."""
+        return patch("src.data._util._load_manifest", return_value=manifest)
+
+    def test_exists_returns_true_when_in_manifest(self):
+        """Path presente nel manifest → esiste."""
+        manifest = _make_manifest(["test-slug/2023/test-slug_2023_clean.parquet"])
+        with self._patch_manifest(manifest):
+            from src.data._util import _parquet_exists
+
+            assert _parquet_exists("test-slug", 2023) is True
+
+    def test_missing_returns_false_when_not_in_manifest_and_not_on_gcs(self):
+        """Path assente dal manifest E assente su GCS → non esiste."""
+        manifest = _make_manifest(["altro-slug/2023/altro-slug_2023_clean.parquet"])
+        with patch("lab_connectors.gcs.object_exists", return_value=False):
+            with self._patch_manifest(manifest):
+                from src.data._util import _parquet_exists
+
+                assert _parquet_exists("test-slug", 2023) is False
+
+    def test_fallback_to_object_exists_when_manifest_empty(self):
+        """Manifest senza files → fallback a object_exists()."""
+        with patch("lab_connectors.gcs.object_exists", return_value=True):
+            with self._patch_manifest({"files": []}):
+                from src.data._util import _parquet_exists
+
+                assert _parquet_exists("test-slug", 2023) is True
+
+    def test_missing_in_manifest_falls_back_to_gcs(self):
+        """Path non nel manifest ma presente su GCS → esiste (evita falso negativo).
+
+        Un parquet appena pubblicato (dopo l'ultimo refresh del manifest)
+        non deve risultare assente.
+        """
+        manifest = _make_manifest(["altro-slug/2023/altro-slug_2023_clean.parquet"])
+        with patch("lab_connectors.gcs.object_exists", return_value=True):
+            with self._patch_manifest(manifest):
+                from src.data._util import _parquet_exists
+
+                assert _parquet_exists("test-slug", 2023) is True
+
+    def test_fallback_passes_correct_params(self):
+        """Fallback chiama object_exists con bucket e key corretti."""
+        with patch("lab_connectors.gcs.object_exists") as mock_exists:
             mock_exists.return_value = True
-            from src.data._util import _parquet_exists
+            with self._patch_manifest({}):
+                from src.data._util import _parquet_exists
 
-            result = _parquet_exists("test-slug", 2023)
-            assert result is True
-            # Verifica parametri corretti
-            called_bucket, called_key = mock_exists.call_args[0]
-            assert called_bucket == CLEAN_BUCKET
-            assert "test-slug" in called_key
-            assert "2023" in called_key
-
-    def test_missing_returns_false_on_404(self):
-        """object_exists False → non esiste."""
-        with patch("src.data._util.object_exists") as mock_exists:
-            mock_exists.return_value = False
-            from src.data._util import _parquet_exists
-
-            assert _parquet_exists("test-slug", 2023) is False
-
-    def test_passes_correct_bucket_and_key(self):
-        """_parquet_exists chiama object_exists con bucket e key corretti."""
-        with patch("src.data._util.object_exists") as mock_exists:
-            mock_exists.return_value = True
-            from src.data._util import _parquet_exists
-
-            _parquet_exists("test-slug", 2023)
-            called_bucket, called_key = mock_exists.call_args[0]
-            assert called_bucket == CLEAN_BUCKET
-            assert called_key == "test-slug/2023/test-slug_2023_clean.parquet"
-
-    def test_url_uses_path_contract(self):
-        """Key passata a object_exists segue il path contract."""
-        with patch("src.data._util.object_exists") as mock_exists:
-            mock_exists.return_value = True
-            from src.data._util import _parquet_exists
-
-            _parquet_exists("mio-slug", 2024)
-            called_key = mock_exists.call_args[0][1]
-            assert "mio-slug" in called_key
-            assert "2024" in called_key
-            assert "clean.parquet" in called_key
+                _parquet_exists("test-slug", 2023)
+                called_bucket, called_key = mock_exists.call_args[0]
+                assert called_bucket == CLEAN_BUCKET
+                assert called_key == "test-slug/2023/test-slug_2023_clean.parquet"
 
 
 # ── load_dataset ─────────────────────────────────────────────────────────────

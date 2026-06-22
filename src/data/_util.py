@@ -16,16 +16,52 @@ import json
 import sys
 
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs import object_exists
+from lab_connectors.gcs.manifest import read_manifest
 from lab_connectors.gcs.paths import CLEAN_BUCKET, https_url
 
 # GCS_BASE: backward compat per data loader che lo importano direttamente.
 # Calcolato dal contratto invece che hardcoded.
 GCS_BASE = f"https://storage.googleapis.com/{CLEAN_BUCKET}"
 
+# Cache processo: manifest caricato una volta per loader (ogni loader è
+# un processo Python separato, quindi non serve thread safety).
+_MANIFEST: dict | None = None
+
+
+def _load_manifest() -> dict:
+    """Carica gcs_manifest.json da GCS, con cache di processo."""
+    global _MANIFEST
+    if _MANIFEST is not None:
+        return _MANIFEST
+    try:
+        _MANIFEST = read_manifest()
+    except Exception:
+        _MANIFEST = {"files": []}
+    return _MANIFEST
+
 
 def _parquet_exists(slug: str, year: int) -> bool:
-    """Verifica se il parquet esiste su GCS via object_exists()."""
+    """Verifica se il parquet esiste su GCS.
+
+    Fast path: gcs_manifest.json (una GET, lookup in memoria) —
+    se il manifest contiene il file, esiste sicuro.
+    Slow path (su miss del manifest): object_exists() via HEAD.
+    Il fallback evita falsi negativi quando un parquet è stato
+    pubblicato dopo l'ultimo refresh del manifest (daily).
+    """
+    manifest = _load_manifest()
+    if manifest.get("files"):
+        target_path = f"{slug}/{year}/{slug}_{year}_clean.parquet"
+        if any(
+            f["bucket"] == CLEAN_BUCKET and f["path"] == target_path
+            for f in manifest["files"]
+        ):
+            return True
+        # Non trovato nel manifest — potrebbe essere stato appena
+        # pubblicato. Cadiamo nel fallback GCS live.
+
+    from lab_connectors.gcs import object_exists
+
     return object_exists(
         CLEAN_BUCKET,
         f"{slug}/{year}/{slug}_{year}_clean.parquet",

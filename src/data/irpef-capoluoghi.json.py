@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Data loader: IRPEF — capoluoghi di regione (per confronto chart)."""
-import duckdb, json, sys
-sys.path.insert(0, "src/data")
-from _util import GCS_BASE
+import duckdb
+import json
+import sys
+from lab_connectors.gcs.paths import https_url
 
 slug = "irpef_comunale"
 years = list(range(2019, 2024))
@@ -12,7 +13,7 @@ CAPOLUOGHI = ["ROMA", "MILANO", "TORINO", "GENOVA", "NAPOLI", "BOLOGNA", "PALERM
 
 con = duckdb.connect()
 parquet_refs = " UNION ALL ".join(
-    f"SELECT * FROM read_parquet('{GCS_BASE}/{slug}/{y}/{slug}_{y}_clean.parquet')"
+    f"SELECT * FROM read_parquet('{https_url('clean', 'clean_parquet', slug=slug, year=y)}')"
     for y in years
 )
 
