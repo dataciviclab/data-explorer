@@ -47,18 +47,32 @@ class TestParquetExists:
 
             assert _parquet_exists("test-slug", 2023) is True
 
-    def test_missing_returns_false_when_not_in_manifest(self):
-        """Path assente dal manifest → non esiste."""
+    def test_missing_returns_false_when_not_in_manifest_and_not_on_gcs(self):
+        """Path assente dal manifest E assente su GCS → non esiste."""
         manifest = _make_manifest(["altro-slug/2023/altro-slug_2023_clean.parquet"])
-        with self._patch_manifest(manifest):
-            from src.data._util import _parquet_exists
+        with patch("lab_connectors.gcs.object_exists", return_value=False):
+            with self._patch_manifest(manifest):
+                from src.data._util import _parquet_exists
 
-            assert _parquet_exists("test-slug", 2023) is False
+                assert _parquet_exists("test-slug", 2023) is False
 
     def test_fallback_to_object_exists_when_manifest_empty(self):
         """Manifest senza files → fallback a object_exists()."""
         with patch("lab_connectors.gcs.object_exists", return_value=True):
             with self._patch_manifest({"files": []}):
+                from src.data._util import _parquet_exists
+
+                assert _parquet_exists("test-slug", 2023) is True
+
+    def test_missing_in_manifest_falls_back_to_gcs(self):
+        """Path non nel manifest ma presente su GCS → esiste (evita falso negativo).
+
+        Un parquet appena pubblicato (dopo l'ultimo refresh del manifest)
+        non deve risultare assente.
+        """
+        manifest = _make_manifest(["altro-slug/2023/altro-slug_2023_clean.parquet"])
+        with patch("lab_connectors.gcs.object_exists", return_value=True):
+            with self._patch_manifest(manifest):
                 from src.data._util import _parquet_exists
 
                 assert _parquet_exists("test-slug", 2023) is True

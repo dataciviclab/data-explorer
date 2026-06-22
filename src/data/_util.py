@@ -43,18 +43,23 @@ def _load_manifest() -> dict:
 def _parquet_exists(slug: str, year: int) -> bool:
     """Verifica se il parquet esiste su GCS.
 
-    Usa gcs_manifest.json (una GET, lookup in memoria) invece di
-    una HEAD request GCS per ogni slug/year.
-    Fallback a object_exists() se il manifest non è disponibile.
+    Fast path: gcs_manifest.json (una GET, lookup in memoria) —
+    se il manifest contiene il file, esiste sicuro.
+    Slow path (su miss del manifest): object_exists() via HEAD.
+    Il fallback evita falsi negativi quando un parquet è stato
+    pubblicato dopo l'ultimo refresh del manifest (daily).
     """
     manifest = _load_manifest()
     if manifest.get("files"):
         target_path = f"{slug}/{year}/{slug}_{year}_clean.parquet"
-        return any(
+        if any(
             f["bucket"] == CLEAN_BUCKET and f["path"] == target_path
             for f in manifest["files"]
-        )
-    # Fallback: manifest non disponibile, usa HEAD diretto
+        ):
+            return True
+        # Non trovato nel manifest — potrebbe essere stato appena
+        # pubblicato. Cadiamo nel fallback GCS live.
+
     from lab_connectors.gcs import object_exists
 
     return object_exists(
