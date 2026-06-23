@@ -38,6 +38,12 @@ themes = [
         "description": "Flussi civili, tempi e carichi dei tribunali",
         "datasets": ["flussi-giustizia-civile"],
     },
+    {
+        "slug": "terzo-settore",
+        "name": "Terzo settore",
+        "description": "5x1000, enti non profit, flussi finanziari al terzo settore",
+        "datasets": ["cinque-per-mille"],
+    },
 ]
 
 json.dump(themes, sys.stdout, ensure_ascii=False)
