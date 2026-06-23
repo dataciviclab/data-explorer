@@ -40,12 +40,13 @@ const extraFallbacks = {
 
 ```js
 // Unifica P.A. Bolzano + Trento per la mappa
+const pa = per_regione.filter(r => r.regione.includes("PROV."));
 const perRegioneUnificata = [
   ...per_regione.filter(r => !r.regione.includes("PROV.")),
   {
     regione: "TRENTINO-ALTO-ADIGE",
-    totale_farmacie: d3.sum(per_regione, r => r.totale_farmacie),
-    comuni_con_farmacie: d3.sum(per_regione, r => r.comuni_con_farmacie),
+    totale_farmacie: d3.sum(pa, r => r.totale_farmacie),
+    comuni_con_farmacie: d3.sum(pa, r => r.comuni_con_farmacie),
   },
 ];
 

@@ -39,7 +39,11 @@ const perDisciplina = Array.from(d3.rollup(dataArricchiti, v => ({
   letti_dh: d3.sum(v, d => d.posti_letto_day_hospital),
   letti_ds: d3.sum(v, d => d.posti_letto_day_surgery),
   letti_util: d3.sum(v, d => d.posti_letto_utilizzati),
-  tasso_medio: d3.mean(v, d => d.tasso_occupazione),
+  tasso_medio: (() => {
+    const totUtil = d3.sum(v, d => d.posti_letto_utilizzati);
+    const totOrd = d3.sum(v, d => d.posti_letto_degenza_ordinaria);
+    return totOrd > 0 ? (totUtil / totOrd) * 100 : null;
+  })(),
   degenza_media: d3.mean(v, d => d.degenza_media_ordinaria),
 }), d => d.disciplina), ([disciplina, v]) => ({disciplina, ...v}))
   .sort((a,b) => b.letti_ordinari - a.letti_ordinari);
