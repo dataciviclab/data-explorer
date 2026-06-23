@@ -75,6 +75,26 @@ export default {
       {
         "name": "Spesa sanitaria regionale LEA",
         "path": "/dataset/bdap-lea"
+      },
+      {
+        "name": "Strutture e attività delle ASL",
+        "path": "/dataset/strutture-asl"
+      },
+      {
+        "name": "Strutture di ricovero del SSN",
+        "path": "/dataset/strutture-ricovero-asl"
+      },
+      {
+        "name": "Posti letto per disciplina ospedaliera",
+        "path": "/dataset/reparti-ricovero"
+      },
+      {
+        "name": "Posti letto ospedalieri",
+        "path": "/dataset/posti-letto-stabilimento"
+      },
+      {
+        "name": "Farmacie italiane",
+        "path": "/dataset/farmacie"
       }
     ]
   },
