@@ -24,6 +24,7 @@ URL_SLUG_OVERRIDES = {
     "camera_votazioni_sparql": "votazioni-camera",          # editoriale: nome tema
     "bdap_entrate_stato": "entrate-stato",                  # editoriale: nome tema
     "inps_pensioni_trimestrale": "pensioni-inps",           # editoriale: nome tema
+    "ade_cinque_per_mille": "cinque-per-mille",             # editoriale: nome tema
 }
 
 def resolve_url_slug(di_slug: str) -> str:

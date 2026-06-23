@@ -175,7 +175,7 @@ Inputs.table(tableData, {
 
 - **Copertura**: il dataset copre il solo 2024. Non sono ancora disponibili i dati 2025 nel formato clean.
 - **Dettaglio ente**: la denominazione degli enti può contenere refusi o caratteri anomali (es. "Bambin Ges?" invece di "Bambin Gesù") ereditati dai CSV originali dell'Agenzia delle Entrate.
-- **Categorie multiple**: un ente può appartenere a più categorie contemporaneamente (es. ente ETS che fa anche ricerca scientifica). Nel grafico per categoria ogni ente è conteggiato in tutte le sue categorie.
+- **Categorie esclusive**: ogni ente è classificato in una singola categoria prevalente. Un ente con più attributi (es. ETS che fa anche ricerca) viene assegnato alla categoria che ne descrive l'attività principale secondo la priorità: ETS/ONLUS → sport → ricerca → comuni → beni culturali → aree protette. Per questo la categoria "Ricerca scientifica" può sembrare sottorappresentata: molti enti di ricerca sono anche ETS e compaiono sotto "ETS / ONLUS".
 
 ---
 
