@@ -23,7 +23,7 @@ with safe_connect() as con:
         SELECT regione,
                COUNT(*) AS num_enti,
                SUM(numero_scelte) AS tot_scelte,
-               ROUND(SUM(importo_totale_erogabile), 0) AS importo_totale
+               ROUND(SUM(COALESCE(importo_totale_erogabile, 0)), 0) AS importo_totale
         FROM ({parquet_refs})
         WHERE regione IS NOT NULL
         GROUP BY regione
@@ -34,7 +34,13 @@ with safe_connect() as con:
         SELECT
             CASE
                 WHEN flag_ets_onlus = true AND flag_asd = false AND flag_comune = false
-                     THEN 'ETS / ONLUS'
+                     AND flag_ricerca_scientifica = false AND flag_ricerca_sanitaria = false THEN 'ETS / ONLUS'
+                WHEN flag_ets_onlus = true AND flag_asd = false AND flag_comune = false
+                     AND flag_ricerca_scientifica = true AND flag_ricerca_sanitaria = true THEN 'ETS + Ricerca scientifica e sanitaria'
+                WHEN flag_ets_onlus = true AND flag_asd = false AND flag_comune = false
+                     AND flag_ricerca_scientifica = true THEN 'ETS + Ricerca scientifica'
+                WHEN flag_ets_onlus = true AND flag_asd = false AND flag_comune = false
+                     AND flag_ricerca_sanitaria = true THEN 'ETS + Ricerca sanitaria'
                 WHEN flag_asd = true THEN 'Sportive dilettantistiche'
                 WHEN flag_ricerca_scientifica = true AND flag_ricerca_sanitaria = true THEN 'Ricerca scientifica e sanitaria'
                 WHEN flag_ricerca_scientifica = true THEN 'Ricerca scientifica'
@@ -45,7 +51,7 @@ with safe_connect() as con:
                 ELSE 'Altro'
             END AS categoria,
             COUNT(*) AS num_enti,
-            ROUND(SUM(importo_totale_erogabile), 0) AS importo_totale
+            ROUND(SUM(COALESCE(importo_totale_erogabile, 0)), 0) AS importo_totale
         FROM ({parquet_refs})
         GROUP BY categoria
         ORDER BY importo_totale DESC
@@ -54,9 +60,9 @@ with safe_connect() as con:
     top_enti = _query(f"""
         SELECT denominazione, regione, sigla_provincia, comune,
                numero_scelte,
-               ROUND(importo_totale_erogabile, 0) AS importo_totale
+               ROUND(COALESCE(importo_totale_erogabile, 0), 0) AS importo_totale
         FROM ({parquet_refs})
-        ORDER BY importo_totale_erogabile DESC
+        ORDER BY importo_totale_erogabile DESC NULLS LAST
         LIMIT 500
     """)
 
