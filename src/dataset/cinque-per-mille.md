@@ -10,7 +10,7 @@ dataset_slug: ade_cinque_per_mille
 
 # 5x1000 — Beneficiari e importi per ente
 
-Ogni anno, i contribuenti italiani possono destinare il 5x1000 della propria IRPEF a enti del terzo settore, ricerca scientifica, sanitaria, comuni, associazioni sportive e beni culturali. Nel 2024 oltre **90.000 enti** hanno ricevuto più di **€520 milioni** da 16,7 milioni di scelte. Questa pagina mostra come si distribuiscono: per territorio, per categoria e per singolo ente.
+Ogni anno, i contribuenti italiani possono destinare il 5x1000 della propria IRPEF a enti del terzo settore, ricerca scientifica, sanitaria, comuni, associazioni sportive e beni culturali. Nel 2024 oltre **90.000 enti** hanno ricevuto più di **€520 milioni** da 15,1 milioni di scelte. Questa pagina mostra come si distribuiscono: per territorio, per categoria e per singolo ente.
 
 **Fonte**: [Agenzia delle Entrate](https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000) · **Periodo**: 2024
 
@@ -96,7 +96,7 @@ Plot.plot({
 
 ## Dove va il 5x1000?
 
-L'81% delle risorse va agli enti del Terzo Settore (ETS e ONLUS). La ricerca sanitaria e scientifica assorbe un altro 16%. Sport, comuni e beni culturali pesano per il restante 3%.
+L'81% delle risorse va agli enti del Terzo Settore (ETS e ONLUS). La ricerca sanitaria e scientifica non ETS assorbe il 12%. Il restante 7% va a sport, comuni, beni culturali e aree protette.
 
 ```js
 Plot.plot({
@@ -175,7 +175,7 @@ Inputs.table(tableData, {
 
 - **Copertura**: il dataset copre il solo 2024. Non sono ancora disponibili i dati 2025 nel formato clean.
 - **Dettaglio ente**: la denominazione degli enti può contenere refusi o caratteri anomali (es. "Bambin Ges?" invece di "Bambin Gesù") ereditati dai CSV originali dell'Agenzia delle Entrate.
-- **Categorie esclusive**: ogni ente è classificato in una singola categoria prevalente. Un ente con più attributi (es. ETS che fa anche ricerca) viene assegnato alla categoria che ne descrive l'attività principale secondo la priorità: ETS/ONLUS → sport → ricerca → comuni → beni culturali → aree protette. Per questo la categoria "Ricerca scientifica" può sembrare sottorappresentata: molti enti di ricerca sono anche ETS e compaiono sotto "ETS / ONLUS".
+- **Categorie esclusive**: ogni ente è classificato in una singola categoria prevalente. Un ente con più attributi (es. ETS che fa anche ricerca) viene assegnato alla categoria più specifica: gli ETS con attività di ricerca compaiono come "ETS + Ricerca scientifica", non sotto "ETS / ONLUS".
 
 ---
 
