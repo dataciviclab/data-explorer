@@ -23,8 +23,11 @@ const data = await FileAttachment("../data/reparti-ricovero.json").json();
 ```
 
 ```js
+// Filtra outlier: tasso utilizzo > 100% indica dati anomali a livello di struttura
+const dataClean = data.filter(d => d.tasso_utilizzo <= 100);
+
 // Aggregazione per disciplina
-const perDisciplina = Array.from(d3.rollup(data, v => ({
+const perDisciplina = Array.from(d3.rollup(dataClean, v => ({
   letti_ordinari: d3.sum(v, d => d.posti_letto_degenza_ordinaria),
   letti_dh: d3.sum(v, d => d.posti_letto_day_hospital),
   letti_ds: d3.sum(v, d => d.posti_letto_day_surgery),
@@ -118,7 +121,7 @@ Plot.plot({
   marginLeft: 200,
   y: {label: null, tickSize: 0},
   x: {grid: true, label: "Tasso di occupazione (%)", domain: [50, 90]},
-  color: {scheme: "RdYlGn", type: "diverging", domain: [50, 70, 90]},
+  color: {scheme: "RdYlGn", domain: [50, 90], legend: true},
   marks: [
     Plot.barX(perDisciplinaUtil, {
       y: "disciplina",
