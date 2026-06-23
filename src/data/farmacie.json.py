@@ -13,32 +13,33 @@ parquet_refs = " UNION ALL ".join(
     for y in YEARS
 )
 
+def _query(sql):
+    """Esegue SQL e restituisce lista di dict — senza pandas/numpy."""
+    rel = con.sql(sql)
+    cols = [desc[0] for desc in rel.description]
+    return [dict(zip(cols, row)) for row in rel.fetchall()]
+
 with safe_connect() as con:
-    # Dati per regione
-    per_regione = con.sql(f"""
+    per_regione = _query(f"""
         SELECT regione, COUNT(*) AS totale_farmacie,
                COUNT(DISTINCT comune) AS comuni_con_farmacie
         FROM ({parquet_refs})
         GROUP BY regione
         ORDER BY regione
-    """).fetchdf().to_dict(orient="records")
-
-    # Dati per tipologia
-    per_tipologia = con.sql(f"""
+    """)
+    per_tipologia = _query(f"""
         SELECT descrizione_tipologia, COUNT(*) AS totale
         FROM ({parquet_refs})
         GROUP BY descrizione_tipologia
         ORDER BY totale DESC
-    """).fetchdf().to_dict(orient="records")
-
-    # Dati per provincia (top 30)
-    per_provincia = con.sql(f"""
+    """)
+    per_provincia = _query(f"""
         SELECT provincia, sigla_provincia, regione, COUNT(*) AS totale
         FROM ({parquet_refs})
         GROUP BY provincia, sigla_provincia, regione
         ORDER BY totale DESC
         LIMIT 30
-    """).fetchdf().to_dict(orient="records")
+    """)
 
     # Anno
     anno = YEARS[0]
