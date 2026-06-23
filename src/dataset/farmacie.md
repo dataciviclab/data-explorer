@@ -85,12 +85,19 @@ Plot.plot({
       fill: d => lookup.get(normalizzaReg(d.properties.DEN_REG)),
       stroke: "#888",
       strokeWidth: 0.25,
-      tip: {format: {fill: d => num(d)}}
+      title: d => `${d.properties.DEN_REG}: ${num(lookup.get(normalizzaReg(d.properties.DEN_REG)))} farmacie`
     }),
-    Plot.geo(confiniReg, {
-      stroke: "#888",
-      strokeWidth: 0.7
-    })
+    Plot.geo(confiniReg, {stroke: "#888", strokeWidth: 0.7}),
+    Plot.tip(regioniGeo, Plot.pointer({
+      channels: {
+        regione: d => d.properties.DEN_REG,
+        farmacie: d => lookup.get(normalizzaReg(d.properties.DEN_REG))
+      },
+      format: {
+        regione: d => d,
+        farmacie: d => num(d) + " farmacie"
+      }
+    }))
   ]
 })
 ```

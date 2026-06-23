@@ -91,6 +91,10 @@ export default {
       {
         "name": "Posti letto ospedalieri",
         "path": "/dataset/posti-letto-stabilimento"
+      },
+      {
+        "name": "Farmacie italiane",
+        "path": "/dataset/farmacie"
       }
     ]
   },

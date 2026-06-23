@@ -173,8 +173,84 @@ Plot.plot({
       fontSize: 11
     }),
     Plot.ruleX([0])
+  ])
+})
+```
+
+---
+
+## Confronto regionale
+
+La distribuzione dei posti letto per disciplina varia significativamente tra regioni. La griglia sotto confronta le prime 6 regioni per numero di letti nelle principali discipline.
+
+```js
+const topDisciplineNazionali = perDisciplina.slice(0, 8).map(d => d.disciplina);
+const regioniTop6 = Array.from(d3.rollup(
+  data,
+  v => d3.sum(v, d => d.posti_letto_degenza_ordinaria),
+  d => d.regione
+))
+  .sort(([, a], [, b]) => d3.descending(a, b))
+  .slice(0, 6)
+  .map(([r]) => r);
+
+const dataSmallMultiple = data.filter(d =>
+  regioniTop6.includes(d.regione) && topDisciplineNazionali.includes(d.disciplina)
+);
+```
+
+```js
+Plot.plot({
+  title: "Posti letto ordinari — top 8 discipline per regione",
+  subtitle: "Prime 6 regioni per numero di letti",
+  width: 800,
+  height: 300,
+  marginLeft: 120,
+  fx: {label: null, tickRotate: -25},
+  y: {domain: topDisciplineNazionali.slice().reverse(), label: null},
+  marks: [
+    Plot.barX(dataSmallMultiple, {
+      y: "disciplina",
+      x: "posti_letto_degenza_ordinaria",
+      fx: "regione",
+      fill: "steelblue",
+      title: d => `${d.disciplina}: ${num(d.posti_letto_degenza_ordinaria)} letti`
+    }),
+    Plot.ruleX([0])
   ]
 })
+```
+
+```js
+const regioniList = Array.from(new Set(data.map(d => d.regione))).sort(d3.ascending);
+const regioneScelta = view(Inputs.select(["Tutte le regioni", ...regioniList], {label: "Filtra per regione", value: "Tutte le regioni"}));
+```
+
+```js
+if (regioneScelta !== "Tutte le regioni") {
+  const regData = data
+    .filter(d => d.regione === regioneScelta && topDisciplineNazionali.includes(d.disciplina))
+    .sort((a, b) => d3.descending(a.posti_letto_degenza_ordinaria, b.posti_letto_degenza_ordinaria));
+
+  display(Plot.plot({
+    title: `${regioneScelta} — posti letto ordinari per disciplina`,
+    width: 800,
+    height: 300,
+    marginLeft: 200,
+    y: {label: null, tickSize: 0},
+    x: {grid: true, tickFormat: "~s"},
+    marks: [
+      Plot.barX(regData, {
+        y: "disciplina",
+        x: "posti_letto_degenza_ordinaria",
+        fill: "steelblue",
+        sort: {y: "-x"},
+        title: d => `${num(d.posti_letto_degenza_ordinaria)} letti`
+      }),
+      Plot.ruleX([0])
+    ]
+  }))
+}
 ```
 
 ---
