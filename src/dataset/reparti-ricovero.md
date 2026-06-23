@@ -151,13 +151,11 @@ Plot.plot({
 La degenza media varia molto per specialità: pochi giorni per Ostetricia e Otorinolaringoiatria, settimane per Recupero e Riabilitazione e Lungodegenti.
 
 ```js
-const perDisciplinaDegenza = perDisciplina
-  .filter(d => d.letti_ordinari > 500)
-  .sort((a,b) => b.degenza_media - a.degenza_media);
-```
-
-```js
-Plot.plot({
+const pd = d3.sort(
+  perDisciplina.filter(d => d.letti_ordinari > 500),
+  d => -d.degenza_media
+);
+display(Plot.plot({
   title: "Degenza media ordinaria per disciplina (giorni) — 2022",
   width: 800,
   height: 400,
@@ -166,14 +164,14 @@ Plot.plot({
   x: {grid: true, label: "Degenza media (giorni)"},
   color: {scheme: "BuPu"},
   marks: [
-    Plot.barX(perDisciplinaDegenza, {
+    Plot.barX(pd, {
       y: "disciplina",
       x: "degenza_media",
       fill: "degenza_media",
       sort: {y: "-x"},
       tip: {format: {x: d => numFix(d, 1) + " giorni"}}
     }),
-    Plot.text(perDisciplinaDegenza, {
+    Plot.text(pd, {
       y: "disciplina",
       x: "degenza_media",
       text: d => numFix(d.degenza_media, 1),
@@ -183,8 +181,8 @@ Plot.plot({
       fontSize: 11
     }),
     Plot.ruleX([0])
-  ])
-})
+  ]
+}))
 ```
 
 ---
@@ -195,28 +193,28 @@ La distribuzione dei posti letto per disciplina varia significativamente tra reg
 
 ```js
 const topDisciplineNazionali = perDisciplina.slice(0, 8).map(d => d.disciplina);
-const regioniTop6 = Array.from(d3.rollup(
+const regioniTop = Array.from(d3.rollup(
   dataArricchiti,
   v => d3.sum(v, d => d.posti_letto_degenza_ordinaria),
   d => d.regione
 ))
   .sort(([, a], [, b]) => d3.descending(a, b))
-  .slice(0, 6)
+  .slice(0, 4)
   .map(([r]) => r);
 
 const dataSmallMultiple = dataArricchiti.filter(d =>
-  regioniTop6.includes(d.regione) && topDisciplineNazionali.includes(d.disciplina)
+  regioniTop.includes(d.regione) && topDisciplineNazionali.includes(d.disciplina)
 );
 ```
 
 ```js
 Plot.plot({
   title: "Posti letto ordinari — top 8 discipline per regione",
-  subtitle: "Prime 6 regioni per numero di letti",
-  width: 800,
+  subtitle: "Prime 4 regioni per numero di letti",
+  width: 900,
   height: 300,
-  marginLeft: 120,
-  fx: {label: null, tickRotate: -25},
+  marginLeft: 130,
+  fx: {label: null, tickRotate: 0},
   y: {domain: topDisciplineNazionali.slice().reverse(), label: null},
   marks: [
     Plot.barX(dataSmallMultiple, {
