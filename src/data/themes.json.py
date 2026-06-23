@@ -18,8 +18,13 @@ themes = [
     {
         "slug": "sanita",
         "name": "Sanità",
-        "description": "Spesa farmaceutica, consumi sanitari e prevenzione",
-        "datasets": ["spesa-farmaceutica", "bdap-lea"],
+        "description": "Spesa farmaceutica, strutture sanitarie e posti letto ospedalieri",
+        "datasets": [
+            "spesa-farmaceutica", "bdap-lea",
+            "strutture-asl", "strutture-ricovero-asl",
+            "reparti-ricovero", "posti-letto-stabilimento",
+            "farmacie",
+        ],
     },
     {
         "slug": "welfare-lavoro",
