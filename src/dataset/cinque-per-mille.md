@@ -96,7 +96,7 @@ Plot.plot({
 
 ## Dove va il 5x1000?
 
-L'81% delle risorse va agli enti del Terzo Settore (ETS e ONLUS). La ricerca sanitaria e scientifica assorbe un altro 16%. Sport, comuni e beni culturali pesano per il restante 3%.
+L'81% delle risorse va agli enti del Terzo Settore (ETS e ONLUS). La ricerca sanitaria e scientifica non ETS assorbe il 12%. Il restante 7% va a sport, comuni, beni culturali e aree protette.
 
 ```js
 Plot.plot({
