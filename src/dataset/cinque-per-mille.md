@@ -1,6 +1,6 @@
 ---
 title: 5x1000 — Beneficiari e importi per ente
-description: Oltre 90.000 enti che ricevono il 5x1000: importi per regione, categoria e singolo ente (Agenzia Entrate)
+description: "Oltre 90.000 enti che ricevono il 5x1000: importi per regione, categoria e singolo ente (Agenzia Entrate)"
 source: Agenzia delle Entrate
 source_url: https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000
 period: "2024"
