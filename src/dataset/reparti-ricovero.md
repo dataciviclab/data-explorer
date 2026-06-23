@@ -23,26 +23,33 @@ const data = await FileAttachment("../data/reparti-ricovero.json").json();
 ```
 
 ```js
-// Filtra outlier: tasso utilizzo > 100% indica dati anomali a livello di struttura
-const dataClean = data.filter(d => d.tasso_utilizzo <= 100);
+// NOTA: tasso_utilizzo nel dataset originale è pre-calcolato con formula diversa
+// dalla semplice occupazione letti. Per la visualizzazione calcoliamo il tasso
+// di occupazione standard: (letti_utilizzati / letti_disponibili) × 100
+const dataArricchiti = data.map(d => ({
+  ...d,
+  tasso_occupazione: d.posti_letto_degenza_ordinaria > 0
+    ? (d.posti_letto_utilizzati / d.posti_letto_degenza_ordinaria) * 100
+    : null
+}));
 
 // Aggregazione per disciplina
-const perDisciplina = Array.from(d3.rollup(dataClean, v => ({
+const perDisciplina = Array.from(d3.rollup(dataArricchiti, v => ({
   letti_ordinari: d3.sum(v, d => d.posti_letto_degenza_ordinaria),
   letti_dh: d3.sum(v, d => d.posti_letto_day_hospital),
   letti_ds: d3.sum(v, d => d.posti_letto_day_surgery),
   letti_util: d3.sum(v, d => d.posti_letto_utilizzati),
-  tasso_medio: d3.mean(v, d => d.tasso_utilizzo),
+  tasso_medio: d3.mean(v, d => d.tasso_occupazione),
   degenza_media: d3.mean(v, d => d.degenza_media_ordinaria),
 }), d => d.disciplina), ([disciplina, v]) => ({disciplina, ...v}))
   .sort((a,b) => b.letti_ordinari - a.letti_ordinari);
 
 const topDiscipline = perDisciplina.slice(0, 15);
 
-const totaleLettiOrd = d3.sum(data, d => d.posti_letto_degenza_ordinaria);
-const totaleLettiDH = d3.sum(data, d => d.posti_letto_day_hospital);
-const totaleLettiDS = d3.sum(data, d => d.posti_letto_day_surgery);
-const totaleLettiUtil = d3.sum(data, d => d.posti_letto_utilizzati);
+const totaleLettiOrd = d3.sum(dataArricchiti, d => d.posti_letto_degenza_ordinaria);
+const totaleLettiDH = d3.sum(dataArricchiti, d => d.posti_letto_day_hospital);
+const totaleLettiDS = d3.sum(dataArricchiti, d => d.posti_letto_day_surgery);
+const totaleLettiUtil = d3.sum(dataArricchiti, d => d.posti_letto_utilizzati);
 ```
 
 <div class="grid grid-cols-4">
@@ -189,7 +196,7 @@ La distribuzione dei posti letto per disciplina varia significativamente tra reg
 ```js
 const topDisciplineNazionali = perDisciplina.slice(0, 8).map(d => d.disciplina);
 const regioniTop6 = Array.from(d3.rollup(
-  data,
+  dataArricchiti,
   v => d3.sum(v, d => d.posti_letto_degenza_ordinaria),
   d => d.regione
 ))
@@ -197,7 +204,7 @@ const regioniTop6 = Array.from(d3.rollup(
   .slice(0, 6)
   .map(([r]) => r);
 
-const dataSmallMultiple = data.filter(d =>
+const dataSmallMultiple = dataArricchiti.filter(d =>
   regioniTop6.includes(d.regione) && topDisciplineNazionali.includes(d.disciplina)
 );
 ```
@@ -225,7 +232,7 @@ Plot.plot({
 ```
 
 ```js
-const regioniList = Array.from(new Set(data.map(d => d.regione))).sort(d3.ascending);
+const regioniList = Array.from(new Set(dataArricchiti.map(d => d.regione))).sort(d3.ascending);
 const regioneScelta = view(Inputs.select(["Tutte le regioni", ...regioniList], {label: "Filtra per regione", value: "Tutte le regioni"}));
 ```
 
@@ -233,6 +240,7 @@ const regioneScelta = view(Inputs.select(["Tutte le regioni", ...regioniList], {
 if (regioneScelta !== "Tutte le regioni") {
   const regData = data
     .filter(d => d.regione === regioneScelta && topDisciplineNazionali.includes(d.disciplina))
+    .map(d => ({...d, posti_letto_degenza_ordinaria: d.posti_letto_degenza_ordinaria}))
     .sort((a, b) => d3.descending(a.posti_letto_degenza_ordinaria, b.posti_letto_degenza_ordinaria));
 
   display(Plot.plot({
@@ -266,14 +274,14 @@ const { header, format } = tableFormat({
   disciplina: { label: "Disciplina", fmt: "string" },
   posti_letto_degenza_ordinaria: { label: "Letti ordinari", fmt: "num" },
   posti_letto_utilizzati: { label: "Letti utilizzati", fmt: "num" },
-  tasso_utilizzo: { label: "Tasso utilizzo %", fmt: "pct" },
+  tasso_occupazione: { label: "Tasso occupaz. %", fmt: "pct" },
   degenza_media_ordinaria: { label: "Degenza media (gg)", fmt: "num" },
 });
 ```
 
 ```js
-Inputs.table(data, {
-  columns: ["regione", "disciplina", "posti_letto_degenza_ordinaria", "posti_letto_day_hospital", "posti_letto_utilizzati", "tasso_utilizzo", "degenza_media_ordinaria"],
+Inputs.table(dataArricchiti, {
+  columns: ["regione", "disciplina", "posti_letto_degenza_ordinaria", "posti_letto_day_hospital", "posti_letto_utilizzati", "tasso_occupazione", "degenza_media_ordinaria"],
   header,
   format,
   rows: 20,
