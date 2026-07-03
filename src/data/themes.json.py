@@ -13,7 +13,7 @@ themes = [
         "slug": "finanza-pubblica",
         "name": "Finanza pubblica",
         "description": "Entrate dello Stato, capacità fiscale, tributi locali, FSC, politiche di coesione, partecipazioni PA e disuguaglianza del reddito",
-        "datasets": ["irpef-comunale", "entrate-stato", "consip-consumi-convenzione", "istat-gini-regionale", "opencivitas-fsc-2025", "opencoesione-progetti", "mef-partecipazioni", "bdap-spese-stato"],
+        "datasets": ["irpef-comunale", "entrate-stato", "consip-consumi-convenzione", "istat-gini-regionale", "opencivitas-fsc-2025", "opencoesione-progetti", "fts-eu-grants", "mef-partecipazioni", "bdap-spese-stato"],
     },
     {
         "slug": "sanita",
