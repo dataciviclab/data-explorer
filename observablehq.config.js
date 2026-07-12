@@ -23,6 +23,14 @@ export default {
       {
         "name": "Incidenti stradali",
         "path": "/dataset/mit-incidentalita"
+      },
+      {
+        "name": "Infrastrutture strategiche SILOS",
+        "path": "/dataset/silos-infrastrutture"
+      },
+      {
+        "name": "Emissioni GHG da processi energetici",
+        "path": "/dataset/ispra-emissioni-ghg"
       }
     ]
   },
@@ -55,6 +63,10 @@ export default {
         "path": "/dataset/opencoesione-progetti"
       },
       {
+        "name": "FTS EU Grants — Finanziamenti UE in Italia",
+        "path": "/dataset/fts-eu-grants"
+      },
+      {
         "name": "Partecipazioni pubbliche",
         "path": "/dataset/mef-partecipazioni"
       },
@@ -75,6 +87,26 @@ export default {
       {
         "name": "Spesa sanitaria regionale LEA",
         "path": "/dataset/bdap-lea"
+      },
+      {
+        "name": "Strutture e attività delle ASL",
+        "path": "/dataset/strutture-asl"
+      },
+      {
+        "name": "Strutture di ricovero del SSN",
+        "path": "/dataset/strutture-ricovero-asl"
+      },
+      {
+        "name": "Posti letto per disciplina ospedaliera",
+        "path": "/dataset/reparti-ricovero"
+      },
+      {
+        "name": "Posti letto ospedalieri",
+        "path": "/dataset/posti-letto-stabilimento"
+      },
+      {
+        "name": "Farmacie italiane",
+        "path": "/dataset/farmacie"
       }
     ]
   },
@@ -119,6 +151,16 @@ export default {
       {
         "name": "Flussi della giustizia civile",
         "path": "/dataset/flussi-giustizia-civile"
+      }
+    ]
+  },
+  {
+    "name": "Terzo settore",
+    "collapsible": true,
+    "pages": [
+      {
+        "name": "5x1000 — Beneficiari e importi per ente",
+        "path": "/dataset/cinque-per-mille"
       }
     ]
   },
