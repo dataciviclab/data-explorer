@@ -31,7 +31,7 @@
     "esbuild": "^0.28.1"
   },
   "devDependencies": {
-    "eslint": "^10.8.0",
+    "eslint": "^10.8.1",
     "git-remote-origin-url": "4.0.0",
     "globals": "^17.8.0"
   }
