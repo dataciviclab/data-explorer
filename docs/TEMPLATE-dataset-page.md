@@ -195,7 +195,7 @@ Inputs.table(filtered, {
 
 <!--
   CHECKLIST PRE-PUBBLICAZIONE
-  [ ] Slug DE e slug DI coincidono (vedi URL_SLUG_OVERRIDES in catalog.json.py)
+  [ ] Slug DE e slug DI coincidono (vedi URL_SLUG_OVERRIDES in src/data/_registry.py)
   [ ] Clean parquet pubblico esiste su GCS
   [ ] Data loader funziona (npm run dev)
   [ ] Frontmatter completo (title, description, source, source_url, period, last_modified, dataset_slug)

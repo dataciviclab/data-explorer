@@ -14,6 +14,7 @@ import {
   generateCatalogEntry,
   isNonEmptyString,
   fetchJson,
+  loadThemeCategories,
 } from "../scripts/generate_catalog.mjs";
 
 describe("isNonEmptyString()", () => {
@@ -44,6 +45,7 @@ describe("generateCatalogEntry()", () => {
     name: "Test Dataset",
     description: "Una descrizione",
     stage: "published",
+    category: "ambiente",
     period: { start: 2020, end: 2024 },
     source: "Fonte Test",
     source_id: "test-source",
@@ -54,13 +56,14 @@ describe("generateCatalogEntry()", () => {
   };
 
   it("produce entry completa con theme", () => {
-    const result = generateCatalogEntry(baseEntry, "economia");
+    const result = generateCatalogEntry(baseEntry, "territorio-ambiente");
 
     assert.equal(result.slug, "test-slug");
     assert.equal(result.name, "Test Dataset");
     assert.equal(result.description, "Una descrizione");
-    assert.equal(result.theme, "economia");
+    assert.equal(result.theme, "territorio-ambiente");
     assert.equal(result.stage, "published");
+    assert.equal(result.category, "ambiente");
     assert.deepEqual(result.years, [2020, 2021, 2022, 2023, 2024]);
     assert.equal(result.source, "Fonte Test");
     assert.equal(result.source_id, "test-source");
@@ -68,6 +71,12 @@ describe("generateCatalogEntry()", () => {
     assert.equal(result.columns.length, 2);
     assert.equal(result.columns[0].name, "anno");
     assert.equal(result.columns[1].role, "metric");
+  });
+
+  it("usa category null quando mancante", () => {
+    const entry = { ...baseEntry, category: undefined };
+    const result = generateCatalogEntry(entry, null);
+    assert.equal(result.category, null);
   });
 
   it("usa theme = null quando non fornito", () => {
@@ -118,6 +127,21 @@ describe("generateCatalogEntry()", () => {
     };
     const result = generateCatalogEntry(entry, null);
     assert.equal(result.columns[0].description, "");
+  });
+});
+
+describe("loadThemeCategories()", () => {
+  it("mappa le categorie registry verso i temi (config editoriale)", async () => {
+    const map = await loadThemeCategories();
+    assert.equal(map.get("ambiente"), "territorio-ambiente");
+    assert.equal(map.get("sanita"), "sanita");
+    assert.equal(map.get("finanza-pubblica"), "finanza-pubblica");
+  });
+
+  it("non mappa categorie fuori dalla config", async () => {
+    const map = await loadThemeCategories();
+    assert.equal(map.has("normativa"), false);
+    assert.equal(map.has("politica"), false);
   });
 });
 

@@ -22,6 +22,20 @@ Lo slug interno (con underscore, es. `aifa_spesa_consumo`) che identifica il par
 
 `_util.py` fornisce `load_dataset()` e `_parquet_exists()` per evitare di replicare logica GCS/DuckDB in ogni loader.
 
+## Catalogo e temi (dal registry)
+
+`catalog.json.py` e `themes.json.py` sono data loader "di sistema" che leggono il
+[fusion registry](https://github.com/dataciviclab/dataset-incubator/blob/main/registry/registry.json)
+di dataset-incubator e alimentano index, pagine tema e sidebar:
+
+- `_registry.py` — logica condivisa e testata: `load_registry()`, `resolve_url_slug()`
+  (URL_SLUG_OVERRIDES), `build_catalog()`, `build_themes()`
+- `catalog/themes.json` (repo root) — config editoriale dei temi: mappa `categories`
+  del registry → tema pubblico. Single source condivisa con `scripts/generate_catalog.mjs`
+
+I temi sono **dinamici**: un dataset entra in un tema se ha una pagina explorer
+(`src/dataset/<url-slug>.md`) e la sua `category` è mappata in `catalog/themes.json`.
+
 ## Moduli JS condivisi (`src/import/`)
 
 Dalla Fase 1 (2026-06), le pagine dataset possono importare moduli condivisi da `src/import/`:

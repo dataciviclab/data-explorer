@@ -56,27 +56,45 @@ function readPageTitle(slug) {
   return match ? match[1].trim() : slug;
 }
 
-function buildSidebar(themes, catalog) {
-  const pages = themes.map((t) => ({
-    name: t.name,
-    collapsible: true,
-    pages: t.datasets.map((slug) => ({
-      name: readPageTitle(slug),
-      path: `/dataset/${slug}`,
-    })),
-  }));
+/**
+ * Costruisce le sezioni tema della sidebar. I temi sono dinamici (category
+ * registry): vengono inclusi solo i dataset con una pagina explorer reale,
+ * evitando link rotti. I temi senza dataset con pagina vengono omessi.
+ *
+ * hasPage: callable slug → bool, iniettabile nei test (default: fs).
+ */
+export function resolveThemePages(themes, hasPage) {
+  return themes
+    .map((t) => {
+      const themePages = [];
+      for (const slug of t.datasets || []) {
+        if (!hasPage(slug)) {
+          console.warn(`  ⚠  tema ${t.name}: ${slug} senza pagina explorer (salta)`);
+          continue;
+        }
+        themePages.push({
+          name: readPageTitle(slug),
+          path: `/dataset/${slug}`,
+        });
+      }
+      if (themePages.length === 0) return null;
+      return { name: t.name, collapsible: true, pages: themePages };
+    })
+    .filter(Boolean);
+}
 
-  // Dataset pubblicati non assegnati a nessun tema → "Altri dataset"
-  // Solo se hanno una pagina .md corrispondente in src/dataset/
+function buildSidebar(themes, catalog) {
+  const pages = resolveThemePages(themes, (slug) =>
+    existsSync(resolve(ROOT, `src/dataset/${slug}.md`))
+  );
+
+  // Dataset con pagina explorer non assegnati a nessun tema → "Altri dataset"
+  // Invariante: ogni pagina .md in src/dataset/ deve comparire nella sidebar.
   const assigned = new Set(themes.flatMap((t) => t.datasets));
   const unassigned = catalog.datasets.filter((d) => {
-    if (d.stage !== "published") return false;
     if (assigned.has(d.url_slug)) return false;
     const pagePath = resolve(ROOT, `src/dataset/${d.url_slug}.md`);
-    if (!existsSync(pagePath)) {
-      console.warn(`  ⚠  ${d.url_slug}: pubblicato ma senza pagina explorer (salta)`);
-      return false;
-    }
+    if (!existsSync(pagePath)) return false;
     return true;
   });
   if (unassigned.length > 0) {

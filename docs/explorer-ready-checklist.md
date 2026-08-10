@@ -50,4 +50,4 @@ Nel Data Explorer entrano prima i dataset che si leggono bene, non quelli sempli
 ## Riferimento
 
 - `docs/dataset-page-standard.md` -- formato pagina
-- `dataset-incubator/registry/clean_catalog.schema.json` -- schema catalogo
+- `dataset-incubator/registry/registry.schema.json` -- schema registry (fusion)
