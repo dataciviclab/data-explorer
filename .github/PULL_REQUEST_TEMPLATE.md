@@ -21,7 +21,7 @@ Se la PR aggiunge un nuovo dataset in explorer:
 
 - [ ] **Data loader**: `src/data/<slug-url>.json.py` — usa `safe_connect()` (non `duckdb.connect()`)
 - [ ] **Pagina**: `src/dataset/<slug-url>.md` — usa moduli condivisi (`format-utils.js`, `geo-utils.js`)
-- [ ] **Tema**: aggiornato `src/data/themes.json.py` (sidebar auto-generata, non toccare `observablehq.config.js`)
+- [ ] **Tema**: tema dinamico — se la `category` del dataset non è mappata, aggiungila a `catalog/themes.json` (sidebar auto-generata, non toccare `observablehq.config.js`)
 - [ ] **Frontmatter**: `title`, `description`, `source`, `source_url`, `period`, `last_modified`, `dataset_slug`
 - [ ] **Sezione Limiti** obbligatoria (copertura, note metodologiche)
 - [ ] **Verifica**: `npm run lint` e `npm test` passano
@@ -34,7 +34,7 @@ Prima della review, verificare:
 - [ ] **`tableFormat` e `Inputs.table` in celle separate** (bug noto OF)
 - [ ] **Mappe**: usare `buildMapLookup()` (non `buildRegLookup` diretto)
 - [ ] **Niente `duckdb.connect()`** — usare `safe_connect()`
-- [ ] **Sidebar**: auto-generata da `themes.json.py` — non modificare `observablehq.config.js`
+- [ ] **Sidebar**: auto-generata da `themes.json` dinamico (registry `category` + `catalog/themes.json`) — non modificare `observablehq.config.js`
 
 ## Verifica
 

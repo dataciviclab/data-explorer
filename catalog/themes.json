@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "temi": [
+    {
+      "slug": "territorio-ambiente",
+      "name": "Territorio e ambiente",
+      "description": "Trasformazioni territoriali, ambiente, energia, rifiuti e sicurezza stradale",
+      "categories": ["ambiente", "energia", "trasporti"]
+    },
+    {
+      "slug": "finanza-pubblica",
+      "name": "Finanza pubblica",
+      "description": "Entrate dello Stato, capacità fiscale, tributi locali, FSC, politiche di coesione, partecipazioni PA e disuguaglianza del reddito",
+      "categories": ["finanza-pubblica", "economia", "appalti"]
+    },
+    {
+      "slug": "sanita",
+      "name": "Sanità",
+      "description": "Spesa farmaceutica, strutture sanitarie e posti letto ospedalieri",
+      "categories": ["sanita"]
+    },
+    {
+      "slug": "welfare-lavoro",
+      "name": "Welfare e lavoro",
+      "description": "Pubblico impiego, pensioni, istruzione e prezzi delle abitazioni",
+      "categories": ["welfare-lavoro", "istruzione"]
+    },
+    {
+      "slug": "giustizia",
+      "name": "Giustizia",
+      "description": "Flussi civili, tempi e carichi dei tribunali",
+      "categories": ["giustizia"]
+    },
+    {
+      "slug": "terzo-settore",
+      "name": "Terzo settore",
+      "description": "5x1000, enti non profit, flussi finanziari al terzo settore",
+      "categories": ["terzo-settore"]
+    }
+  ]
+}

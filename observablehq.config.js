@@ -9,16 +9,12 @@ export default {
     "collapsible": true,
     "pages": [
       {
+        "name": "Emissioni GHG da processi energetici",
+        "path": "/dataset/ispra-emissioni-ghg"
+      },
+      {
         "name": "Rifiuti urbani nei comuni",
         "path": "/dataset/rifiuti-urbani"
-      },
-      {
-        "name": "Capacità rinnovabile per regione",
-        "path": "/dataset/capacita-rinnovabile"
-      },
-      {
-        "name": "Produzione elettrica per fonte",
-        "path": "/dataset/produzione-elettrica-fonti"
       },
       {
         "name": "Incidenti stradali",
@@ -29,8 +25,12 @@ export default {
         "path": "/dataset/silos-infrastrutture"
       },
       {
-        "name": "Emissioni GHG da processi energetici",
-        "path": "/dataset/ispra-emissioni-ghg"
+        "name": "Capacità rinnovabile per regione",
+        "path": "/dataset/capacita-rinnovabile"
+      },
+      {
+        "name": "Produzione elettrica per fonte",
+        "path": "/dataset/produzione-elettrica-fonti"
       }
     ]
   },
@@ -39,20 +39,32 @@ export default {
     "collapsible": true,
     "pages": [
       {
-        "name": "IRPEF comunale",
-        "path": "/dataset/irpef-comunale"
-      },
-      {
         "name": "Entrate dello Stato",
         "path": "/dataset/entrate-stato"
+      },
+      {
+        "name": "Spese dello Stato",
+        "path": "/dataset/bdap-spese-stato"
       },
       {
         "name": "Consumi in convenzione Consip",
         "path": "/dataset/consip-consumi-convenzione"
       },
       {
+        "name": "FTS EU Grants — Finanziamenti UE in Italia",
+        "path": "/dataset/fts-eu-grants"
+      },
+      {
+        "name": "IRPEF comunale",
+        "path": "/dataset/irpef-comunale"
+      },
+      {
         "name": "Indice di Gini regionale",
         "path": "/dataset/istat-gini-regionale"
+      },
+      {
+        "name": "Partecipazioni pubbliche",
+        "path": "/dataset/mef-partecipazioni"
       },
       {
         "name": "Fondo di Solidarietà Comunale 2025",
@@ -61,18 +73,6 @@ export default {
       {
         "name": "OpenCoesione — Progetti delle politiche di coesione",
         "path": "/dataset/opencoesione-progetti"
-      },
-      {
-        "name": "FTS EU Grants — Finanziamenti UE in Italia",
-        "path": "/dataset/fts-eu-grants"
-      },
-      {
-        "name": "Partecipazioni pubbliche",
-        "path": "/dataset/mef-partecipazioni"
-      },
-      {
-        "name": "Spese dello Stato",
-        "path": "/dataset/bdap-spese-stato"
       }
     ]
   },
@@ -89,24 +89,24 @@ export default {
         "path": "/dataset/bdap-lea"
       },
       {
-        "name": "Strutture e attività delle ASL",
-        "path": "/dataset/strutture-asl"
-      },
-      {
-        "name": "Strutture di ricovero del SSN",
-        "path": "/dataset/strutture-ricovero-asl"
-      },
-      {
-        "name": "Posti letto per disciplina ospedaliera",
-        "path": "/dataset/reparti-ricovero"
+        "name": "Farmacie italiane",
+        "path": "/dataset/farmacie"
       },
       {
         "name": "Posti letto ospedalieri",
         "path": "/dataset/posti-letto-stabilimento"
       },
       {
-        "name": "Farmacie italiane",
-        "path": "/dataset/farmacie"
+        "name": "Posti letto per disciplina ospedaliera",
+        "path": "/dataset/reparti-ricovero"
+      },
+      {
+        "name": "Strutture e attività delle ASL",
+        "path": "/dataset/strutture-asl"
+      },
+      {
+        "name": "Strutture di ricovero del SSN",
+        "path": "/dataset/strutture-ricovero-asl"
       }
     ]
   },
@@ -123,24 +123,24 @@ export default {
         "path": "/dataset/pensioni-inps"
       },
       {
-        "name": "Pensioni Pubblica Amministrazione — DAG",
-        "path": "/dataset/pensioni-pa-dag"
+        "name": "Densità abitativa",
+        "path": "/dataset/housing-crowding"
       },
       {
         "name": "Indice prezzi abitazioni (IPAB) per area",
         "path": "/dataset/istat-ipab-aree"
       },
       {
-        "name": "Alunni per corso ed età",
-        "path": "/dataset/mim-alunni-corso-eta"
+        "name": "Pensioni Pubblica Amministrazione — DAG",
+        "path": "/dataset/pensioni-pa-dag"
       },
       {
         "name": "Popolazione italiana per età",
         "path": "/dataset/popolazione-istat"
       },
       {
-        "name": "Densità abitativa",
-        "path": "/dataset/housing-crowding"
+        "name": "Alunni per corso ed età",
+        "path": "/dataset/mim-alunni-corso-eta"
       }
     ]
   },

@@ -44,8 +44,10 @@ Apri http://localhost:3000
      `last_modified`, `dataset_slug`
    - primo blocco: distribuzione o stock base, non ranking o delta
    - sezione **Limiti** obbligatoria in fondo
-3. **Tema**: assegna il dataset a un tema in `src/data/themes.json.py` (o creane uno nuovo).
-   La sidebar si auto-genera — **non modificare** `observablehq.config.js` a mano.
+3. **Tema**: i temi sono **dinamici** — derivano dalla `category` del registry.
+   Per assegnare/creare un tema modifica `catalog/themes.json` (mappa
+   `categories` → tema). La sidebar e le pagine tema si auto-generano —
+   **non modificare** `observablehq.config.js` a mano.
 4. **Verifica**: `npm run lint && npm test && npm run build`
 5. **Checklist pre-pub** nel template PR: verificare slug, parquet, frontmatter,
    moduli condivisi, `tableFormat` in cella separata.
@@ -106,6 +108,6 @@ Prima di aprire una PR:
 
 - [`docs/`](docs/) — documentazione del repo
 - [`dataset-incubator`](https://github.com/dataciviclab/dataset-incubator) — pipeline e contratto tecnico
-- [`clean_catalog.json`](https://github.com/dataciviclab/dataset-incubator/blob/main/registry/clean_catalog.json) — catalogo dataset disponibili
+- [`registry/registry.json`](https://github.com/dataciviclab/dataset-incubator/blob/main/registry/registry.json) — registry dataset disponibili (fusion, con `category` per i temi)
 - [`lab-connectors`](https://github.com/dataciviclab/lab-connectors) — dipendenza per GCS e HTTP
 - [`.github`](https://github.com/dataciviclab/.github) — policy condivise
