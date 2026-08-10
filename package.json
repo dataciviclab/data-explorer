@@ -33,6 +33,6 @@
   "devDependencies": {
     "eslint": "^10.8.0",
     "git-remote-origin-url": "4.0.0",
-    "globals": "^17.8.0"
+    "globals": "^17.9.0"
   }
 }
