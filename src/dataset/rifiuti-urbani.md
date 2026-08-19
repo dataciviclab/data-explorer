@@ -111,9 +111,9 @@ Plot.plot({
 
 ---
 
-## 2. Grandi comuni (popolazione ≥ 100.000) — ${String(annoSel)}
+## 2. Grandi comuni — ${String(annoSel)}
 
-Nei grandi comuni il divario è ancora più netto. Alcuni comuni del Nord superano l'80% di differenziata, mentre altri restano sotto il 50%.
+Nei grandi comuni (popolazione ≥ 100000) il divario è ancora più netto. Alcuni comuni del Nord superano l'80% di differenziata, mentre altri restano sotto il 50%.
 
 ```js
 Plot.plot({
@@ -164,7 +164,7 @@ Inputs.table(regFiltered, {
 ## Limiti
 
 - **Copertura**: i dati coprono il periodo 2020-2024. I dati 2024 sono preliminari e potrebbero essere rivisti da ISPRA.
-- **Popolazione**: i dati comunali con popolazione ≥ 100.000 abitanti sono un sottoinsieme dei comuni italiani; non rappresentano l'intero territorio nazionale.
+- **Popolazione**: i dati comunali con popolazione ≥ 100000 abitanti sono un sottoinsieme dei comuni italiani; non rappresentano l'intero territorio nazionale.
 - **Percentuale RD**: calcolata come rapporto tra totale RD e totale RU. Variazioni nella metodologia di calcolo ISPRA tra anni possono influenzare il dato.
 
 ---
