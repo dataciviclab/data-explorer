@@ -6,11 +6,12 @@ source_url: https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?ling
 period: "2026"
 last_modified: 2026-06-20
 dataset_slug: farmacie
+data_driven: true
 ---
 
 # Farmacie italiane
 
-L'anagrafica completa delle farmacie italiane pubbliche e private: oltre 58.000 farmacie, dispensari e succursali su tutto il territorio nazionale. Per ogni farmacia sono disponibili indirizzo, coordinate geografiche, tipologia e periodo di attività. Dati aggiornati al 2026.
+L'anagrafica completa delle farmacie italiane pubbliche e private: oltre ${num(data.totale_farmacie)} farmacie, dispensari e succursali su tutto il territorio nazionale. Per ogni farmacia sono disponibili indirizzo, coordinate geografiche, tipologia e periodo di attività. Dati aggiornati al 2026.
 
 **Fonte**: Ministero della Salute · **Periodo**: 2026
 
@@ -52,6 +53,8 @@ const perRegioneUnificata = [
 
 const lookup = buildMapLookup(perRegioneUnificata, regioniGeo, "regione", "totale_farmacie", null, extraFallbacks);
 ```
+
+**L'Italia conta ${num(data.totale_farmacie)} farmacie, di cui la maggioranza ordinarie. La distribuzione segue la popolazione: le regioni più popolose hanno più farmacie.**
 
 <div class="grid grid-cols-3">
   <div class="card">
@@ -185,12 +188,13 @@ Inputs.table(per_provincia, {
 - **Copertura**: i dati sono aggiornati al 2026. Le farmacie con data di chiusura antecedente possono comunque comparire nel dataset (sono conservate le record storiche).
 - **Coordinate**: alcune farmacie potrebbero non avere coordinate geografiche (latitudine/longitudine non disponibili per tutti i record).
 - **Tipologia**: la classificazione della tipologia presenta alcune disomogeneità (es. "Dispensario" vs "Dispensario stagionale", maiuscole/minuscole). I dati sono normalizzati il più possibile in questa pagina.
-- **Doppi record**: una farmacia può avere più record se ha cambiato denominazione o gestione (date di validità multiple). Il conteggio totale (`58.691`) include queste variazioni.
+- **Doppi record**: una farmacia può avere più record se ha cambiato denominazione o gestione (date di validità multiple). Il conteggio totale (`${num(data.totale_farmacie)}`) include queste variazioni.
 
 ---
 
 ## Risorse
 
 - [Ministero della Salute — Open Data](https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?lingua=italiano&id=5551&area=Lea&menu=vuoto)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/farmacie/2026/farmacie_2026_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/farmacie)

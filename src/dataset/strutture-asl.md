@@ -6,6 +6,7 @@ source_url: https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?ling
 period: "2022"
 last_modified: 2026-06-05
 dataset_slug: strutture_asl
+data_driven: true
 ---
 
 # Strutture e attività delle ASL
@@ -60,6 +61,8 @@ const totaleRicette = d3.sum(data, d => d.euro_importo_ricette);
 const numAsl = data.length;
 ```
 
+**In Italia ci sono ${num(numAsl)} ASL con ${num(totaleMedici)} medici di base e ${num(totalePediatri)} pediatri per ${num(totaleResidenti)} residenti.**
+
 <div class="grid grid-cols-4">
   <div class="card">
     <h3>ASL</h3>
@@ -81,9 +84,9 @@ const numAsl = data.length;
 
 ---
 
-## Medici di base ogni 10.000 residenti
+## Medici di base ogni 10000 residenti
 
-Quanti medici di medicina generale servono la popolazione in ogni regione? La densità di medici di base varia sensibilmente sul territorio: si va dai circa 5 medici ogni 10.000 residenti di alcune regioni del Sud agli oltre 7 del Nord-Ovest.
+Quanti medici di medicina generale servono la popolazione in ogni regione? La densità di medici di base varia sensibilmente sul territorio: si va dai circa 5 medici ogni 10000 residenti di alcune regioni del Sud agli oltre 7 del Nord-Ovest.
 
 ```js
 Plot.plot({
@@ -138,7 +141,7 @@ Plot.plot({
 
 ---
 
-## Pediatri ogni 10.000 residenti in età infantile
+## Pediatri ogni 10000 residenti in età infantile
 
 La popolazione in età pediatrica (0-14 anni) è servita dai pediatri di libera scelta. Il rapporto pediatri/bambini è un indicatore importante della capacità del territorio di seguire la popolazione più giovane.
 
@@ -215,5 +218,6 @@ Inputs.table(data, {
 ## Risorse
 
 - [Ministero della Salute — Open Data Strutture e attività ASL](https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?lingua=italiano&id=5551&area=Lea&menu=vuoto)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/strutture_asl/2022/strutture_asl_2022_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/strutture-asl)
