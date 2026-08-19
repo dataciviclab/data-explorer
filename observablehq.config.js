@@ -162,7 +162,7 @@ export default {
     "collapsible": true,
     "pages": [
       {
-        "name": "5x1000 — Beneficiari e importi per ente",
+        "name": "5x1000 — beneficiari e importi per ente",
         "path": "/dataset/cinque-per-mille"
       }
     ]
