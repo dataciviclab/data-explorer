@@ -23,7 +23,7 @@ Playwright (`~/.cache/ms-playwright/`); se manca: `npx playwright install`.
 
    ```bash
    node scripts/verifica/verify-page.mjs [/dataset/slug]
-   # default: /dataset/anzianita
+   # default: /dataset/entrate-stato
    ```
 
    Configurabile via env:

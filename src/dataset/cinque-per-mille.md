@@ -185,6 +185,7 @@ Inputs.table(tableData, {
 ## Risorse
 
 - [Agenzia delle Entrate — 5x1000 (fonte originale)](https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/ade_cinque_per_mille/2024/ade_cinque_per_mille_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/ade-cinque-per-mille)
 Nel ${anno} le entrate erogabili valgono **${euroCompact(importoTot)}** distribuite a **${num(numEnti)}** enti (in media **${euroCompact(importoMedio)}** a ente, ma la media nasconde una concentrazione estrema). La top 10 degli enti assorbe da sola **${pct(quotaTop10)}** del totale, e la regione in testa, **${topReg.regione.toLowerCase()}**, pesa da sola il **${pct(qTotale(topReg.importo_totale, importoTot))}**.
