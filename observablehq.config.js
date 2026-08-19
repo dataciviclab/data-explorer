@@ -3,6 +3,9 @@ export default {
   output: "dist/observable",
   title: "DataCivicLab Explorer",
   theme: ["air", "ocean-floor"],
+  interpreters: {
+    ".py": ["python3"]
+  },
   pages: [
   {
     "name": "Territorio e ambiente",

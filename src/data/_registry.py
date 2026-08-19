@@ -1,26 +1,47 @@
 #!/usr/bin/env python3
-"""Registry dataset-incubator → catalogo e temi explorer.
+"""Registry multi-repo (fusion) → catalogo e temi explorer.
 
 Helper condiviso dai data loader `catalog.json.py` e `themes.json.py`.
 
-Legge il registry fusion di dataset-incubator (`registry/registry.json`),
-risolve gli URL slug editoriali (URL_SLUG_OVERRIDES) e deriva i temi dal
-campo `category` di ogni dataset usando la config editoriale
-`catalog/themes.json` (single source of truth).
+Legge i registry fusion di TUTTI i repo del Lab (ogni repo committa
+`registry/registry.json`, fusion ADR), li fonde in un unico catalogo e
+risolve gli URL slug editoriali (URL_SLUG_OVERRIDES) e i temi dal campo
+`category` di ogni dataset usando la config editoriale `catalog/themes.json`
+(single source of truth).
+
+## Fusion e dedup
+
+REGISTRY_REPOS è ordinato per priorità: in caso di slug duplicato tra repo
+(es. migrazioni dataset-incubator → open-politica), vince il repo che compare
+per primo. Ogni entry del catalogo porta `registry_source` (repo di provenienza).
 
 Contratto registry (schema_version 1):
   datasets[]: slug, name, description, source, source_id, period,
               columns[] (name, type, role, semantic_type), location,
-              stage, registry_source, tags, category, mart_refs, run
+              stage, tags, category, mart_refs, run
 """
 import json
 import os
 
 import requests
 
-REGISTRY_URL = (
+# Repo con registry fusion (priorità decrescente in caso di slug duplicato).
+# dataset-incubator primo: è la fonte storica con stage published; gli altri
+# repo (dominio) entrano con i loro slug unici. Se un slug duplicato diventa
+# canonicale in un altro repo, sposta quel repo sopra in questa lista.
+REGISTRY_REPOS = [
+    "dataset-incubator",
+    "open-politica",
+    "open-conto-annuale",
+    "eurostat",
+    "dcl-bologna",
+    "open-siope",
+    "rna-aiuti-stato",
+]
+
+REGISTRY_URL_TEMPLATE = (
     "https://raw.githubusercontent.com/dataciviclab/"
-    "dataset-incubator/main/registry/registry.json"
+    "{repo}/main/registry/registry.json"
 )
 
 # ROOT: repo root, calcolato da __file__ per non dipendere dal cwd
@@ -56,7 +77,7 @@ URL_SLUG_OVERRIDES = {
     "popolazione_istat_comunale_2019_2025": "popolazione-istat",  # editoriale: slug pagina ereditato
 }
 
-# Cache di processo: il registry viene caricato una volta per processo.
+# Cache di processo: i registry vengono caricati una volta per processo.
 _REGISTRY_CACHE: dict | None = None
 
 
@@ -67,12 +88,60 @@ def fetch_json(url: str) -> dict:
     return r.json()
 
 
+def _registry_url(repo: str) -> str:
+    """URL raw del registry fusion di un repo."""
+    return REGISTRY_URL_TEMPLATE.format(repo=repo)
+
+
 def load_registry() -> dict:
-    """Carica il registry dataset-incubator (cache di processo)."""
+    """Carica e fonde i registry di tutti i repo (cache di processo).
+
+    Ritorna un dict con la stessa forma di un registry singolo (schema v1):
+      - datasets[]: dedup per slug, con priorità = ordine REGISTRY_REPOS,
+        ogni entry arricchita con `registry_source` (repo di provenienza)
+      - updated_at: il più recente tra i repo
+      - repos[]: lista dei repo letti
+    """
     global _REGISTRY_CACHE
     if _REGISTRY_CACHE is None:
-        _REGISTRY_CACHE = fetch_json(REGISTRY_URL)
+        _REGISTRY_CACHE = fuse_registries(REGISTRY_REPOS)
     return _REGISTRY_CACHE
+
+
+def fuse_registries(repos: list[str] | None = None) -> dict:
+    """Fonde i registry dei repo: dedup per slug, priorità = ordine lista.
+
+    Il primo repo che contiene uno slug vince; alle entry vinte viene
+    aggiunto `registry_source` (nome repo). I repo senza registry.json
+    (non pubblicato o unreachable) vengono saltati senza errore.
+    """
+    repos = repos or REGISTRY_REPOS
+    seen: set[str] = set()
+    datasets: list[dict] = []
+    updated_at: str | None = None
+
+    for repo in repos:
+        try:
+            payload = fetch_json(_registry_url(repo))
+        except Exception:
+            # Repo senza registry o unreachable: lo saltiamo, il resto funziona.
+            continue
+        for ds in payload.get("datasets", []):
+            slug = ds["slug"]
+            if slug in seen:
+                continue
+            seen.add(slug)
+            datasets.append({**ds, "registry_source": repo})
+        repo_updated = payload.get("updated_at", "")
+        if repo_updated and (updated_at is None or repo_updated > updated_at):
+            updated_at = repo_updated
+
+    return {
+        "schema_version": 1,
+        "updated_at": updated_at or "",
+        "repos": repos,
+        "datasets": datasets,
+    }
 
 
 def resolve_url_slug(di_slug: str) -> str:
@@ -110,7 +179,9 @@ def build_catalog(registry: dict | None = None) -> dict:
     """Costruisce il catalogo explorer (output di catalog.json.py).
 
     Ogni entry espone slug DI + url_slug DE (URL_SLUG_OVERRIDES), stato,
-    periodo e metadati editoriali (category, tags) del registry.
+    periodo, metadati editoriali (category, tags), il repo di provenienza
+    (registry_source), il location GCS e le colonne (con role/semantic_type)
+    per il rendering data-driven delle pagine.
     Consumato da index, temi page e generate-config (sidebar).
     """
     if registry is None:
@@ -128,10 +199,23 @@ def build_catalog(registry: dict | None = None) -> dict:
             "description": ds.get("description", "")[:150],
             "stage": ds.get("stage", ""),
             "years": f"{period.get('start', '?')}–{period.get('end', '?')}" if period else "?",
+            "period": {"start": period.get("start"), "end": period.get("end")},
             "source": ds.get("source", ""),
             "source_id": ds.get("source_id", ""),
             "category": ds.get("category", ""),
             "tags": ds.get("tags", []),
+            "registry_source": ds.get("registry_source", ""),
+            "location": ds.get("location", {}),
+            "columns": [
+                {
+                    "name": c.get("name"),
+                    "type": c.get("type"),
+                    "role": c.get("role", ""),
+                    "semantic_type": c.get("semantic_type", ""),
+                    "description": c.get("description", ""),
+                }
+                for c in ds.get("columns", [])
+            ],
         })
     return {
         "updated_at": registry.get("updated_at", ""),

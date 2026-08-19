@@ -90,6 +90,144 @@ class TestParquetExists:
                 assert called_key == "test-slug/2023/test-slug_2023_clean.parquet"
 
 
+# ── location / _parquet_refs ────────────────────────────────────────────────
+
+
+class TestLocationHttpsPrefix:
+    """Contratto: _location_https_prefix deriva il prefix HTTPS dal location registry."""
+
+    def _prefix(self, location):
+        from src.data._util import _location_https_prefix
+
+        return _location_https_prefix(location, "test-slug")
+
+    def test_no_location_returns_none(self):
+        assert self._prefix(None) is None
+        assert self._prefix({}) is None
+
+    def test_non_gs_path_returns_none(self):
+        assert self._prefix({"path": "https://example.com/x"}) is None
+
+    def test_simple_slug(self):
+        loc = {"path": f"gs://{CLEAN_BUCKET}/test-slug/2023/test-slug_2023_clean.parquet"}
+        assert self._prefix(loc) == (
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/test-slug"
+        )
+
+    def test_prefixed_repo(self):
+        loc = {"path": f"gs://{CLEAN_BUCKET}/conto-annuale/anzianita/2023/anzianita_2023_clean.parquet"}
+        assert self._prefix(loc) == (
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/conto-annuale/anzianita"
+        )
+
+    def test_year_in_middle(self):
+        loc = {"path": f"gs://{CLEAN_BUCKET}/a/b/2020/c/d.parquet"}
+        assert self._prefix(loc) == (
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/a/b"
+        )
+
+
+class TestParquetRefs:
+    """Contratto: _parquet_refs produce una ref HTTPS per anno dal location."""
+
+    def _refs(self, slug, years, location=None):
+        from src.data._util import _parquet_refs
+
+        return _parquet_refs(slug, years, location)
+
+    def test_canonical_fallback(self):
+        refs = self._refs("test-slug", [2022, 2023])
+        assert refs == [
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/test-slug/2022/test-slug_2022_clean.parquet",
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/test-slug/2023/test-slug_2023_clean.parquet",
+        ]
+
+    def test_from_location_prefixed(self):
+        loc = {"path": f"gs://{CLEAN_BUCKET}/siope/siope_x/2026/siope_x_2026_clean.parquet"}
+        refs = self._refs("siope_x", [2026], loc)
+        assert refs == [
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/siope/siope_x/2026/siope_x_2026_clean.parquet"
+        ]
+
+    def test_multi_file_glob_per_year(self):
+        loc = {
+            "path": f"gs://{CLEAN_BUCKET}/conto-annuale/anzianita/*/anzianita_*_clean.parquet",
+            "multi_file": True,
+        }
+        refs = self._refs("anzianita", [2023, 2024], loc)
+        assert refs == [
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/conto-annuale/anzianita/2023/anzianita_2023_clean.parquet",
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/conto-annuale/anzianita/2024/anzianita_2024_clean.parquet",
+        ]
+
+
+class TestTargetPath:
+    """Contratto: _target_path deriva la key GCS dal location (prefix e multi_file)."""
+
+    def _path(self, slug, year, location=None):
+        from src.data._util import _target_path
+
+        return _target_path(slug, year, location)
+
+    def test_canonical_fallback(self):
+        assert self._path("test-slug", 2023) == "test-slug/2023/test-slug_2023_clean.parquet"
+
+    def test_prefixed(self):
+        loc = {"path": f"gs://{CLEAN_BUCKET}/siope/siope_x/2026/siope_x_2026_clean.parquet"}
+        assert self._path("siope_x", 2026, loc) == "siope/siope_x/2026/siope_x_2026_clean.parquet"
+
+    def test_multi_file(self):
+        loc = {
+            "path": f"gs://{CLEAN_BUCKET}/conto-annuale/anzianita/*/anzianita_*_clean.parquet",
+            "multi_file": True,
+        }
+        assert self._path("anzianita", 2024, loc) == (
+            "conto-annuale/anzianita/2024/anzianita_2024_clean.parquet"
+        )
+
+
+class TestRawSample:
+    """Contratto: raw_sample produce JSON raw distribuito tra gli anni."""
+
+    def setup_method(self):
+        self._saved_stdout = sys.stdout
+
+    def teardown_method(self):
+        sys.stdout = self._saved_stdout
+
+    @patch("src.data._util.safe_connect")
+    @patch("src.data._util._parquet_exists", return_value=True)
+    @patch("src.data._util._parquet_refs", return_value=["ref1", "ref2"])
+    def test_distributes_sample_per_year(self, mock_refs, mock_exists, mock_safe_connect):
+        """Con più refs, il campione è distribuito con USING SAMPLE per-anno."""
+        con = MagicMock()
+        con.sql.return_value.description = [("anno",), ("valore",)]
+        con.sql.return_value.fetchall.return_value = [("2020", 1.0), ("2021", 2.0)]
+        mock_safe_connect.return_value.__enter__.return_value = con
+        from src.data._util import raw_sample
+
+        buf = io.StringIO()
+        sys.stdout = buf
+        raw_sample("test-slug", [2020, 2021], limit=1000)
+
+        sql_call = con.sql.call_args_list[0][0][0]
+        assert "USING SAMPLE 500 ROWS" in sql_call  # 1000 / 2 refs
+        output = json.loads(buf.getvalue())
+        assert len(output) == 2
+        assert output[0]["valore"] == 1
+
+    @patch("src.data._util.safe_connect")
+    @patch("src.data._util._parquet_exists", return_value=False)
+    def test_empty_when_no_years(self, mock_exists, mock_safe_connect):
+        from src.data._util import raw_sample
+
+        buf = io.StringIO()
+        sys.stdout = buf
+        raw_sample("test-slug", [2020, 2021])
+        assert json.loads(buf.getvalue()) == []
+        mock_safe_connect.assert_not_called()
+
+
 # ── load_dataset ─────────────────────────────────────────────────────────────
 
 
@@ -143,7 +281,7 @@ class TestLoadDataset:
         assert "test-slug" in sql_call
 
     @patch("src.data._util.safe_connect")
-    @patch("src.data._util._parquet_exists", side_effect=lambda s, y: y == 2021)
+    @patch("src.data._util._parquet_exists", side_effect=lambda s, y, loc=None: y == 2021)
     def test_skips_missing_years(self, mock_exists, mock_safe_connect, mock_con):
         """Anno senza parquet → saltato, no errore."""
         mock_safe_connect.return_value.__enter__.return_value = mock_con

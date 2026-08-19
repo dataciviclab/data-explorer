@@ -124,6 +124,9 @@ try {
   output: "dist/observable",
   title: "DataCivicLab Explorer",
   theme: ["air", "ocean-floor"],
+  interpreters: {
+    ".py": ${JSON.stringify((process.env.PYTHON3 || "python3").split(/\s+/))}
+  },
   pages: ${JSON.stringify(pages, null, 2)},
 };
 `;

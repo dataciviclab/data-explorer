@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Data loader: catalogo explorer derivato dal registry dataset-incubator.
+"""Data loader: catalogo explorer dai registry multi-repo (fusion).
 
-Legge registry/registry.json (fusion registry) e produce il catalogo
-esposto al frontend (index, temi page, sidebar build). La logica di
-costruzione è in _registry.build_catalog() (testabile e condivisa).
+Legge i registry.json di TUTTI i repo del Lab (fusion ADR) e produce il
+catalogo esposto al frontend (index, temi page, sidebar build). La logica
+di costruzione è in _registry.fuse_registries()/build_catalog() (testabile
+e condivisa).
 """
 import json
 import sys
