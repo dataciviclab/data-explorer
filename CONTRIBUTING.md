@@ -11,8 +11,9 @@ Per le regole GitHub condivise dell'organizzazione, parti prima da
 
 Ogni pagina dataset ha:
 - un **data loader** Python che interroga il parquet e produce JSON aggregato
-- un **file `.md`** Observable che definisce layout, grafici e tabelle
-- una **voce nel config** `observablehq.config.js` per la navigazione
+- un **file `.md`** Observable (modello *narrativo data-driven*) che definisce KPI, grafici e tabelle
+- la navigazione è **auto-generata** dal registry: la sidebar nasce da `scripts/generate-config.mjs`
+  (legge `src/dataset/*.md` + catalog) — **non si modifica** `observablehq.config.js` a mano
 
 Qui **non** stanno:
 - pipeline o trasformazione dati (vedi [`dataset-incubator`](https://github.com/dataciviclab/dataset-incubator))
@@ -86,6 +87,22 @@ Prima di proporre una nuova pagina, controlla:
 - [`docs/TEMPLATE-dataset-page.md`](docs/TEMPLATE-dataset-page.md) — template operativo
 
 Il principio guida: *nel Data Explorer entrano prima i dataset che si leggono bene, non quelli semplicemente disponibili.*
+
+### Modello narrativo data-driven (standard pagina)
+
+Le pagine non riportano **numeri scritti a mano**: KPI e frasi con dati citano variabili calcolate dai data loader, così la pagina si aggiorna da sola quando si ripubblica il parquet. Esempio: `Nel ${last} le entrate valgono ${euroCompact(totaleLast)}`.
+
+Struttura tipo (dataset-first, in quest'ordine):
+1. frontmatter + intro con la "domanda" e i numeri chiave (da dati)
+2. blocco **base**: la distribuzione naturale del dataset nell'anno più recente
+3. blocco **derivato**: trend/confronti (es. soglie, pre/post evento)
+4. eventuale blocco secondario di lettura
+5. tabella finale ricercabile + `Limiti` + `Risorse`
+
+Pagine di riferimento (canoniche):
+- `src/dataset/entrate-stato.md` — serie, KPI, soglia 50%, confronto pre/post
+- `src/dataset/cinque-per-mille.md` — mappa coropletica + categorie + concentrazione
+- `src/dataset/dipendenti-pubblici.md` — stock + trend + composizione (genere)
 
 ## Quando aprire una issue
 

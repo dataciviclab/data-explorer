@@ -118,6 +118,16 @@ Regole:
 
 Meglio una pagina con una sola lettura forte e pulita che una pagina con molte query deboli.
 
+## Narrativa data-driven
+
+I numeri nelle pagine **non sono hardcoded**: ogni KPI o cifra nel testo cita una variabile calcolata dal data loader a build-time, così la pagina si aggiorna da sola quando si ripubblica il parquet.
+
+- **KPI card**: 3-4 metriche chiave dal parquet (totale anno più recente, quota, variazione).
+- **Frasi con numeri**: `es. Nel ${last} le entrate valgono ${euroCompact(totaleLast)}` — mai il numero scritto a mano.
+- **Blocco base** = la forma naturale del dataset (mappa, composizione, stock) **prima** di trend e letture derivate.
+- **Moduli condivisi**: `format-utils.js` (`num`, `euro`, `euroCompact`, `pct`, `numFix`, `tableFormat`); `geo-utils.js` (`loadItalianRegions` + `buildMapLookup`) solo se serve la mappa; `tableFormat` e `Inputs.table` in **celle separate**.
+- **Riferimenti canonici**: `entrate-stato.md`, `cinque-per-mille.md`, `dipendenti-pubblici.md`.
+
 ## Confine editoriale
 
 | Posizione | Contenuto |
