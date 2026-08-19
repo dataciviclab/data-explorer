@@ -191,7 +191,13 @@ Inputs.table(filtered, {
 - [Fonte originale]({source_url})
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/{slug_gcs}/{anno}/{slug_gcs}_{anno}_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/{slug_candidate})
-- [Analisi collegate](/analisi/{slug-analisi}) <!-- se esistono -->
+
+<!--
+  ANALISI
+  Le analisi del Lab ora vivono nel Data Explorer come pagine vivaci (data-driven).
+  Se questa pagina è la "versione esplorante" di un'analisi, aggiungi qui un link
+  alla/alle altre pagine/temi correlati, non al repo hub.
+-->
 
 <!--
   CHECKLIST PRE-PUBBLICAZIONE

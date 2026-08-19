@@ -177,14 +177,13 @@ Inputs.table(tableData, {
 
 ## Limiti
 
-- **Copertura**: la pagina mostra i dati del ${anno}; gli anni precedenti/successivi sono nell'[analisi del Lab](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/cinque-per-mille), che copre il triennio 2023–2025.
+- **Copertura**: la pagina mostra i dati del solo ${anno}. Gli anni 2023 e 2025 non sono ancora presenti in questa pagina.
 - **Dettaglio ente**: la denominazione può contenere refusi o caratteri anomali (es. "Bambin Ges?") ereditati dai CSV originali dell'Agenzia delle Entrate.
 - **Categorie non esclusive**: un ente può avere più attributi (es. ETS che fa anche ricerca) ed è assegnato a una categoria prevalente; l'importo è quello *erogabile* calcolato dall'Agenzia, non necessariamente l'erogato.
 
 ## Risorse
 
 - [Agenzia delle Entrate — 5x1000 (fonte originale)](https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000)
-- [Analisi del Lab — "5x1000: €601 milioni record nel 2025"](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/cinque-per-mille)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/ade_cinque_per_mille/2024/ade_cinque_per_mille_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/ade-cinque-per-mille)
 Nel ${anno} le entrate erogabili valgono **${euroCompact(importoTot)}** distribuite a **${num(numEnti)}** enti (in media **${euroCompact(importoMedio)}** a ente, ma la media nasconde una concentrazione estrema). La top 10 degli enti assorbe da sola **${pct(quotaTop10)}** del totale, e la regione in testa, **${topReg.regione.toLowerCase()}**, pesa da sola il **${pct(qTotale(topReg.importo_totale, importoTot))}**.

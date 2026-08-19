@@ -17,7 +17,7 @@ Ogni pagina dataset ha:
 
 Qui **non** stanno:
 - pipeline o trasformazione dati (vedi [`dataset-incubator`](https://github.com/dataciviclab/dataset-incubator))
-- analisi o notebook (vedi [`dataciviclab/analisi/`](https://github.com/dataciviclab/dataciviclab/tree/main/analisi))
+- notebook estesi ("quaderni" lunghi): la forma notebook resta nel repo hub; nel Data Explorer le analisi diventano **pagine vivaci data-driven** (vedi "Standard pagina" sotto)
 
 ## Setup locale
 

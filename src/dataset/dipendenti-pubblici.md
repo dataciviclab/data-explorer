@@ -155,7 +155,7 @@ const { header, format } = tableFormat({
 ```js
 const compartiList = ["Tutti", ...new Set(data.map(d => d.comparto).sort())];
 const compSel = view(Inputs.select(compartiList, {label: "Comparto", value: "Tutti"}));
-const tableData = compSel === "Tutti" ? data : data.filter(d => d.comparto === compSel);
+const tableData = (!compSel || compSel === "Tutti") ? (data || []) : (data || []).filter(d => d.comparto === compSel);
 ```
 
 ```js
@@ -176,6 +176,5 @@ Inputs.table(tableData, {
 ## Risorse
 
 - [MEF · RGS · BDAP (fonte originale)](https://www.rgs.mef.gov.it/)
-- [Analisi del Lab — "Dipendenti pubblici: il declino, la svolta, i conti in tasca"](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/dipendenti-pubblici)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2023/dipendenti_pubblici_2023_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/dipendenti-pubblici)

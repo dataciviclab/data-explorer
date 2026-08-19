@@ -189,6 +189,5 @@ Inputs.table(table, {
 ## Risorse
 
 - [RGS · BDAP — fonte originale](https://bdap.rgs.mef.gov.it/)
-- [Analisi del Lab — "BDAP Entrate Stato 2008-2024, il peso dei prestiti raddoppia"](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/entrate-stato)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_entrate_stato/2024/bdap_entrate_stato_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-entrate-stato)
