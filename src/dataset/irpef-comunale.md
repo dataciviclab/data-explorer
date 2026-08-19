@@ -51,9 +51,9 @@ const aggre = (l) => ({
   contribuenti: d3.sum(l, r => r.numero_contribuenti)
 });
 const perRegione = [
-  ...regLast.filter(r => !/P\.A\./.test(r.regione)),
-  ...(adige.length ? [{ regione: "TRENTINO-ALTO-ADIGE", ...aggre(adige) }] : [])
-].map(r => ({ regione: r.regione, reddito_medio: r.contribuenti ? r.reddito / r.contribuenti : null }));
+  ...regLast.filter(r => !/P\.A\./.test(r.regione)).map(r => ({ regione: r.regione, reddito_medio: r.numero_contribuenti ? r.reddito_imponibile_eur / r.numero_contribuenti : null })),
+  ...(adige.length ? [(() => { const a = aggre(adige); return { regione: "TRENTINO-ALTO-ADIGE", reddito_medio: a.contribuenti ? a.reddito / a.contribuenti : null }; })()] : [])
+];
 const lookup = buildMapLookup(perRegione, regioniGeo, "regione", "reddito_medio");
 const topReg = [...perRegione].sort((a, b) => (b.reddito_medio ?? 0) - (a.reddito_medio ?? 0))[0];
 ```
