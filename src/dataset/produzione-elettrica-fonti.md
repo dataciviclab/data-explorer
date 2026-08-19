@@ -64,6 +64,8 @@ const perRegione = Array.from(
   <div class="card"><h3>Termoelettrico</h3><span class="big">${termoD >= 0 ? "+" : ""}${numFix(termoD, 0)}%</span></div>
 </div>
 
+Dal **${first}** al **${last}** la produzione totale è passata da **${numFix(tot2015 / 1000, 0)} a ${numFix(totLast / 1000, 0)} TWh** (${deltaTot >= 0 ? "+" : ""}${numFix(deltaTot, 1)}%). Al netto dell'oscillazione idrica (clima), la composizione è cambiata in modo strutturale: <strong>il termoelettrico perde ${numFix(termoShareAt(first) - termoShareAt(last), 0)} punti di quota</strong>, il fotovoltaico (${numFix(fvD, 0)}%) e l'eolico (${numFix(eolD, 0)}%) guadagnano.
+
 ## 1. Il mix di oggi — produzione per fonte (${last})
 
 La composizione della produzione netta nel ${last} è ancora dominata dal termoelettrico, ma le rinnovabili valgono ormai ${pct(rSLast)} del totale. Questa è la "fotografia" del mix; come è cambiata nel tempo lo mostra il blocco seguente.
@@ -165,4 +167,3 @@ Inputs.table(searchQuery, {
 - [Terna (fonte originale)](https://www.terna.it/)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/terna-electricity-by-source)
-Dal **${first}** al **${last}** la produzione totale è passata da **${numFix(tot2015 / 1000, 0)} a ${numFix(totLast / 1000, 0)} TWh** (${deltaTot >= 0 ? "+" : ""}${numFix(deltaTot, 1)}%). Al netto dell'oscillazione idrica (clima), la composizione è cambiata in modo strutturale: <strong>il termoelettrico perde ${numFix(termoShareAt(first) - termoShareAt(last), 0)} punti di quota</strong>, il fotovoltaico (${numFix(fvD, 0)}%) e l'eolico (${numFix(eolD, 0)}%) guadagnano.
