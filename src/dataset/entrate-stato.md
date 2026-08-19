@@ -10,7 +10,7 @@ dataset_slug: bdap_entrate_stato
 
 # Entrate dello Stato — come si finanzia il bilancio
 
-**In 16 anni le entrate tributarie sono cresciute del 37%, ma le accensioni di prestiti sono raddoppiate (+119%). Dal 2020 lo Stato si finanzia con debito quasi quanto con le tasse: la quota delle entrate tributarie sul totale è passata dal 61,9% al 49,3%, scendendo per quattro anni su cinque sotto la soglia del 50%.**
+**In ${last - first} anni le entrate tributarie sono cresciute del ${numFix(deltaTrib, 0)}%, ma le accensioni di prestiti sono più che raddoppiate (+${numFix(deltaPres, 0)}%). Dal 2020 lo Stato si finanzia con debito quasi quanto con le tasse: la quota delle entrate tributarie sul totale è passata dal ${pct(pctTrib2008)} al ${pct(pctTribLast)}, scendendo per quattro anni su cinque sotto la soglia del 50%.**
 
 Previsioni definitive di **entrata dello Stato per titolo**, dal bilancio dello Stato (BDAP — RGS MEF). Ogni numero di questa pagina è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 

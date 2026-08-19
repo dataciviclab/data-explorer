@@ -1,6 +1,6 @@
 ---
 title: 5x1000 — beneficiari e importi per ente
-description: "Il 5x1000 del 2024: oltre €522 milioni a 90.611 enti, per territorio, categoria e singolo ente (Agenzia delle Entrate)"
+description: "Il 5x1000: come si distribuisce il fondo per territorio, categoria e singolo ente (Agenzia delle Entrate)"
 source: Agenzia delle Entrate
 source_url: https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000
 period: "2024"
@@ -10,7 +10,7 @@ dataset_slug: ade_cinque_per_mille
 
 # 5x1000 — dove vanno i soldi della tua firma
 
-**Nel 2024 oltre 90.000 enti hanno ricevuto più di €522 milioni dal 5x1000, da 15,1 milioni di scelte dei contribuenti. Ma la distribuzione è fortemente concentrata: Lombardia e Lazio da sole assorbono oltre la metà delle risorse, e i primi 10 enti prendono più di un quarto del totale.**
+**Nel ${anno} ${num(numEnti)} enti hanno ricevuto più di ${euroCompact(importoTot)} dal 5x1000, da ${numFix(totScelte / 1e6, 1)} milioni di scelte dei contribuenti. Ma la distribuzione è fortemente concentrata: Lombardia e Lazio da sole assorbono oltre la metà delle risorse, e i primi 10 enti prendono più di un quarto del totale.**
 
 Ogni anno i contribuenti italiani destinano il 5x1000 della propria IRPEF a enti del Terzo Settore, ricerca scientifica e sanitaria, comuni, associazioni sportive, beni culturali e aree protette. Questa pagina mostra come si distribuiscono i fondi per territorio, categoria e singolo ente. I numeri sono calcolati dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 

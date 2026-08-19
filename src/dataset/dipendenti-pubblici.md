@@ -10,7 +10,7 @@ dataset_slug: dipendenti_pubblici
 
 # Dipendenti pubblici — declino, svolta e divari
 
-**La PA italiana ha smesso di rimpicciolirsi. Dopo un calo ininterrotto fino al 2018 (3,23 milioni di dipendenti), nel 2024 si supera quota 3,39 milioni. Ma la ripresa non è diffusa: la crescita è trainata quasi solo da Istruzione e Sanità, mentre funzioni centrali e locali continuano a perdere personale. E la PA resta un mondo a forte prevalenza femminile (oltre 60%), con divari enormi tra comparti.**
+**La PA italiana ha smesso di rimpicciolirsi. Dopo un calo ininterrotto fino al ${minimo.anno} (${numFix(minimo.tot / 1e6, 2)} milioni di dipendenti), nel ${last} si supera quota ${numFix(totLast / 1e6, 2)} milioni. Ma la ripresa non è diffusa: la crescita è trainata quasi solo da Istruzione e Sanità, mentre funzioni centrali e locali continuano a perdere personale. E la PA resta un mondo a forte prevalenza femminile (${pct(donnePctLast)}), con divari enormi tra comparti.**
 
 Dati BDAP/RGS sul pubblico impiego per **comparto, genere e orario di lavoro**, dal 2010 al 2024. Ogni numero è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
