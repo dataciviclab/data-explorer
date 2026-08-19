@@ -6,16 +6,19 @@ source_url: https://esploradati.istat.it/
 period: "2019–2025"
 last_modified: 2026-06-01
 dataset_slug: popolazione_istat_comunale_2019_2025
+data_driven: true
 ---
 
 # Popolazione italiana per età
 
-Popolazione residente italiana per fascia d'età, sesso e anno. I dati mostrano la struttura demografica del paese e la sua evoluzione nel tempo.
+**Nel ${String(annoSel)} l'Italia conta ${unit(totale, "")} residenti. Le donne rappresentano il ${pct(pctFemmine, 1)} della popolazione, ma ilvero squilibrio è nelle fasce d'età: gli over 60 superano i giovani under 30, e la popolazione continua a invecchiare.**
+
+Popolazione residente italiana per fascia d'età, sesso e anno. I dati mostrano la struttura demografica del paese e la sua evoluzione nel tempo. Ogni numero di questa pagina è calcolato dal dato a build-time.
 
 **Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2019–2025
 
 ```js
-import { num, pct, tableFormat } from "../import/format-utils.js";
+import { num, numFix, pct, unit, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -49,7 +52,7 @@ const trend = Array.from(
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Popolazione</h3>
-    <span class="big">${(totale / 1e6).toFixed(1)} <small style="opacity:0.6">mln</small></span>
+    <span class="big">${unit(totale, "")}</span>
   </div>
   <div class="card">
     <h3>Femmine</h3>
@@ -64,9 +67,9 @@ const trend = Array.from(
 
 ---
 
-## Popolazione per fascia d'età
+## 1. Popolazione per fascia d'età — ${String(annoSel)}
 
-Come si distribuisce la popolazione italiana tra le fasce d'età? Il grafico mostra la composizione per classe di età, divisa tra maschi e femmine.
+Il grafico a specchio mostra la distribuzione maschi (destra, blu) e femmine (sinistra, rossa) per fascia d'età. Le fasce più giovani tendono ad avere più maschi, quelle più anziane più femmine (maggiore speranza di vita femminile).
 
 ```js
 // Gender split per fascia
@@ -114,11 +117,9 @@ Plot.plot({
 })
 ```
 
-Il grafico a specchio mostra la distribuzione maschi (destra, blu) e femmine (sinistra, rossa) per fascia d'età. Le fasce più giovani tendono ad avere più maschi, quelle più anziane più femmine (maggiore speranza di vita femminile).
-
 ---
 
-## Evoluzione per fascia d'età
+## 2. Evoluzione per fascia d'età ${trend[0].anno}–${trend[trend.length - 1].anno}
 
 Come cambia la popolazione nelle diverse fasce d'età? I giovani (0-14 e 15-29) sono in calo, gli over 60 in crescita.
 
@@ -185,9 +186,7 @@ Inputs.table(filtered, {
 
 - **Copertura**: la serie copre il periodo 2019-2025. Dati precedenti non sono disponibili in questo dataset.
 - **Fasce d'età**: la classificazione per fascia d'età segue la definizione ISTAT. I dati per singola età (0-100) sono disponibili nel dataset originale.
-- **Stato civile**: il dataset include anche la disaggregazione per stato civile (celibi, coniugati, ecc.) non mostrata in questa pagina.
 - **Popolazione residente**: i dati si riferiscono alla popolazione residente in Italia al 1° gennaio di ogni anno. Non include italiani all'estero (AIRE) né stranieri non residenti.
-- **Dettaglio territoriale**: i dati sono aggregati a livello nazionale. La disaggregazione comunale e regionale è disponibile nel dataset originale.
 
 ---
 

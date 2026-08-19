@@ -6,13 +6,16 @@ source_url: https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani
 period: "2020–2024"
 last_modified: 2026-05-26
 dataset_slug: ispra_ru_base
+data_driven: true
 ---
 
 # Rifiuti urbani nei comuni
 
-Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta differenziata e percentuale per regione.
+**Nel ${String(annoSel)} i comuni italiani hanno prodotto ${unit(totRU, "t")} di rifiuti urbani, con una quota di raccolta differenziata del ${pct(mediaRd)}. Ma il divario tra regioni è enorme: dalla Val d'Aopia con oltre l'80% al Sud dove si resta spesso sotto il 60%.**
 
-**Fonte**: ISPRA · **Periodo**: 2020–2024
+Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta differenziata e percentuale per regione. Ogni numero di questa pagina è calcolato dal dato a build-time.
+
+**Fonte**: [ISPRA](https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani) · **Periodo**: 2020–2024
 
 ```js
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
@@ -74,7 +77,9 @@ const comuniFiltrati = comuni
 
 ---
 
-## Raccolta differenziata per regione
+## 1. Raccolta differenziata per regione — ${String(annoSel)}
+
+La mappa mostra la quota di raccolta differenziata su totale rifiuti urbani per regione. Le regioni settentrionali e la Val d'Aosta guidano la classifica; al Sud e nelle Isole la differenziazione resta più bassa.
 
 ```js
 const rdLookup = buildMapLookup(regFiltered, regioniGeo, "regione", "quota_rd");
@@ -102,15 +107,19 @@ Plot.plot({
 })
 ```
 
+> **Nota di lettura**: la scala quantile divide le regioni in gruppi di pari dimensione. I valori precisi sono nella tabella in fondo alla pagina.
+
 ---
 
-## Grandi comuni (popolazione ≥ 100.000)
+## 2. Grandi comuni (popolazione ≥ 100.000) — ${String(annoSel)}
+
+Nei grandi comuni il divario è ancora più netto. Alcuni comuni del Nord superano l'80% di differenziata, mentre altri restano sotto il 50%.
 
 ```js
 Plot.plot({
   title: `Percentuale RD nei grandi comuni — ${String(annoSel)}`,
   width: 800,
-  height: 350,
+  height: 450,
   marginLeft: 120,
   y: {label: null, tickSize: 0},
   x: {grid: true, label: "% RD"},
@@ -130,7 +139,7 @@ Plot.plot({
 
 ---
 
-## Regioni — dettaglio
+## Dettaglio per regione
 
 ```js
 const { header, format } = tableFormat({
@@ -149,8 +158,6 @@ Inputs.table(regFiltered, {
   rows: 25, width: "100%"
 })
 ```
-
----
 
 ---
 

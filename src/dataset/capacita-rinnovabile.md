@@ -6,17 +6,20 @@ source_url: https://www.terna.it/
 period: "2015–2024"
 last_modified: 2026-06-10
 dataset_slug: terna_capacita_rinnovabile
+data_driven: true
 ---
 
 # Capacità rinnovabile per regione
 
-Dati Terna sulla capacità di generazione rinnovabile installata per regione e fonte (potenza netta). Dal 2015 al 2024, la potenza rinnovabile italiana è cresciuta da **~52 GW a oltre 71 GW**, trainata principalmente dal fotovoltaico.
+**In ${annoMax - annoMin} anni la potenza rinnovabile italiana è cresciuta del ${numFix(crescitaPct)}%, passando da ${unit(tot2015, "MW")} a ${unit(tot2024, "MW")}. Il fotovoltaico traina la crescita, ma la distribuzione geografica è tutt'altro che uniforme: le regioni del Sud e delle Isole concentrano una quota crescente della capacità installata.**
+
+Dati Terna sulla capacità di generazione rinnovabile installata per regione e fonte (potenza netta). Ogni numero di questa pagina è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
 **Fonte**: [Terna](https://www.terna.it/) · **Periodo**: 2015–2024
 
 ```js
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
-import { num, unit } from "../import/format-utils.js";
+import { num, numFix, unit, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -87,7 +90,37 @@ const crescitaPct = Math.round((tot2024 - tot2015) / tot2015 * 1000) / 10;
 
 ---
 
-## Evoluzione per fonte 2015-2024
+## 1. Distribuzione regionale — ${String(annoSel)}
+
+La mappa mostra come si distribuisce la potenza rinnovabile installata tra le regioni italiane. Ogni colore rappresenta una fascia di potenza (scala quantile): le regioni con più capacità sono quelle del Sud e delle Isole, dove fotovoltaico ed eolico hanno trovato le condizioni più favorevoli.
+
+```js
+Plot.plot({
+  title: `Potenza rinnovabile per regione — ${String(annoSel)}`,
+  projection: {type: "mercator", domain: regioniGeo},
+  width: 800,
+  height: 600,
+  color: {scheme: "Greens", legend: true, label: "Potenza (MW)", type: "quantile"},
+  marks: [
+    Plot.geo(regioniGeo, {
+      fill: d => regLookup.get(normalizzaReg(d.properties.DEN_REG)),
+      stroke: "#888",
+      strokeWidth: 0.25,
+      tip: {format: {fill: d => unit(d, "MW")}}
+    }),
+    Plot.geo(confiniReg, {
+      stroke: "#888",
+      strokeWidth: 0.7
+    })
+  ]
+})
+```
+
+> **Nota di lettura**: la scala quantile divide le regioni in gruppi di pari dimensione. I valori precisi sono nella tabella in fondo alla pagina.
+
+---
+
+## 2. Evoluzione per fonte ${String(annoMin)}–${String(annoMax)}
 
 La capacità rinnovabile italiana è cresciuta da ${unit(tot2015, "MW")} a ${unit(tot2024, "MW")} (+${crescitaPct}%). Il fotovoltaico è la tecnologia che è cresciuta di più in termini assoluti, seguito dall'eolico. L'idroelettrico e le bioenergie restano sostanzialmente stabili.
 
@@ -108,7 +141,7 @@ Plot.plot({
 
 ---
 
-## Mix per fonte — ${String(annoSel)}
+## 3. Mix per fonte — ${String(annoSel)}
 
 ```js
 const totMix = d3.sum(fontiNazionali, d => d.potenza_mw);
@@ -148,39 +181,21 @@ Plot.plot({
 
 ---
 
-## Distribuzione regionale — ${String(annoSel)}
+## Dettaglio per regione e fonte
 
 ```js
-Plot.plot({
-  title: `Potenza rinnovabile per regione — ${String(annoSel)}`,
-  projection: {type: "mercator", domain: regioniGeo},
-  width: 800,
-  height: 600,
-  color: {scheme: "Greens", legend: true, label: "Potenza (MW)", type: "quantile"},
-  marks: [
-    Plot.geo(regioniGeo, {
-      fill: d => regLookup.get(normalizzaReg(d.properties.DEN_REG)),
-      stroke: "#888",
-      strokeWidth: 0.25,
-      tip: {format: {fill: d => unit(d, "MW")}}
-    }),
-    Plot.geo(confiniReg, {
-      stroke: "#888",
-      strokeWidth: 0.7
-    })
-  ]
-})
+const { header, format } = tableFormat({
+  regione: { label: "Regione", fmt: "string" },
+  fonti: { label: "Fonte", fmt: "string" },
+  potenza_mw: { label: "Potenza (MW)", fmt: "num" },
+});
 ```
-
----
-
-## Dettaglio per regione e fonte
 
 ```js
 Inputs.table(filtered, {
   columns: ["regione", "fonti", "potenza_mw"],
-  header: {regione: "Regione", fonti: "Fonte", potenza_mw: "Potenza (MW)"},
-  format: {potenza_mw: x => unit(x, "MW")},
+  header,
+  format,
   rows: 30,
   width: "100%"
 })
@@ -192,7 +207,6 @@ Inputs.table(filtered, {
 
 - **Copertura**: la serie copre il periodo 2015-2024. I dati 2024 sono preliminari e potrebbero essere rivisti da Terna.
 - **Tipo capacità**: i dati si riferiscono alla potenza netta installata (tipo_capacita = 'Netta'). Non include capacità lorda o eventuale capacità autorizzata ma non ancora installata.
-- **Fonti**: la disaggregazione per fonte segue la classificazione Terna.
 - **Map**: la mappa usa una scala quantile — ogni colore contiene lo stesso numero di regioni. I valori precisi sono nella tabella sottostante.
 
 ---
@@ -202,5 +216,4 @@ Inputs.table(filtered, {
 - [Terna (fonte originale)](https://www.terna.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/terna_capacita_rinnovabile/2024/terna_capacita_rinnovabile_2024_clean.parquet)
-- [Analisi](https://github.com/dataciviclab/dataciviclab/tree/main/analisi/terna-electricity-by-source)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/terna-capacita-rinnovabile)

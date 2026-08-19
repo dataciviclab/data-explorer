@@ -58,7 +58,7 @@ export default {
         "path": "/dataset/fts-eu-grants"
       },
       {
-        "name": "IRPEF comunale",
+        "name": "IRPEF — quanto reddito si dichiara in ogni territorio",
         "path": "/dataset/irpef-comunale"
       },
       {
