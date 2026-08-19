@@ -6,6 +6,7 @@ source_url: https://bdap.rgs.mef.gov.it/
 period: "2008–2024"
 last_modified: 2026-05-26
 dataset_slug: bdap_entrate_stato
+data_driven: true
 ---
 
 # Entrate dello Stato — come si finanzia il bilancio

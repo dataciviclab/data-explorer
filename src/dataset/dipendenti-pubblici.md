@@ -6,6 +6,7 @@ source_url: https://www.rgs.mef.gov.it/
 period: "2010–2024"
 last_modified: 2026-08-19
 dataset_slug: dipendenti_pubblici
+data_driven: true
 ---
 
 # Dipendenti pubblici — declino, svolta e divari
@@ -39,6 +40,7 @@ const totLast = y(last).tot;
 const deltaAbs = totLast - byAnno[0].tot;
 const deltaPct = byAnno[0].tot ? (deltaAbs / byAnno[0].tot) * 100 : null;
 const donnePctLast = totLast ? (y(last).donne / totLast) * 100 : null;
+const caloMin = byAnno[0].tot - minimo.tot;
 ```
 
 ```js
@@ -69,7 +71,7 @@ const funzCentrali = varNamed("FUNZIONI CENTRALI");
   <div class="card"><h3>Donne ${last}</h3><span class="big">${pct(donnePctLast)}</span></div>
 </div>
 
-Dal **${first}** al **${minimo.anno}** il pubblico impiego si è ridotto di oltre 89.000 unità, effetto del blocco del turnover e dei tagli. Poi la curva ha cambiato direzione e nel **${last}** si contano **${num(totLast)}** dipendenti, più del punto di partenza. Ma la crescita è concentrata in pochi comparti: **Istruzione e Ricerca (${istruzione.var > 0 ? "+" : ""}${num(istruzione.var)})** e **Sanità (${sanita.var > 0 ? "+" : ""}${num(sanita.var)})** crescono, mentre **Funzioni Locali (${num(funzLocali.var)})** e **Centrali (${num(funzCentrali.var)})** continuano a calare.
+Dal **${first}** al **${minimo.anno}** il pubblico impiego si è ridotto di ${num(caloMin)} unità, effetto del blocco del turnover e dei tagli. Poi la curva ha cambiato direzione e nel **${last}** si contano **${num(totLast)}** dipendenti, più del punto di partenza. Ma la crescita è concentrata in pochi comparti: **Istruzione e Ricerca (${istruzione.var > 0 ? "+" : ""}${num(istruzione.var)})** e **Sanità (${sanita.var > 0 ? "+" : ""}${num(sanita.var)})** crescono, mentre **Funzioni Locali (${num(funzLocali.var)})** e **Centrali (${num(funzCentrali.var)})** continuano a calare.
 ## 1. Chi lavora nella PA — lo stock ${last}
 
 Per natura, il pubblico impiego si divide in comparti di contrattazione. Il quadro del ${last} è dominato da Istruzione e Ricerca, che da sola impiega più di un terzo del totale, davanti a Sanità e alle funzioni amministrative.

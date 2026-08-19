@@ -6,6 +6,7 @@ source_url: https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000
 period: "2024"
 last_modified: 2026-06-23
 dataset_slug: ade_cinque_per_mille
+data_driven: true
 ---
 
 # 5x1000 — dove vanno i soldi della tua firma

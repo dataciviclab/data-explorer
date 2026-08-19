@@ -86,6 +86,37 @@ function checkBuildMapLookup(content, slug) {
 
 // ── 4. duckdb.connect() nei loader ──────────────────────────────────────────
 
+function checkNoHardcodedNumbers(content, slug) {
+  // Solo pagine "data-driven" (opt-in via frontmatter data_driven: true):
+  // nella prosa non devono comparire cifre scritte a mano — i numeri vanno
+  // interpolati da variabili calcolate dal dato (KPI/card/chart).
+  if (!/\bdata_driven:\s*true\b/.test(content.slice(0, 400))) return;
+
+  const prose = content
+    .replace(/^---[\s\S]*?---\n?/, "") // frontmatter
+    .replace(/```[\s\S]*?```/g, ""); // blocchi di codice fenced
+
+  const rules = [
+    { re: /€\s*-?\d/g, msg: "importo in euro" },
+    { re: /\b\d+(?:[.,]\d+)?\s*(?:miliardi|milioni|mld|mln)\b/gi, msg: "quantità con unità (milioni/miliardi)" },
+    { re: /\b\d+[.,]\d+\s*%/g, msg: "percentuale con decimali" },
+    { re: /\b\d{1,3}(?:[.,]\d{3})+(?:\b|[^\d])/g, msg: "numero con separatore migliaia" },
+  ];
+
+  const findings = [];
+  for (const { re, msg } of rules) {
+    for (const m of prose.matchAll(re)) {
+      findings.push(`${msg} → "${m[0].trim()}"`);
+    }
+  }
+
+  if (findings.length) {
+    for (const f of findings.slice(0, 8)) {
+      errors.push(`${slug}: cifra hardcoded nella prosa (${f}) — usa una variabile calcolata dal dato`);
+    }
+  }
+}
+
 function checkDuckdbConnect(loaderPath, slug) {
   if (!existsSync(loaderPath)) return;
   const content = readFileSync(loaderPath, "utf-8");
@@ -117,6 +148,7 @@ for (const slug of readdirSync(datasetDir)) {
   checkNoToLocaleString(content, name);
   checkTableFormatCell(content, name);
   checkBuildMapLookup(content, name);
+  checkNoHardcodedNumbers(content, name);
 
   // Loader corrispondente
   const loaderPath = resolve(dataDir, `${name}.json.py`);
