@@ -38,11 +38,13 @@ Apri http://localhost:3000
    - lo slug DI (con underscore) va come parametro `slug=` a `load_dataset()`
 2. **Pagina**: copia il [template `docs/TEMPLATE-dataset-page.md`](docs/TEMPLATE-dataset-page.md)
    in `src/dataset/<slug-url>.md` e compila ogni sezione
+   - **frontmatter**: obbligatorio `title`, `description`, `source`, `source_url`, `period`,
+     `last_modified`, `dataset_slug`, `data_driven: true`
    - **formattazione**: usa `num()`, `euro()`, `pct()` da `format-utils.js` — **mai `toLocaleString`**
+   - **decimali**: usa `decimals: N` nel spec di `tableFormat()` per campi con virgola (es. Gini, indici)
+   - **colori nei grafici**: usa colori literal (`fill: "#4e79a7"`) — **mai** `fill: "NomeCampo"` (Plot interpreta come field name, non colore)
    - **mappe**: usa `buildMapLookup()` con `loadItalianRegions()` — **mai `buildRegLookup` diretto**
    - **tabelle**: `tableFormat` e `Inputs.table` in **celle separate** (bug noto OF altrimenti)
-   - frontmatter obbligatorio: `title`, `description`, `source`, `source_url`, `period`,
-     `last_modified`, `dataset_slug`
    - primo blocco: distribuzione o stock base, non ranking o delta
    - sezione **Limiti** obbligatoria in fondo
 3. **Tema**: i temi sono **dinamici** — derivano dalla `category` del registry.
@@ -63,6 +65,7 @@ Apri http://localhost:3000
 | `tableFormat` + `Inputs.table` stessa cella | Tabella non renderizzata per bug OF |
 | `buildRegLookup` in pagine con mappa | Usare `buildMapLookup()` che include fuzzy matching |
 | `duckdb.connect()` nei loader | Usare `safe_connect()` da lab-connectors |
+| Cifre hardcoded in pagine `data_driven` | Numeri devono essere variabili calcolate dal dato |
 
 ### Moduli condivisi (`src/import/`)
 
@@ -71,13 +74,21 @@ Apri http://localhost:3000
 | `geo-utils.js` | `normalizzaReg()`, `loadItalianRegions()`, `buildMapLookup()`, `buildRegLookupWithTrentino()` | Pagine con mappe coropletiche |
 | `format-utils.js` | `num()`, `euro()`, `euroCompact()`, `pct()`, `unit()`, `numFix()`, `tableFormat()` | Qualsiasi pagina (formattazione) |
 
-Esempio:
+`tableFormat()` supporta `decimals: N` nel spec per campi con decimali:
+```js
+const { header, format } = tableFormat({
+  gini: { label: "Gini", fmt: "num", decimals: 3 },
+  popolazione: { label: "Popolazione", fmt: "num" },  // intero, senza decimals
+});
+```
+
+Esempio import:
 ```js
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 import { num, euro, pct, tableFormat } from "../import/format-utils.js";
 ```
 
-Vedi `src/dataset/rifiuti-urbani.md` come riferimento completo.
+Riferimenti canonici: `src/dataset/entrate-stato.md`, `src/dataset/cinque-per-mille.md`, `src/dataset/dipendenti-pubblici.md`.
 
 ## Standard e criteri
 
@@ -93,11 +104,15 @@ Il principio guida: *nel Data Explorer entrano prima i dataset che si leggono be
 Le pagine non riportano **numeri scritti a mano**: KPI e frasi con dati citano variabili calcolate dai data loader, così la pagina si aggiorna da sola quando si ripubblica il parquet. Esempio: `Nel ${last} le entrate valgono ${euroCompact(totaleLast)}`.
 
 Struttura tipo (dataset-first, in quest'ordine):
-1. frontmatter + intro con la "domanda" e i numeri chiave (da dati)
-2. blocco **base**: la distribuzione naturale del dataset nell'anno più recente
-3. blocco **derivato**: trend/confronti (es. soglie, pre/post evento)
-4. eventuale blocco secondario di lettura
-5. tabella finale ricercabile + `Limiti` + `Risorse`
+1. frontmatter con `data_driven: true`
+2. data loader + import moduli condivisi + filtro anno
+3. computazione variabili (KPI, aggregazioni)
+4. intro narrativa con template literal (usa variabili computate)
+5. KPI cards
+6. blocco **base**: la distribuzione naturale del dataset nell'anno più recente
+7. blocco **derivato**: trend/confronti (es. soglie, pre/post evento)
+8. eventuale blocco secondario di lettura
+9. tabella finale ricercabile + `Limiti` + `Risorse`
 
 Pagine di riferimento (canoniche):
 - `src/dataset/entrate-stato.md` — serie, KPI, soglia 50%, confronto pre/post

@@ -6,17 +6,14 @@ source_url: https://esploradati.istat.it/
 period: "2003–2024"
 last_modified: 2026-05-27
 dataset_slug: istat_gini_regionale
+data_driven: true
 ---
 
 # Indice di Gini regionale
 
-Disuguaglianza del reddito netto per regione, misurata con l'indice di Gini. I dati permettono di confrontare il livello di disuguaglianza tra territori e la sua evoluzione nel tempo.
-
-**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2003–2024
-
 ```js
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
-import { numFix, tableFormat } from "../import/format-utils.js";
+import { num, numFix, pct, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -48,6 +45,8 @@ const annoData = filtered
 // Dati per la mappa: esclude province autonome (20 regioni reali)
 const annoDataRegioni = annoData.filter(d => !d.regione.startsWith('Provincia Autonoma'));
 const mediaRegionale = d3.mean(annoDataRegioni, d => d.gini);
+const minGini = d3.min(annoDataRegioni, d => d.gini);
+const maxGini = d3.max(annoDataRegioni, d => d.gini);
 
 // Lookup per mappa con normalizzazione automatica
 const giniLookup = buildMapLookup(annoDataRegioni, regioniGeo, "regione", "gini");
@@ -60,10 +59,16 @@ const trendNazionale = Array.from(
 ).sort((a, b) => a.anno - b.anno);
 ```
 
+**Nel ${String(annoSel)} la media regionale dell'indice di Gini è ${numFix(mediaRegionale, 3)} (${conFitti ? "con" : "senza"} fitti imputati). La regione con il Gini più alto è ${annoDataRegioni[0].regione} (${numFix(annoDataRegioni[0].gini, 3)}), quella più bassa è ${annoDataRegioni[annoDataRegioni.length - 1].regione} (${numFix(annoDataRegioni[annoDataRegioni.length - 1].gini, 3)}).**
+
+Disuguaglianza del reddito netto per regione, misurata con l'indice di Gini. I dati permettono di confrontare il livello di disuguaglianza tra territori e la sua evoluzione nel tempo. Ogni numero di questa pagina è calcolato dal dato a build-time.
+
+**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2003–2024
+
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Media regionale</h3>
-    <span class="big">${mediaRegionale.toFixed(3)}</span>
+    <span class="big">${numFix(mediaRegionale, 3)}</span>
     <small style="opacity:0.6">${annoSel} ${conFitti ? "con" : "senza"} fitti imputati</small>
   </div>
   <div class="card">
@@ -72,15 +77,15 @@ const trendNazionale = Array.from(
   </div>
   <div class="card">
     <h3>Min – Max</h3>
-    <span class="big">${d3.min(annoDataRegioni, d => d.gini).toFixed(3)} – ${d3.max(annoDataRegioni, d => d.gini).toFixed(3)}</span>
+    <span class="big">${numFix(minGini, 3)} – ${numFix(maxGini, 3)}</span>
   </div>
 </div>
 
 ---
 
-## Disuguaglianza per regione
+## 1. Disuguaglianza per regione — ${String(annoSel)}
 
-Quali regioni hanno la distribuzione del reddito più diseguale? L'indice di Gini varia da 0 (uguaglianza perfetta) a 1 (massima disuguaglianza). La mappa mostra la distribuzione geografica della disuguaglianza, con le regioni del Sud che presentano i valori più alti.
+La mappa mostra la distribuzione geografica della disuguaglianza, con le regioni del Sud che presentano i valori più alti. L'indice di Gini varia da 0 (uguaglianza perfetta) a 1 (massima disuguaglianza).
 
 ```js
 Plot.plot({
@@ -104,15 +109,13 @@ Plot.plot({
 })
 ```
 
-Trentino-Alto Adige e le due province autonome sono aggregate nel valore regionale. I dati precisi per ogni regione sono nella tabella sottostante.
-
-> **Nota**: la legenda usa la scala `quantile` — ogni colore contiene lo stesso numero di regioni, indipendentemente dal valore effettivo del Gini. I valori precisi sono nella tabella sottostante.
+> **Nota di lettura**: la legenda usa la scala `quantile` — ogni colore contiene lo stesso numero di regioni. Trentino-Alto Adige e le province autonome sono aggregate nel valore regionale. I valori precisi sono nella tabella in fondo.
 
 ---
 
-## Evoluzione regionale
+## 2. Evoluzione regionale ${trendNazionale[0].anno}–${trendNazionale[trendNazionale.length - 1].anno}
 
-La media regionale dell'indice di Gini mostra una leggera riduzione della disuguaglianza tra 2003 e metà anni 2000, seguita da una risalita graduale.
+La media regionale dell'indice di Gini mostra una leggera riduzione della disuguaglianza nei primi anni, seguita da una risalita graduale.
 
 ```js
 Plot.plot({
@@ -156,13 +159,19 @@ const annoConDelta = annoDataRegioni.map((d, i) => ({
 ```
 
 ```js
+const { header, format } = tableFormat({
+  pos: { label: "#", fmt: "num" },
+  regione: { label: "Regione", fmt: "string" },
+  gini: { label: "Gini", fmt: "num", decimals: 3 },
+  diff_media: { label: "Δ media", fmt: "num", decimals: 3 },
+});
+```
+
+```js
 Inputs.table(annoConDelta, {
   columns: ["pos", "regione", "gini", "diff_media"],
-  header: {pos: "#", regione: "Regione", gini: "Gini", diff_media: "Δ media"},
-  format: {
-    gini: x => numFix(x, 3),
-    diff_media: x => (x > 0 ? "+" : "") + numFix(x, 3)
-  },
+  header,
+  format,
   rows: 25,
   width: "100%"
 })
@@ -173,9 +182,8 @@ Inputs.table(annoConDelta, {
 ## Limiti
 
 - **Copertura**: la serie copre il periodo 2003-2024. Dati 2025 non ancora disponibili al momento dell'ultimo aggiornamento.
-- **Fitti imputati**: il toggle "Includi fitti imputati" controlla se nel reddito è incluso il valore figurativo della proprietà dell'abitazione. Con i fitti imputati la disuguaglianza è sistematicamente più bassa (~0.03 punti) perché la proprietà della casa riduce la dispersione del reddito disponibile.
+- **Fitti imputati**: il toggle "Includi fitti imputati" controlla se nel reddito è incluso il valore figurativo della proprietà dell'abitazione. Con i fitti imputati la disuguaglianza è sistematicamente più bassa (~0.03 punti).
 - **Indice di Gini**: misura la disuguaglianza della distribuzione del reddito netto. Non cattura disuguaglianza di ricchezza, consumi o opportunità.
-- **Media regionale**: calcolata come media semplice delle regioni, non ponderata per popolazione.
 
 ---
 

@@ -65,7 +65,6 @@ with safe_connect() as con:
               fabbisogno_mln_euro,
               link_scheda
             FROM {table}
-            WHERE COALESCE(costi_mln_euro, 0) > 0
             ORDER BY livello, costi_mln_euro DESC
             """,
         ),

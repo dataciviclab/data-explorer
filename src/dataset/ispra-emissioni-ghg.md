@@ -154,11 +154,11 @@ Plot.plot({
 ```js
 const { header, format } = tableFormat({
   anno: { label: "Anno", fmt: "string" },
-  industrie_energetiche: { label: "Ind. energetiche", fmt: "num" },
-  industrie_manifatturiere: { label: "Ind. manifatturiere", fmt: "num" },
-  residenziale_e_servizi: { label: "Residenziale e servizi", fmt: "num" },
-  trasporti: { label: "Trasporti", fmt: "num" },
-  totale: { label: "Totale", fmt: "num" },
+  industrie_energetiche: { label: "Ind. energetiche", fmt: "num", decimals: 1 },
+  industrie_manifatturiere: { label: "Ind. manifatturiere", fmt: "num", decimals: 1 },
+  residenziale_e_servizi: { label: "Residenziale e servizi", fmt: "num", decimals: 1 },
+  trasporti: { label: "Trasporti", fmt: "num", decimals: 1 },
+  totale: { label: "Totale", fmt: "num", decimals: 1 },
 });
 ```
 

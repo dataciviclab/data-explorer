@@ -51,7 +51,9 @@ ma non entrano nei temi né nella sidebar.
 
 Dalla Fase 1 (2026-06), le pagine dataset possono importare moduli condivisi da `src/import/`:
 
-- `geo-utils.js` — `normalizzaReg()`, `loadItalianRegions()`, `buildRegLookup()`, `buildRegLookupWithTrentino()`
+- `geo-utils.js` — `normalizzaReg()`, `loadItalianRegions()`, `buildMapLookup()`, `buildRegLookupWithTrentino()`
 - `format-utils.js` — `num()`, `euro()`, `euroCompact()`, `pct()`, `unit()`, `numFix()`, `tableFormat()`
 
-Vedi `src/dataset/rifiuti-urbani.md` come esempio di pagina che li usa.
+`tableFormat()` supporta `decimals: N` per campi con virgola (es. indici, Gini, densità).
+
+Vedi `src/dataset/entrate-stato.md` come esempio di pagina che li usa.

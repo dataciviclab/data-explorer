@@ -70,7 +70,7 @@ export default {
         "path": "/dataset/mef-partecipazioni"
       },
       {
-        "name": "Fondo di Solidarietà Comunale 2025",
+        "name": "Fondo di Solidarietà Comunale",
         "path": "/dataset/opencivitas-fsc-2025"
       },
       {

@@ -6,16 +6,13 @@ source_url: https://dati.consip.it/
 period: "2023–2025"
 last_modified: 2025-12-31
 dataset_slug: consip_consumi_convenzione
+data_driven: true
 ---
 
 # Consumi in convenzione Consip
 
-La spesa della Pubblica Amministrazione per beni e servizi acquistati attraverso le convenzioni Consip. I dati sono disaggregati per regione della PA, tipologia di amministrazione e fornitore.
-
-**Fonte**: Consip · **Periodo**: 2023–2025
-
 ```js
-import { num, euro, tableFormat } from "../import/format-utils.js";
+import { num, euro, euroCompact, tableFormat } from "../import/format-utils.js";
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 ```
 
@@ -43,10 +40,16 @@ const totOrdini = regioni
   .reduce((s, d) => s + d.numero_ordini_con_consumi, 0);
 ```
 
+**Nel ${String(annoSel)} la PA ha speso ${euroCompact(totAnno)} in convenzioni Consip, con ${num(totOrdini)} ordini. La regione PA con la spesa più alta è ${regFiltered[0]?.regione_pa || "—"} (${euroCompact(regFiltered[0]?.valore_economico_consumi || 0)}).**
+
+La spesa della Pubblica Amministrazione per beni e servizi acquistati attraverso le convenzioni Consip. I dati sono disaggregati per regione della PA, tipologia di amministrazione e fornitore. Ogni numero di questa pagina è calcolato dal dato a build-time.
+
+**Fonte**: [Consip](https://dati.consip.it/) · **Periodo**: 2023–2025
+
 <div class="grid grid-cols-2">
   <div class="card">
     <h3>Spesa totale</h3>
-    <span class="big">€ ${(totAnno / 1e6).toFixed(0)} <small style="opacity:0.6">mln</small></span>
+    <span class="big">${euroCompact(totAnno)}</span>
   </div>
   <div class="card">
     <h3>Ordini</h3>
@@ -56,9 +59,7 @@ const totOrdini = regioni
 
 ---
 
-## Spesa per regione della PA
-
-Quali regioni concentrano la spesa in convenzione? Il Lazio e la Lombardia guidano la classifica, trainate rispettivamente dagli apparati centrali dello Stato e dagli enti territoriali.
+## 1. Spesa per regione della PA — ${annoSel}
 
 ```js
 const regFiltered = regioni
@@ -89,9 +90,11 @@ Plot.plot({
 })
 ```
 
+> **Nota di lettura**: la regione indicata è quella della PA acquirente, non del fornitore. Per le amministrazioni centrali, la sede legale è spesso nel Lazio indipendentemente dalla destinazione d'uso.
+
 ---
 
-## Spesa per tipo di amministrazione
+## 2. Spesa per tipo di amministrazione — ${annoSel}
 
 Chi spende di più attraverso Consip? Comuni, aziende di servizi pubblici e ministeri sono le prime tre categorie per volume di acquisti.
 
@@ -148,12 +151,10 @@ Inputs.table(regFiltered, {
 
 ---
 
----
-
 ## Limiti
 
 - **Copertura**: i dati coprono il periodo 2023-2025. Anni precedenti non sono disponibili in questo dataset.
-- **Regione PA**: la regione indicata è quella della PA acquirente, non quella del fornitore né quella di utilizzo del bene/servizio. Per le amministrazioni centrali, la sede legale è spesso nel Lazio indipendentemente dalla destinazione d'uso.
+- **Regione PA**: la regione indicata è quella della PA acquirente, non quella del fornitore né quella di utilizzo del bene/servizio.
 - **Convenzioni**: il dato include solo acquisti attraverso convenzioni Consip attive. Acquisti diretti o attraverso altri strumenti (MEPA, accordi quadro) non sono inclusi.
 
 ---
