@@ -140,7 +140,7 @@ La soglia tratteggiata è il 50%. L'indice è nettamente sopra quota 50 nella sa
 
 ## Dettaglio per comparto e anno
 
-<small>Scorri e filtra per comparto. Serie ${first}–${last}.</small>
+<small>Serie completa ${first}–${last}, per comparto e anno.</small>
 
 ```js
 const { header, format } = tableFormat({
@@ -153,13 +153,7 @@ const { header, format } = tableFormat({
 ```
 
 ```js
-const compartiList = ["Tutti", ...new Set(data.map(d => d.comparto).sort())];
-const compSel = view(Inputs.select(compartiList, {label: "Comparto", value: "Tutti"}));
-const tableData = (!compSel || compSel === "Tutti") ? (data || []) : (data || []).filter(d => d.comparto === compSel);
-```
-
-```js
-Inputs.table(tableData, {
+Inputs.table(data, {
   columns: ["anno", "comparto", "donne", "uomini", "totale"],
   header, format, rows: 20, width: "100%", sort: "anno", reverse: true
 })
