@@ -43,6 +43,12 @@ jobs:
       - name: Build Observable Framework
         run: npm run build
 
+      - name: Smoke — le pagine standard devono esistere nel build
+        run: |
+          test -f dist/observable/dataset/entrate-stato.html
+          test -f dist/observable/dataset/cinque-per-mille.html
+          test -f dist/observable/dataset/dipendenti-pubblici.html
+
       - name: Copy CNAME for custom domain
         run: cp static/CNAME dist/observable/
 

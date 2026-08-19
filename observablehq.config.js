@@ -3,6 +3,9 @@ export default {
   output: "dist/observable",
   title: "DataCivicLab Explorer",
   theme: ["air", "ocean-floor"],
+  interpreters: {
+    ".py": ["python3"]
+  },
   pages: [
   {
     "name": "Territorio e ambiente",
@@ -159,7 +162,7 @@ export default {
     "collapsible": true,
     "pages": [
       {
-        "name": "5x1000 — Beneficiari e importi per ente",
+        "name": "5x1000 — beneficiari e importi per ente",
         "path": "/dataset/cinque-per-mille"
       }
     ]

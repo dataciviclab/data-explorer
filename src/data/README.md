@@ -20,21 +20,32 @@ Lo slug interno (con underscore, es. `aifa_spesa_consumo`) che identifica il par
 
 ## Utility condivisa
 
-`_util.py` fornisce `load_dataset()` e `_parquet_exists()` per evitare di replicare logica GCS/DuckDB in ogni loader.
+`_util.py` fornisce `load_dataset()`, `_parquet_exists()` e `_parquet_refs()`
+per evitare di replicare logica GCS/DuckDB in ogni loader.
+
+Per i dataset di repo dominio (siope, eurostat, conto-annuale, ...) il path
+GCS reale può divergere dal pattern canonico (prefix per repo, layout flat):
+passa il `location` dal registry a `load_dataset()` e le refs HTTPS vengono
+derivate dal path reale invece che dallo slug.
 
 ## Catalogo e temi (dal registry)
 
-`catalog.json.py` e `themes.json.py` sono data loader "di sistema" che leggono il
-[fusion registry](https://github.com/dataciviclab/dataset-incubator/blob/main/registry/registry.json)
-di dataset-incubator e alimentano index, pagine tema e sidebar:
+`catalog.json.py` e `themes.json.py` sono data loader "di sistema" che leggono
+i registry fusion di TUTTI i repo del Lab (dataset-incubator, open-politica,
+open-conto-annuale, eurostat, dcl-bologna, open-siope, rna-aiuti-stato) e
+alimentano index, pagine tema e sidebar:
 
-- `_registry.py` — logica condivisa e testata: `load_registry()`, `resolve_url_slug()`
-  (URL_SLUG_OVERRIDES), `build_catalog()`, `build_themes()`
+- `_registry.py` — logica condivisa e testata: `fuse_registries()` (dedup per
+  slug, priorità = ordine `REGISTRY_REPOS`, entry con `registry_source`),
+  `resolve_url_slug()` (URL_SLUG_OVERRIDES), `build_catalog()`, `build_themes()`
 - `catalog/themes.json` (repo root) — config editoriale dei temi: mappa `categories`
-  del registry → tema pubblico. Single source condivisa con `scripts/generate_catalog.mjs`
+  del registry → tema pubblico. Single source of truth, consumata da `_registry.py`.
 
 I temi sono **dinamici**: un dataset entra in un tema se ha una pagina explorer
 (`src/dataset/<url-slug>.md`) e la sua `category` è mappata in `catalog/themes.json`.
+
+I dataset senza pagina explorer restano nel catalogo (index "Tutti i dataset")
+ma non entrano nei temi né nella sidebar.
 
 ## Moduli JS condivisi (`src/import/`)
 
