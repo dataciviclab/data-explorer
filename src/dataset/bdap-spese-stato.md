@@ -68,7 +68,7 @@ const plot = await import("npm:@observablehq/plot");
 display(plot.plot({
   title: `Spesa per amministrazione — ${last}`,
   width: 800, height: 400, marginLeft: 150,
-  x: {grid: true, tickFormat: plot.formatNumber},
+  x: {grid: true, tickFormat: euroCompact},
   y: {label: null, tickSize: 0},
   color: {scheme: "Blues"},
   marks: [
@@ -110,7 +110,7 @@ const perMisTop = perMis.slice(0, 12);
 display(plot.plot({
   title: `Spesa per missione — ${last} (top 12)`,
   width: 800, height: 380, marginLeft: 190,
-  x: {grid: true, tickFormat: plot.formatNumber},
+  x: {grid: true, tickFormat: euroCompact},
   y: {label: null, tickSize: 0},
   color: {scheme: "Oranges"},
   marks: [
