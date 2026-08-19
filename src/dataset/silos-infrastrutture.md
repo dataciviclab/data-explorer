@@ -6,16 +6,13 @@ source_url: https://silos.infrastrutturestrategiche.it/
 period: "2004–2024"
 last_modified: 2026-07-03
 dataset_slug: silos_infrastrutture
+data_driven: true
 ---
 
 # Infrastrutture strategiche SILOS
 
-Il dataset raccoglie le infrastrutture strategiche e prioritarie censite nel sistema SILOS: ferrovie, strade, sistemi urbani, porti, aeroporti, opere idriche e altri interventi. La struttura è gerarchica: livelli alti descrivono programmi, direttrici o macro-opere; livelli più bassi descrivono articolazioni operative e sotto-interventi.
-
-**Fonte**: [SILOS — Camera dei Deputati](https://silos.infrastrutturestrategiche.it/) · **Periodo**: 2004–2024 · Snapshot 2024
-
 ```js
-import { num, euroCompact, pct } from "../import/format-utils.js";
+import { num, numFix, pct, unit, euroCompact, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -46,7 +43,15 @@ const totali = {
 };
 
 const quotaCoperta = totali.costi_mln_euro ? (totali.disponibilita_mln_euro / totali.costi_mln_euro) * 100 : 0;
+```
 
+**Al livello ${livelloSel} il SILOS censa ${num(totali.interventi)} interventi per un costo di ${euroMln(totali.costi_mln_euro)}. La disponibilità finanziaria copre il ${pct(quotaCoperta)} del totale, con ${euroMln(totali.fabbisogno_mln_euro)} di fabbisogno residuo.**
+
+Il dataset raccoglie le infrastrutture strategiche e prioritarie censite nel sistema SILOS: ferrovie, strade, sistemi urbani, porti, aeroporti, opere idriche e altri interventi. La struttura è gerarchica: livelli alti descrivono programmi, direttrici o macro-opere; livelli più bassi descrivono articolazioni operative e sotto-interventi. Ogni numero di questa pagina è calcolato dal dato a build-time.
+
+**Fonte**: [SILOS — Camera dei Deputati](https://silos.infrastrutturestrategiche.it/) · **Periodo**: 2004–2024 · Snapshot 2024
+
+```js
 function aggregateBy(rows, key, valueName = key) {
   return Array.from(
     d3.rollup(
@@ -148,7 +153,7 @@ Plot.plot({
     Plot.barX(perSistema, {
       y: "sistema_infrastrutturale",
       x: "costi_mln_euro",
-      fill: "Costo",
+      fill: "#4e79a7",
       sort: {y: "-x"},
       tip: {format: {x: euroMln}}
     }),

@@ -63,8 +63,13 @@ export function tableFormat(spec) {
   for (const [col, cfg] of Object.entries(spec)) {
     const label = typeof cfg === "string" ? col : (cfg.label || col);
     const fmt = typeof cfg === "string" ? cfg : (cfg.fmt || "num");
+    const dec = typeof cfg === "object" ? cfg.decimals : undefined;
     header[col] = label;
-    format[col] = FORMATTERS[fmt] || FORMATTERS.num;
+    if (dec != null) {
+      format[col] = (x) => (x != null ? numFix(x, dec) : "\u2014");
+    } else {
+      format[col] = FORMATTERS[fmt] || FORMATTERS.num;
+    }
   }
   return { header, format };
 }

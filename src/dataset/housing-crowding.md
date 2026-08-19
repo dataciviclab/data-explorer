@@ -6,16 +6,13 @@ source_url: https://esploradati.istat.it/
 period: "2004–2025"
 last_modified: 2026-06-02
 dataset_slug: istat_housing_crowding
+data_driven: true
 ---
 
 # Densità abitativa
 
-Indice di densità abitativa (componenti per 100 mq) per titolo di godimento. I dati mostrano come evolve l'affollamento abitativo in Italia e le differenze tra proprietà e affitto.
-
-**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2004–2025
-
 ```js
-import { numFix } from "../import/format-utils.js";
+import { num, numFix, pct, unit, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -30,7 +27,16 @@ const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {labe
 ```js
 const filtered = data.filter(d => d.anno === annoSel);
 const totale = d3.mean(filtered, d => d.componenti_per_100mq);
+const minVal = d3.min(filtered, d => d.componenti_per_100mq);
+const maxVal = d3.max(filtered, d => d.componenti_per_100mq);
+const densityGap = maxVal - minVal;
 ```
+
+**Nel ${String(annoSel)} la densità abitativa media è di ${numFix(totale, 1)} componenti per 100 mq, con un divario di ${numFix(densityGap, 1)} punti tra chi affitta (${numFix(maxVal, 1)}) e chi possiede (${numFix(minVal, 1)}).**
+
+Indice di densità abitativa (componenti per 100 mq) per titolo di godimento. I dati mostrano come evolve l'affollamento abitativo in Italia e le differenze tra proprietà e affitto. Ogni numero di questa pagina è calcolato dal dato a build-time.
+
+**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2004–2025
 
 <div class="grid grid-cols-3">
   <div class="card">
@@ -39,18 +45,20 @@ const totale = d3.mean(filtered, d => d.componenti_per_100mq);
     <small style="opacity:0.6">componenti/100mq</small>
   </div>
   <div class="card">
-    <h3>Anni</h3>
-    <span class="big">${anni.length}</span>
+    <h3>Divario affitto/proprietà</h3>
+    <span class="big">${numFix(densityGap, 1)}</span>
+    <small style="opacity:0.6">punti di densità</small>
   </div>
   <div class="card">
-    <h3>Min – Max</h3>
-    <span class="big">${numFix(d3.min(filtered, d => d.componenti_per_100mq), 1)} – ${numFix(d3.max(filtered, d => d.componenti_per_100mq), 1)}</span>
+    <h3>Periodo</h3>
+    <span class="big">${String(anni[anni.length - 1])}–${String(anni[0])}</span>
+    <small style="opacity:0.6">${anni.length} osservazioni</small>
   </div>
 </div>
 
 ---
 
-## Densità per titolo di godimento
+## 1. Densità per titolo di godimento — ${String(annoSel)}
 
 Chi vive in case più affollate? Chi affitta ha una densità abitativa maggiore rispetto a chi possiede l'abitazione.
 
@@ -76,9 +84,11 @@ Plot.plot({
 })
 ```
 
+> **Nota di lettura**: il grafico mostra lo **stock** del ${String(annoSel)}: la densità per ciascuna tipologia di godimento. La tendenza temporale è nel grafico successivo.
+
 ---
 
-## Evoluzione 2004-2025
+## 2. Evoluzione 2004–2025
 
 Come cambia la densità abitativa nel tempo? Il divario tra proprietà e affitto si è ridotto negli ultimi vent'anni.
 
@@ -118,10 +128,18 @@ Plot.plot({
 ## Dettaglio per anno
 
 ```js
+const { header, format } = tableFormat({
+  anno: { label: "Anno", fmt: "string" },
+  titolo_godimento: { label: "Titolo godimento", fmt: "string" },
+  componenti_per_100mq: { label: "Comp./100mq", fmt: "num", decimals: 2 },
+});
+```
+
+```js
 Inputs.table(trend, {
   columns: ["anno", "titolo_godimento", "componenti_per_100mq"],
-  header: {anno: "Anno", titolo_godimento: "Titolo godimento", componenti_per_100mq: "Comp./100mq"},
-  format: {componenti_per_100mq: x => numFix(x, 2)},
+  header,
+  format,
   rows: 25,
   width: "100%"
 })
@@ -134,7 +152,6 @@ Inputs.table(trend, {
 - **Copertura**: la serie copre il periodo 2004-2025. Dati precedenti non sono disponibili.
 - **Indice**: la densità abitativa misura i componenti del nucleo familiare ogni 100 mq di abitazione. Valori più alti indicano maggiore affollamento.
 - **Nazionale**: i dati sono a livello nazionale. Non è disponibile la disaggregazione regionale in questo dataset.
-- **Fonte**: i dati provengono dall'indagine ISTAT sulle condizioni abitative (SDMX 33_179).
 
 ---
 
