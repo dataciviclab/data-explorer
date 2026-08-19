@@ -7,7 +7,7 @@ from lab_connectors.gcs import object_exists
 from lab_connectors.gcs.paths import https_url
 
 slug = "dipendenti_pubblici"
-years = list(range(2010, 2024))
+years = list(range(2010, 2025))  # 2010-2024
 
 valid_years = [y for y in years if object_exists(
     "dataciviclab-clean", f"{slug}/{y}/{slug}_{y}_clean.parquet")]

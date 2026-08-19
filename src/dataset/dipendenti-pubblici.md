@@ -1,18 +1,18 @@
 ---
 title: Dipendenti pubblici per comparto
-description: "Il pubblico impiego dal 2010 al 2023: declino, svolta e composizione di genere per comparto (BDAP RGS MEF)"
+description: "Il pubblico impiego dal 2010 al 2024: declino, svolta e composizione di genere per comparto (BDAP RGS MEF)"
 source: MEF — RGS · BDAP
 source_url: https://www.rgs.mef.gov.it/
-period: "2010–2023"
-last_modified: 2026-05-26
+period: "2010–2024"
+last_modified: 2026-08-19
 dataset_slug: dipendenti_pubblici
 ---
 
 # Dipendenti pubblici — declino, svolta e divari
 
-**La PA italiana ha smesso di rimpicciolirsi. Dopo un calo ininterrotto fino al 2018 (3,23 milioni di dipendenti), nel 2023 si supera quota 3,33 milioni. Ma la ripresa non è diffusa: la crescita è trainata quasi solo da Istruzione e Sanità, mentre funzioni centrali e locali continuano a perdere personale. E la PA resta un mondo a forte prevalenza femminile, con divari enormi tra comparti.**
+**La PA italiana ha smesso di rimpicciolirsi. Dopo un calo ininterrotto fino al 2018 (3,23 milioni di dipendenti), nel 2024 si supera quota 3,39 milioni. Ma la ripresa non è diffusa: la crescita è trainata quasi solo da Istruzione e Sanità, mentre funzioni centrali e locali continuano a perdere personale. E la PA resta un mondo a forte prevalenza femminile (oltre 60%), con divari enormi tra comparti.**
 
-Dati BDAP/RGS sul pubblico impiego per **comparto, genere e orario di lavoro**, dal 2010 al 2023. Ogni numero è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
+Dati BDAP/RGS sul pubblico impiego per **comparto, genere e orario di lavoro**, dal 2010 al 2024. Ogni numero è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
 ```js
 import { num, pct, numFix, tableFormat } from "../import/format-utils.js";
@@ -42,8 +42,8 @@ const donnePctLast = totLast ? (y(last).donne / totLast) * 100 : null;
 ```
 
 ```js
-// Stock 2023 per comparto + variazione 2010→2023
-const stock2023 = data.filter(d => d.anno === last)
+// Stock per comparto nell'anno più recente + variazione dal primo anno
+const stockLast = data.filter(d => d.anno === last)
   .map(d => ({ comparto: d.comparto, totale: d.totale, donne: d.donne, pctDonne: d.totale ? (d.donne / d.totale) * 100 : null }))
   .sort((a, b) => b.totale - a.totale);
 const comparti = data.filter(d => d.anno === first).map(d => d.comparto);
@@ -82,14 +82,14 @@ display(plot.plot({
   x: {grid: true, tickFormat: plot.formatNumber},
   y: {label: null, tickSize: 0},
   marks: [
-    plot.barX(stock2023, {x: "totale", y: "comparto", fill: "#3182bd", sort: {y: "-x"}, tip: true}),
-    plot.text(stock2023, {x: "totale", y: "comparto", text: (d) => ` ${num(d.totale)}`, dx: 6, textAnchor: "start", fontSize: 11}),
+    plot.barX(stockLast, {x: "totale", y: "comparto", fill: "#3182bd", sort: {y: "-x"}, tip: true}),
+    plot.text(stockLast, {x: "totale", y: "comparto", text: (d) => ` ${num(d.totale)}`, dx: 6, textAnchor: "start", fontSize: 11}),
     plot.ruleX([0])
   ]
 }))
 ```
 
-> **Nota di lettura**: il grafico mostra lo **stock** del ${last}: quanti dipendenti contano i vari comparti, indipendentemente dalle assunzioni. L'istruzione domina con oltre ${num(stock2023[0].totale)} addetti.
+> **Nota di lettura**: il grafico mostra lo **stock** del ${last}: quanti dipendenti contano i vari comparti, indipendentemente dalle assunzioni. L'istruzione domina con oltre ${num(stockLast[0].totale)} addetti.
 
 ## 2. Il trend ${first}–${last}: declino e svolta
 
@@ -114,8 +114,8 @@ La linea tratteggiata è il livello del ${first}. Il punto arancione segna il mi
 ## 3. I divari dentro la PA: la composizione di genere
 
 ```js
-const donnePctArr = stock2023.map(d => d.pctDonne ?? 0);
-const donneBars = stock2023.map(d => ({ comparto: d.comparto, donne: d.pctDonne ?? 0 }));
+const donnePctArr = stockLast.map(d => d.pctDonne ?? 0);
+const donneBars = stockLast.map(d => ({ comparto: d.comparto, donne: d.pctDonne ?? 0 }));
 ```
 
 La PA è un mondo a forte prevalenza femminile (il **${pct(donnePctLast)}** del totale nel ${last}), ma con differenze straordinarie tra comparti: si va dal **${pct(Math.max(...donnePctArr))}** dell'istruzione al **${pct(Math.min(...donnePctArr))}** del personale in regime di diritto pubblico.
@@ -170,5 +170,5 @@ Inputs.table(data, {
 ## Risorse
 
 - [MEF · RGS · BDAP (fonte originale)](https://www.rgs.mef.gov.it/)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2023/dipendenti_pubblici_2023_clean.parquet)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2024/dipendenti_pubblici_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/dipendenti-pubblici)
