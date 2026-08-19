@@ -1,21 +1,22 @@
 ---
 title: Spese dello Stato
-description: Previsioni definitive di spesa per amministrazione e missione — BDAP, 2008-2024
-source: MEF — BDAP
+description: "Le previsioni definitive di spesa dello Stato per amministrazione e missione, 2008-2024 — chi spende e in cosa (BDAP RGS MEF)"
+source: MEF — RGS · BDAP
 source_url: https://www.rgs.mef.gov.it/
 period: "2008–2024"
-last_modified: 2026-06-10
+last_modified: 2026-08-19
 dataset_slug: bdap_spese_stato
+data_driven: true
 ---
 
-# Spese dello Stato
+# Spese dello Stato — chi spende e in cosa
 
-Previsioni definitive di spesa delle amministrazioni statali italiane, per amministrazione e missione. I dati mostrano chi spende e in cosa, dal 2008 al 2024.
+**In ${last - first} anni la spesa statale è cresciuta del ${numFix(deltaPct, 0)}% (da ${numFix(d2008.spesa / 1e9, 0)} a ${numFix(totLast / 1e9, 0)} miliardi), con il salto del 2020 legato alle misure pandemiche. Ma la spesa è fortemente concentrata: ${top.amministrazione.toLowerCase()} vale da solo ${pct(topShare)} del totale, e le prime voci obbligate — debito pubblico, relazioni finanziarie e previdenza — assorbono ${pct(voceShare)} della spesa.**
 
-**Fonte**: [MEF — BDAP](https://www.rgs.mef.gov.it/) · **Periodo**: 2008–2024
+Previsioni definitive di **spesa dello Stato per amministrazione e missione** (BDAP — RGS MEF). Ogni numero è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
 ```js
-import { num, euroCompact, tableFormat } from "../import/format-utils.js";
+import { num, euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -23,150 +24,130 @@ const data = await FileAttachment("../data/bdap-spese-stato.json").json();
 ```
 
 ```js
-const anni = [...new Set(data.map(d => d.anno))].sort((a, b) => b - a);
-const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {label: "Anno", value: anni[0]}));
-```
+const byAnno = Array.from(d3.rollup(data, v => d3.sum(v, d => d.spesa_cp), d => d.anno))
+  .map(([anno, spesa]) => ({ anno, spesa }))
+  .sort((a, b) => a.anno - b.anno);
+const last = byAnno[byAnno.length - 1].anno;
+const first = byAnno[0].anno;
+const minimo = byAnno.reduce((m, x) => x.spesa < m.spesa ? x : m, byAnno[0]);
+const totLast = byAnno[byAnno.length - 1].spesa;
+const d2008 = byAnno[0];
+const deltaPct = d2008 ? ((totLast - d2008.spesa) / d2008.spesa) * 100 : null;
 
-```js
-const filtered = data.filter(d => d.anno === annoSel);
-const totSpesa = d3.sum(filtered, d => d.spesa_cp);
-const nAmm = new Set(filtered.map(d => d.amministrazione)).size;
-const nMissioni = new Set(filtered.map(d => d.missione)).size;
-
-// Spesa per amministrazione
+const lastRows = data.filter(d => d.anno === last);
 const perAmm = Array.from(
-  d3.rollup(filtered, v => d3.sum(v, d => d.spesa_cp), d => d.amministrazione),
-  ([amministrazione, spesa]) => ({amministrazione, spesa})
+  d3.rollup(lastRows, v => d3.sum(v, d => d.spesa_cp), d => d.amministrazione),
+  ([amministrazione, spesa]) => ({ amministrazione, spesa })
 ).sort((a, b) => b.spesa - a.spesa);
-
-// Spesa per missione
-const perMissione = Array.from(
-  d3.rollup(filtered, v => d3.sum(v, d => d.spesa_cp), d => d.missione),
-  ([missione, spesa]) => ({missione, spesa})
-).sort((a, b) => b.spesa - a.spesa).slice(0, 15);
-
-// Trend totale
-const trend = Array.from(
-  d3.rollup(data, v => d3.sum(v, d => d.spesa_cp), d => d.anno),
-  ([anno, spesa]) => ({anno, spesa})
-).sort((a, b) => a.anno - b.anno);
-
-// Delta 2008→2024
-const spesa2008 = trend.find(d => d.anno === 2008)?.spesa || 0;
-const spesa2024 = trend.find(d => d.anno === 2024)?.spesa || 0;
-const deltaPct = spesa2008 ? Math.round((spesa2024 - spesa2008) / spesa2008 * 1000) / 10 : 0;
+const perMis = Array.from(
+  d3.rollup(lastRows, v => d3.sum(v, d => d.spesa_cp), d => d.missione),
+  ([missione, spesa]) => ({ missione, spesa })
+).sort((a, b) => b.spesa - a.spesa);
+const nAmm = perAmm.length;
+const nMis = perMis.length;
+const top = perAmm[0];
+const topShare = totLast ? (top.spesa / totLast) * 100 : null;
+const voceShare = totLast
+  ? (perMis.filter(m => m.missione.includes("Debito pubblico") || m.missione.includes("Relazioni finanziarie") || m.missione.includes("Politiche previdenziali")).reduce((s, m) => s + m.spesa, 0) / totLast) * 100
+  : null;
 ```
 
-<div class="grid grid-cols-3">
-  <div class="card">
-    <h3>Spesa totale</h3>
-    <span class="big">${euroCompact(totSpesa)}</span>
-    <small style="opacity:0.6">${String(annoSel)}</small>
-  </div>
-  <div class="card">
-    <h3>Amministrazioni</h3>
-    <span class="big">${nAmm}</span>
-  </div>
-  <div class="card">
-    <h3>Missioni</h3>
-    <span class="big">${nMissioni}</span>
-  </div>
+<div class="grid grid-cols-4">
+  <div class="card"><h3>Spesa totale ${last}</h3><span class="big">${euroCompact(totLast)}</span></div>
+  <div class="card"><h3>Δ ${first}→${last}</h3><span class="big">${deltaPct >= 0 ? "+" : ""}${numFix(deltaPct, 0)}%</span></div>
+  <div class="card"><h3>Amministrazioni</h3><span class="big">${num(nAmm)}</span></div>
+  <div class="card"><h3>Missioni</h3><span class="big">${num(nMis)}</span></div>
 </div>
 
----
+## 1. Chi spende — la spesa per amministrazione (${last})
 
-## Evoluzione della spesa 2008-2024
-
-La spesa statale totale è cresciuta da €748 mld nel 2008 a oltre €1.245 mld nel 2024 (+${deltaPct}%). Il salto del 2020 riflette le misure pandemiche.
+Per natura, la spesa si articola per amministrazione. Il quadro del ${last} è dominato da un solo attore, il Ministero dell'Economia, che gestisce da solo oltre ${pct(topShare)} del totale (interessi sul debito, relazioni finanziarie e gran parte delle partite "obbligate").
 
 ```js
-Plot.plot({
-  title: "Previsioni definitive di spesa — 2008-2024",
-  width: 800,
-  height: 350,
-  x: {tickFormat: d => String(d), label: null},
-  y: {grid: true, tickFormat: "~s", label: "Spesa (€)"},
-  marks: [
-    Plot.lineY(trend, {x: "anno", y: "spesa", tip: {format: {y: d => euroCompact(d)}}}),
-    Plot.dot(trend, {x: "anno", y: "spesa", fill: "steelblue", r: 3}),
-    Plot.areaY(trend, {x: "anno", y: "spesa", fill: "steelblue", fillOpacity: 0.05}),
-    Plot.ruleY([0])
-  ]
-})
-```
-
----
-
-## Spesa per amministrazione — ${String(annoSel)}
-
-```js
-Plot.plot({
-  title: `Spesa per amministrazione — ${String(annoSel)}`,
-  width: 800,
-  height: 400,
-  marginLeft: 220,
+const plot = await import("npm:@observablehq/plot");
+display(plot.plot({
+  title: `Spesa per amministrazione — ${last}`,
+  width: 800, height: 400, marginLeft: 150,
+  x: {grid: true, tickFormat: plot.formatNumber},
   y: {label: null, tickSize: 0},
-  x: {grid: true, tickFormat: "~s"},
   color: {scheme: "Blues"},
   marks: [
-    Plot.barX(perAmm, {
-      y: "amministrazione",
-      x: "spesa",
-      fill: "spesa",
-      sort: {y: "-x"},
-      tip: {format: {x: d => euroCompact(d)}}
-    }),
-    Plot.ruleX([0])
+    plot.barX(perAmm, {x: "spesa", y: "amministrazione", fill: "spesa", sort: {y: "-x"}, tip: true}),
+    plot.text(perAmm, {x: "spesa", y: "amministrazione", text: (d) => ` ${euroCompact(d.spesa)} — ${pct((d.spesa / totLast) * 100)}`, dx: 6, textAnchor: "start", fontSize: 10}),
+    plot.ruleX([0])
   ]
-})
+}))
 ```
 
----
+> **Nota di lettura**: mostra lo **stock** del ${last}: quanto spende ogni ministero. È il dato nella sua forma naturale; il trend e la composizione per missione arrivano qui sotto.
 
-## Spesa per missione — ${String(annoSel)}
+## 2. Il trend ${first}–${last}: crescita e scatto del 2020
+
+Nel complesso la spesa è cresciuta per quasi tutto il periodo, con un plateau/rimbalzi nella prima parte del decennio e lo **scatto strutturale del 2020** (misure pandemiche) da cui non si è più tornati indietro.
 
 ```js
-Plot.plot({
-  title: `Spesa per missione — ${String(annoSel)}`,
-  width: 800,
-  height: 400,
-  marginLeft: 220,
-  y: {label: null, tickSize: 0},
-  x: {grid: true, tickFormat: "~s"},
-  color: {scheme: "Oranges"},
+display(plot.plot({
+  title: `Spesa totale dello Stato — ${first}–${last}`,
+  width: 800, height: 320,
+  x: {tickFormat: String}, y: {grid: true, tickFormat: (d) => euroCompact(d)},
   marks: [
-    Plot.barX(perMissione, {
-      y: "missione",
-      x: "spesa",
-      fill: "spesa",
-      sort: {y: "-x"},
-      tip: {format: {x: d => euroCompact(d)}}
-    }),
-    Plot.ruleX([0])
+    plot.lineY(byAnno, {x: "anno", y: "spesa", stroke: "#3182bd", strokeWidth: 2, tip: {format: {y: (d) => euroCompact(d)}}}),
+    plot.dot(byAnno, {x: "anno", y: "spesa", fill: "#fff", stroke: "#3182bd"}),
+    plot.dot(byAnno.filter(d => d.anno === minimo.anno), {x: "anno", y: "spesa", fill: "#d95f0e", r: 4, tip: true}),
+    plot.ruleY([byAnno[0].spesa], {stroke: "#999", strokeDasharray: "4 4"})
   ]
-})
+}))
 ```
 
+La linea tratteggiata è il livello del ${first}; il punto arancione segna il minimo della serie (${minimo.anno}).
+
+## 3. In cosa si spende — le missioni (${last})
+
+Guardando per **missione** (classificazione COFOG), emergono le voci che da sole spiegano la concentrazione: gli **interessi sul debito pubblico**, le **relazioni finanziarie** con gli enti territoriali e le **politiche previdenziali** sono le prime tre voci di spesa.
+
+```js
+const perMisTop = perMis.slice(0, 12);
+display(plot.plot({
+  title: `Spesa per missione — ${last} (top 12)`,
+  width: 800, height: 380, marginLeft: 190,
+  x: {grid: true, tickFormat: plot.formatNumber},
+  y: {label: null, tickSize: 0},
+  color: {scheme: "Oranges"},
+  marks: [
+    plot.barX(perMisTop, {x: "spesa", y: "missione", fill: "spesa", sort: {y: "-x"}, tip: true}),
+    plot.text(perMisTop, {x: "spesa", y: "missione", text: (d) => ` ${euroCompact(d.spesa)} — ${pct((d.spesa / totLast) * 100)}`, dx: 6, textAnchor: "start", fontSize: 10}),
+    plot.ruleX([0])
+  ]
+}))
+```
 ---
 
-## Dettaglio per amministrazione e missione
+## Dettaglio ${last} per amministrazione e missione
+
+<small>Righe amministrazione×missione per l'anno più recente (${last}). Cerca un amministrazione o una voce.</small>
 
 ```js
 const { header, format } = tableFormat({
   amministrazione: { label: "Amministrazione", fmt: "string" },
   missione: { label: "Missione", fmt: "string" },
-  spesa_cp: { label: "Spesa (cp)", fmt: "euroCompact" },
-  spesa_cs: { label: "Spesa (cs)", fmt: "euroCompact" },
+  spesa_cp: { label: "Spesa (competenza)", fmt: "euroCompact" },
+  spesa_cs: { label: "Spesa (cassa)", fmt: "euroCompact" }
 });
 ```
 
 ```js
-Inputs.table(filtered, {
+const searchQuery = view(Inputs.search(lastRows, {placeholder: "cerca ministero o missione…", label: "Cerca"}));
+```
+
+```js
+Inputs.table(searchQuery, {
   columns: ["amministrazione", "missione", "spesa_cp", "spesa_cs"],
   header,
   format,
   rows: 20,
-  width: "100%"
+  width: "100%",
+  sort: "spesa_cp",
+  reverse: true
 })
 ```
 
@@ -174,16 +155,14 @@ Inputs.table(filtered, {
 
 ## Limiti
 
-- **Copertura**: la serie copre il periodo 2008-2024. Tutti i dati provengono da un unico file BDAP.
-- **Previsioni definitive**: i dati sono previsioni di spesa definitive, non spese effettivamente sostenute. Possono differire dai consuntivi.
-- **Amministrazioni**: la denominazione delle amministrazioni può cambiare nel periodo (es. fusioni, scissioni di ministeri). I dati riflettono la denominazione al momento della previsione.
-- **Missioni**: la classificazione per missione segue il COFOG (Classificazione delle Funzioni di Governo). Alcune missioni hanno denominazioni leggermente variabili negli anni.
-
----
+- **Copertura**: la serie copre il periodo 2008-2024 (unico file BDAP multi-anno); anni precedenti non comparabili.
+- **Previsioni definitive**: i valori sono previsioni di spesa definitive (base competenza), non spese effettivamente sostenute; possono differire dai consuntivi.
+- **Amministrazioni**: la denominazione può cambiare nel periodo (fusioni/scissioni di ministeri); i dati riflettono la denominazione al momento della previsione.
+- **Missioni**: la classificazione segue il COFOG; alcune denominazioni variano leggermente tra gli anni.
 
 ## Risorse
 
-- [MEF — BDAP](https://www.rgs.mef.gov.it/)
-- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
+- [MEF · RGS · BDAP (fonte originale)](https://www.rgs.mef.gov.it/)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_spese_stato/2024/bdap_spese_stato_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-spese-stato)
+La spesa è passata da **${euroCompact(d2008.spesa)}** nel ${first} a **${euroCompact(totLast)}** nel ${last}, toccando il minimo della serie nel **${minimo.anno}** (${euroCompact(minimo.spesa)}). Il **2020** segna lo scatto pandemico: da lì il livello non è più sceso. La crescita, però, è trainata soprattutto da voci "obbligate" concentrate al centro: ${top.amministrazione.toLowerCase()} vale ${pct(topShare)} e debito+relazioni+previdenza pesano ${pct(voceShare)}.
