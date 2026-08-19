@@ -16,7 +16,7 @@ data_driven: true
 Produzione netta di energia elettrica in **GWh per fonte e regione** (Terna). Ogni numero è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
 ```js
-import { num, pct, numFix, tableFormat } from "../import/format-utils.js";
+import { pct, numFix, tableFormat } from "../import/format-utils.js";
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 ```
 
@@ -48,6 +48,7 @@ const pctD = (f) => g(first, f) ? ((g(last, f) - g(first, f)) / g(first, f)) * 1
 const termoD = pctD("Termoelettrico");
 const fvD = pctD("Fotovoltaico");
 const eolD = pctD("Eolico");
+const termoShareAt = (a) => { const t = byAnno.find(p => p.anno === a)?.gwh ?? 0; return t ? (g(a, "Termoelettrico") / t) * 100 : null; };
 
 const mixLast = stackData.filter(d => d.anno === last).sort((a, b) => b.gwh - a.gwh);
 const perRegione = Array.from(
@@ -164,4 +165,4 @@ Inputs.table(searchQuery, {
 - [Terna (fonte originale)](https://www.terna.it/)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/terna_electricity_by_source/2024/terna_electricity_by_source_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/terna-electricity-by-source)
-Dal **${first}** al **${last}** la produzione totale è passata da **${numFix(tot2015 / 1000, 0)} a ${numFix(totLast / 1000, 0)} TWh** (${deltaTot >= 0 ? "+" : ""}${numFix(deltaTot, 1)}%). Al netto dell'oscillazione idrica (clima), la composizione è cambiata in modo strutturale: <strong>il termoelettrico perde 12 punti di quota</strong>, il fotovoltaico (${numFix(fvD, 0)}%) e l'eolico (${numFix(eolD, 0)}%) guadagnano.
+Dal **${first}** al **${last}** la produzione totale è passata da **${numFix(tot2015 / 1000, 0)} a ${numFix(totLast / 1000, 0)} TWh** (${deltaTot >= 0 ? "+" : ""}${numFix(deltaTot, 1)}%). Al netto dell'oscillazione idrica (clima), la composizione è cambiata in modo strutturale: <strong>il termoelettrico perde ${numFix(termoShareAt(first) - termoShareAt(last), 0)} punti di quota</strong>, il fotovoltaico (${numFix(fvD, 0)}%) e l'eolico (${numFix(eolD, 0)}%) guadagnano.
