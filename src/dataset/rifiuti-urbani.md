@@ -11,7 +11,7 @@ data_driven: true
 
 # Rifiuti urbani nei comuni
 
-**Nel ${String(annoSel)} i comuni italiani hanno prodotto ${unit(totRU, "t")} di rifiuti urbani, con una quota di raccolta differenziata del ${pct(mediaRd)}. Ma il divario tra regioni è enorme: dalla Val d'Aopia con oltre l'80% al Sud dove si resta spesso sotto il 60%.**
+**Nel ${String(annoSel)} i comuni italiani hanno prodotto ${unit(totRU, "t")} di rifiuti urbani, con una quota di raccolta differenziata del ${pct(mediaRd)}. Ma il divario tra regioni è enorme: dalla Val d'Aosta con oltre ${pct(maxRd)} al Sud dove si resta spesso sotto ${pct(minRd)}.**
 
 Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta differenziata e percentuale per regione. Ogni numero di questa pagina è calcolato dal dato a build-time.
 
@@ -51,6 +51,8 @@ const regFiltered = rifiutiData
 const totRU = regFiltered.reduce((s, d) => s + d.totale_ru_tonnellate, 0);
 const totRD = regFiltered.reduce((s, d) => s + d.totale_rd_tonnellate, 0);
 const mediaRd = Math.round(totRD / totRU * 1000) / 10;
+const maxRd = d3.max(regFiltered, d => d.quota_rd);
+const minRd = d3.min(regFiltered, d => d.quota_rd);
 ```
 
 ```js
@@ -58,6 +60,8 @@ const comuniFiltrati = comuni
   .filter(d => d.anno === annoSel)
   .map(d => ({...d, percentuale_rd: Math.round(d.totale_rd_tonnellate / d.totale_ru_tonnellate * 1000) / 10}))
   .sort((a, b) => b.percentuale_rd - a.percentuale_rd);
+const maxRdComuni = d3.max(comuniFiltrati, d => d.percentuale_rd);
+const minRdComuni = d3.min(comuniFiltrati, d => d.percentuale_rd);
 ```
 
 <div class="grid grid-cols-3">
@@ -113,7 +117,7 @@ Plot.plot({
 
 ## 2. Grandi comuni — ${String(annoSel)}
 
-Nei grandi comuni (popolazione ≥ 100000) il divario è ancora più netto. Alcuni comuni del Nord superano l'80% di differenziata, mentre altri restano sotto il 50%.
+Nei grandi comuni (popolazione ≥ 100000) il divario è ancora più netto. Alcuni comuni del Nord superano il ${pct(maxRdComuni)} di differenziata, mentre altri restano sotto il ${pct(minRdComuni)}.
 
 ```js
 Plot.plot({

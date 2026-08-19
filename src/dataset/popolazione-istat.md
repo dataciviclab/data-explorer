@@ -11,12 +11,6 @@ data_driven: true
 
 # Popolazione italiana per età
 
-**Nel ${String(annoSel)} l'Italia conta ${unit(totale, "")} residenti. Le donne rappresentano il ${pct(pctFemmine, 1)} della popolazione, ma ilvero squilibrio è nelle fasce d'età: gli over 60 superano i giovani under 30, e la popolazione continua a invecchiare.**
-
-Popolazione residente italiana per fascia d'età, sesso e anno. I dati mostrano la struttura demografica del paese e la sua evoluzione nel tempo. Ogni numero di questa pagina è calcolato dal dato a build-time.
-
-**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2019–2025
-
 ```js
 import { num, numFix, pct, unit, tableFormat } from "../import/format-utils.js";
 ```
@@ -39,6 +33,9 @@ const filtered = data.filter(d => d.anno === annoSel).sort((a, b) => {
 const totale = d3.sum(filtered, d => d.popolazione_residente);
 const pctFemmine = d3.sum(filtered, d => d.totale_femmine) / totale * 100;
 const nFasce = filtered.length;
+
+const over60 = d3.sum(filtered.filter(d => ["60-74", "75+"].includes(d.fascia_eta)), d => d.popolazione_residente);
+const under30 = d3.sum(filtered.filter(d => ["0-14", "15-29"].includes(d.fascia_eta)), d => d.popolazione_residente);
 ```
 
 ```js
@@ -48,6 +45,12 @@ const trend = Array.from(
   ([anno, fasce]) => ({anno, ...Object.fromEntries(fasce)})
 ).sort((a, b) => a.anno - b.anno);
 ```
+
+**Nel ${String(annoSel)} l'Italia conta ${unit(totale, "")} residenti. Le donne rappresentano il ${pct(pctFemmine, 1)} della popolazione, ma il vero squilibrio è nelle fasce d'età: gli over 60 (${unit(over60, "")}) superano i giovani under 30 (${unit(under30, "")}), e la popolazione continua a invecchiare.**
+
+Popolazione residente italiana per fascia d'età, sesso e anno. I dati mostrano la struttura demografica del paese e la sua evoluzione nel tempo. Ogni numero di questa pagina è calcolato dal dato a build-time.
+
+**Fonte**: [ISTAT](https://esploradati.istat.it/) · **Periodo**: 2019–2025
 
 <div class="grid grid-cols-3">
   <div class="card">
