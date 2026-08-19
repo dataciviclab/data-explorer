@@ -20,7 +20,7 @@ export async function launchPage(options = {}) {
   return { browser, page };
 }
 
-export async function goto(page, path = "/dataset/anzianita", timeout = 60000) {
+export async function goto(page, path = "/dataset/entrate-stato", timeout = 60000) {
   await page.goto(BASE_URL + path, { waitUntil: "networkidle", timeout });
   await page.waitForTimeout(2500);
 }

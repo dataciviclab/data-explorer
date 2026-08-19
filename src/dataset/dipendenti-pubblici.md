@@ -172,5 +172,6 @@ Inputs.table(data, {
 ## Risorse
 
 - [MEF · RGS · BDAP (fonte originale)](https://www.rgs.mef.gov.it/)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/dipendenti_pubblici/2024/dipendenti_pubblici_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/dipendenti-pubblici)

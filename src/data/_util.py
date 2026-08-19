@@ -215,9 +215,8 @@ def raw_sample(
 ) -> None:
     """Legge un campione raw di righe dal parquet (senza aggregare).
 
-    Per il rendering data-driven (dataset-page.js): la pagina scarica un
-    campione e le aggregazioni (trend, rank, choropleth) avvengono in JS
-    (charts-core). Il loader resta "stupido" e generico per qualsiasi slug.
+    Restituisce le righe raw senza aggregare; trend/rank/choropleth vengono
+    calcolati a valle nelle pagine. Il loader resta "stupido" e generico.
 
     Output: array JSON di righe (v1 contract), dedup su chiavi uguali
     per evitare righe duplicate nei glob multi-anno.

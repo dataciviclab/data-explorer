@@ -29,7 +29,7 @@ Regole:
 
 - il primo blocco deve mostrare la distribuzione base del dataset nell'anno più recente
 - solo dopo possono arrivare delta, confronti, trend o metriche derivate
-- le letture più interpretative restano nel repo `dataciviclab/analisi`
+- le letture più interpretative vivono come pagine di analisi data-driven del Data Explorer
 - il dataset deve essere mostrato prima di essere interpretato
 
 ## Blocco principale
@@ -104,7 +104,7 @@ Regole:
 - `section-note`: ok per spiegare una metrica, un filtro o il perimetro del blocco
 - `method-note`: usare con cautela, solo se evita una lettura sbagliata del dato e non è removibile senza rendere il blocco poco comprensibile
 - se una `method-note` porta da sola il peso interpretativo del blocco, quel contenuto probabilmente non è ancora pronto per il Data Explorer
-- se la nota diventa il cuore della pagina, quel contenuto probabilmente appartiene a `dataciviclab/analisi`
+- se la nota diventa il cuore della pagina, quel contenuto probabilmente appartiene a una pagina di analisi dedicata del Data Explorer
 
 ## Cosa evitare
 
@@ -136,7 +136,7 @@ I numeri nelle pagine **non sono hardcoded**: ogni KPI o cifra nel testo cita un
 | Blocco 2 | confronto, delta, trend o lettura derivata |
 | Tabella finale | vista completa scaricabile |
 
-Le letture interpretative più forti appartengono a `dataciviclab/analisi`, non alle pagine del Data Explorer.
+Le letture interpretative più forti vivono in pagine di analisi dedicate del Data Explorer (come narrativa data-driven), non compresse nel blocco dataset.
 
 ## Checklist rapida di review
 

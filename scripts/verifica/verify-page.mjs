@@ -8,7 +8,7 @@
 import { chromium } from "playwright";
 import { BASE_URL, chromePath } from "./browser.js";
 
-const path = process.argv[2] || "/dataset/anzianita";
+const path = process.argv[2] || "/dataset/entrate-stato";
 const url = BASE_URL + path;
 
 const browser = await chromium.launch({ executablePath: chromePath() });
