@@ -6,16 +6,19 @@ source_url: https://indicatoriambientali.isprambiente.it/
 period: "1990–2023"
 last_modified: 2026-07-12
 dataset_slug: ispra_emissioni_ghg
+data_driven: true
 ---
 
 # Emissioni GHG da processi energetici
 
-Emissioni di gas serra da processi energetici in Italia, per settore economico: industrie energetiche, industrie manifatturiere, residenziale e servizi, trasporti. Dati in Mt CO₂ equivalente, fonte ISPRA Inventario Nazionale UNFCCC/EEA.
+**Nel ${String(annoMax)} le emissioni da processi energetici ammontano a ${unit(ultimoAnno.totale, "Mt CO₂eq")}, in ${varPct > 0 ? "aumento" : "diminuzione"} del ${Math.abs(varPct)}% rispetto al ${String(annoMin)}. I trasporti sono il settore più stabile, mentre industrie energetiche e manifatturiere sono in calo strutturale.**
+
+Emissioni di gas serra da processi energetici in Italia, per settore economico: industrie energetiche, industrie manifatturiere, residenziale e servizi, trasporti. Ogni numero di questa pagina è calcolato dal dato a build-time.
 
 **Fonte**: [ISPRA](https://indicatoriambientali.isprambiente.it/) · **Periodo**: 1990–2023
 
 ```js
-import { num, unit } from "../import/format-utils.js";
+import { num, numFix, pct, unit, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -63,28 +66,9 @@ const trendPerSettore = data.flatMap(d =>
 
 ---
 
-## Evoluzione per settore 1990-2023
+## 1. Mix settoriale — ${String(annoMax)}
 
-Le emissioni da industrie energetiche e manifatturiere sono in calo strutturale dagli anni 2000. Il settore trasporti resta il più stabile, mentre residenziale e servizi risente della variabilità climatica invernale.
-
-```js
-Plot.plot({
-  title: "Emissioni GHG per settore — 1990-2023",
-  width: 800,
-  height: 350,
-  x: {tickFormat: d => String(d), label: null},
-  y: {grid: true, label: "Emissioni (Mt CO₂eq)"},
-  color: {legend: true, scheme: "Set2"},
-  marks: [
-    Plot.areaY(trendPerSettore, {x: "anno", y: "emissioni", fill: "settore", order: "sum", offset: "wiggle", fillOpacity: 0.7}),
-    Plot.ruleY([0]),
-  ]
-})
-```
-
----
-
-## Mix settoriale — ${String(annoMax)}
+La composizione delle emissioni per settore nel ${String(annoMax)}. I trasporti e le industrie energetiche sono le due voci principali; residenziale e servizi risente della variabilità climatica invernale.
 
 ```js
 const mixUltimoAnno = settori.map(s => ({settore: settoreLabel[s], emissioni: ultimoAnno[s], pct: ultimoAnno[s] / ultimoAnno.totale * 100}));
@@ -121,9 +105,32 @@ Plot.plot({
 })
 ```
 
+> **Nota di lettura**: il grafico mostra lo **stock** del ${String(annoMax)}: quante emissioni per ciascun settore. La lettura del trend è nel grafico successivo.
+
 ---
 
-## Serie storica emissioni totali
+## 2. Evoluzione per settore ${String(annoMin)}–${String(annoMax)}
+
+Le emissioni da industrie energetiche e manifatturiere sono in calo strutturale dagli anni 2000. Il settore trasporti resta il più stabile, mentre residenziale e servizi risente della variabilità climatica invernale.
+
+```js
+Plot.plot({
+  title: "Emissioni GHG per settore — 1990-2023",
+  width: 800,
+  height: 350,
+  x: {tickFormat: d => String(d), label: null},
+  y: {grid: true, label: "Emissioni (Mt CO₂eq)"},
+  color: {legend: true, scheme: "Set2"},
+  marks: [
+    Plot.areaY(trendPerSettore, {x: "anno", y: "emissioni", fill: "settore", order: "sum", fillOpacity: 0.7}),
+    Plot.ruleY([0]),
+  ]
+})
+```
+
+---
+
+## 3. Serie storica emissioni totali
 
 ```js
 Plot.plot({
@@ -145,10 +152,21 @@ Plot.plot({
 ## Dettaglio per anno
 
 ```js
+const { header, format } = tableFormat({
+  anno: { label: "Anno", fmt: "string" },
+  industrie_energetiche: { label: "Ind. energetiche", fmt: "num" },
+  industrie_manifatturiere: { label: "Ind. manifatturiere", fmt: "num" },
+  residenziale_e_servizi: { label: "Residenziale e servizi", fmt: "num" },
+  trasporti: { label: "Trasporti", fmt: "num" },
+  totale: { label: "Totale", fmt: "num" },
+});
+```
+
+```js
 Inputs.table(data.slice().sort((a, b) => b.anno - a.anno), {
   columns: ["anno", ...settori, "totale"],
-  header: {anno: "Anno", ...Object.fromEntries(settori.map(s => [s, settoreLabel[s]])), totale: "Totale"},
-  format: Object.fromEntries([...settori, "totale"].map(s => [s, x => unit(x, "Mt CO₂eq")])),
+  header,
+  format,
   rows: 34,
   width: "100%"
 })

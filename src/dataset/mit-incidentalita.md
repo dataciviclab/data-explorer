@@ -6,16 +6,19 @@ source_url: https://www.mit.gov.it/
 period: "2001–2018"
 last_modified: 2026-06-02
 dataset_slug: mit_incidentalita_mensile
+data_driven: true
 ---
 
 # Incidenti stradali
 
-Serie mensile di incidenti stradali, morti e feriti in Italia. I dati mostrano l'evoluzione della sicurezza stradale dal 2001 al 2018 e gli effetti delle campagne di prevenzione.
+**Nel ${String(annoSel)} in Italia si sono registrati ${num(totIncidenti)} incidenti stradali, con ${num(totMorti)} morti e ${num(totFeriti)} feriti. Dal 2001 i morti sono diminuiti del ${numFix((1 - annuale[annuale.length - 1].morti / annuale[0].morti) * 100, 0)}%, ma il cammino verso la "Vision Zero" è ancora lungo.**
+
+Serie mensile di incidenti stradali, morti e feriti in Italia. I dati mostrano l'evoluzione della sicurezza stradale dal 2001 al 2018 e gli effetti delle campagne di prevenzione. Ogni numero di questa pagina è calcolato dal dato a build-time.
 
 **Fonte**: [MIT](https://www.mit.gov.it/) · **Periodo**: 2001–2018 · Dati mensili
 
 ```js
-import { num, numFix } from "../import/format-utils.js";
+import { num, numFix, pct, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -64,9 +67,41 @@ const annuale = Array.from(
 
 ---
 
-## Trend 2001-2018
+## 1. Riepilogo annuale — ${String(annoSel)}
 
-Incidenti, morti e feriti sono in costante calo dal 2001. Il miglioramento della sicurezza stradale è visibile su tutti e tre gli indicatori, con una riduzione particolarmente marcata dei morti (-60%).
+Il bilancio dei ${String(annoSel)}: ${num(totIncidenti)} incidenti, ${num(totMorti)} morti, ${num(totFeriti)} feriti. L'indice di mortalità (morti per incidente) è dell'${pct(d3.sum(filtered, d => d.morti) / d3.sum(filtered, d => d.incidenti) * 100)}.
+
+```js
+const riepilogo = [
+  {voce: "Incidenti", valore: totIncidenti},
+  {voce: "Morti", valore: totMorti},
+  {voce: "Feriti", valore: totFeriti},
+];
+```
+
+```js
+Plot.plot({
+  title: `Riepilogo incidenti stradali — ${String(annoSel)}`,
+  width: 800,
+  height: 200,
+  marginLeft: 120,
+  x: {grid: true, tickFormat: "~s"},
+  y: {label: null, tickSize: 0},
+  marks: [
+    Plot.barX(riepilogo, {y: "voce", x: "valore", fill: "#4e79a7", sort: {y: null}, tip: true}),
+    Plot.text(riepilogo, {y: "voce", x: "valore", text: d => num(d.valore), dx: 6, textAnchor: "start", fontSize: 12}),
+    Plot.ruleX([0])
+  ]
+})
+```
+
+> **Nota di lettura**: il grafico mostra lo **stock** del ${String(annoSel)}: il numero totale di incidenti, morti e feriti nell'anno. La lettura del trend è nel grafico successivo.
+
+---
+
+## 2. Trend 2001–2018
+
+Incidenti, morti e feriti sono in costante calo dal 2001. Il miglioramento della sicurezza stradale è visibile su tutti e tre gli indicatori.
 
 ```js
 Plot.plot({
@@ -85,9 +120,9 @@ Plot.plot({
 
 ---
 
-## Calo percentuale dal 2001
+## 3. Calo percentuale dal 2001
 
-Per confrontare la riduzione di morti e feriti — che hanno scale molto diverse — il grafico mostra la variazione percentuale rispetto al 2001 (base 100). Entrambi gli indicatori sono in forte calo, ma i morti sono diminuiti molto più rapidamente dei feriti (-58% contro -36% al 2018).
+Per confrontare la riduzione di morti e feriti — che hanno scale molto diverse — il grafico mostra la variazione percentuale rispetto al 2001 (base 100). I morti sono diminuiti molto più rapidamente dei feriti.
 
 ```js
 const base2001 = annuale.find(d => d.anno === 2001);
@@ -126,16 +161,21 @@ Plot.plot({
 ## Dettaglio mensile
 
 ```js
+const { header, format } = tableFormat({
+  mese: { label: "Mese", fmt: "string" },
+  incidenti: { label: "Incidenti", fmt: "num" },
+  morti: { label: "Morti", fmt: "num" },
+  feriti: { label: "Feriti", fmt: "num" },
+  indice_mortalita: { label: "Mort.%", fmt: "pct" },
+  indice_gravita: { label: "Grav.%", fmt: "pct" },
+});
+```
+
+```js
 Inputs.table(filtered, {
   columns: ["mese", "incidenti", "morti", "feriti", "indice_mortalita", "indice_gravita"],
-  header: {mese: "Mese", incidenti: "Incidenti", morti: "Morti", feriti: "Feriti", indice_mortalita: "Mort.%", indice_gravita: "Grav.%"},
-  format: {
-    incidenti: x => num(x),
-    morti: x => num(x),
-    feriti: x => num(x),
-    indice_mortalita: x => numFix(x, 2) + "%",
-    indice_gravita: x => numFix(x, 2) + "%"
-  },
+  header,
+  format,
   rows: 15,
   width: "100%"
 })
@@ -147,7 +187,6 @@ Inputs.table(filtered, {
 
 - **Copertura**: la serie copre il periodo 2001-2018. Dati successivi al 2018 non sono disponibili in questo dataset (la fonte MIT ha cambiato metodologia).
 - **Nazionale**: i dati sono aggregati a livello nazionale. Non è disponibile la disaggregazione regionale o provinciale.
-- **Indicatori**: l'indice di mortalità (morti/incidenti × 100) e l'indice di gravità sono calcolati dal MIT sulla base dei dati mensili.
 - **Metodologia**: la rilevazione degli incidenti stradali ha subito cambiamenti metodologici nel periodo considerato. I dati pre e post 2010 potrebbero non essere perfettamente confrontabili.
 
 ---

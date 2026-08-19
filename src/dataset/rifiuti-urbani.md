@@ -6,13 +6,16 @@ source_url: https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani
 period: "2020–2024"
 last_modified: 2026-05-26
 dataset_slug: ispra_ru_base
+data_driven: true
 ---
 
 # Rifiuti urbani nei comuni
 
-Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta differenziata e percentuale per regione.
+**Nel ${String(annoSel)} i comuni italiani hanno prodotto ${unit(totRU, "t")} di rifiuti urbani, con una quota di raccolta differenziata del ${pct(mediaRd)}. Ma il divario tra regioni è enorme: dalla Val d'Aosta con oltre ${pct(maxRd)} al Sud dove si resta spesso sotto ${pct(minRd)}.**
 
-**Fonte**: ISPRA · **Periodo**: 2020–2024
+Dati ISPRA sui rifiuti urbani dei comuni italiani. Produzione totale, raccolta differenziata e percentuale per regione. Ogni numero di questa pagina è calcolato dal dato a build-time.
+
+**Fonte**: [ISPRA](https://www.isprambiente.gov.it/it/dati/dati-sui-rifiuti-urbani) · **Periodo**: 2020–2024
 
 ```js
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
@@ -48,6 +51,8 @@ const regFiltered = rifiutiData
 const totRU = regFiltered.reduce((s, d) => s + d.totale_ru_tonnellate, 0);
 const totRD = regFiltered.reduce((s, d) => s + d.totale_rd_tonnellate, 0);
 const mediaRd = Math.round(totRD / totRU * 1000) / 10;
+const maxRd = d3.max(regFiltered, d => d.quota_rd);
+const minRd = d3.min(regFiltered, d => d.quota_rd);
 ```
 
 ```js
@@ -55,6 +60,8 @@ const comuniFiltrati = comuni
   .filter(d => d.anno === annoSel)
   .map(d => ({...d, percentuale_rd: Math.round(d.totale_rd_tonnellate / d.totale_ru_tonnellate * 1000) / 10}))
   .sort((a, b) => b.percentuale_rd - a.percentuale_rd);
+const maxRdComuni = d3.max(comuniFiltrati, d => d.percentuale_rd);
+const minRdComuni = d3.min(comuniFiltrati, d => d.percentuale_rd);
 ```
 
 <div class="grid grid-cols-3">
@@ -74,7 +81,9 @@ const comuniFiltrati = comuni
 
 ---
 
-## Raccolta differenziata per regione
+## 1. Raccolta differenziata per regione — ${String(annoSel)}
+
+La mappa mostra la quota di raccolta differenziata su totale rifiuti urbani per regione. Le regioni settentrionali e la Val d'Aosta guidano la classifica; al Sud e nelle Isole la differenziazione resta più bassa.
 
 ```js
 const rdLookup = buildMapLookup(regFiltered, regioniGeo, "regione", "quota_rd");
@@ -102,15 +111,19 @@ Plot.plot({
 })
 ```
 
+> **Nota di lettura**: la scala quantile divide le regioni in gruppi di pari dimensione. I valori precisi sono nella tabella in fondo alla pagina.
+
 ---
 
-## Grandi comuni (popolazione ≥ 100.000)
+## 2. Grandi comuni — ${String(annoSel)}
+
+Nei grandi comuni (popolazione ≥ 100000) il divario è ancora più netto. Alcuni comuni del Nord superano il ${pct(maxRdComuni)} di differenziata, mentre altri restano sotto il ${pct(minRdComuni)}.
 
 ```js
 Plot.plot({
   title: `Percentuale RD nei grandi comuni — ${String(annoSel)}`,
   width: 800,
-  height: 350,
+  height: 450,
   marginLeft: 120,
   y: {label: null, tickSize: 0},
   x: {grid: true, label: "% RD"},
@@ -130,7 +143,7 @@ Plot.plot({
 
 ---
 
-## Regioni — dettaglio
+## Dettaglio per regione
 
 ```js
 const { header, format } = tableFormat({
@@ -152,12 +165,10 @@ Inputs.table(regFiltered, {
 
 ---
 
----
-
 ## Limiti
 
 - **Copertura**: i dati coprono il periodo 2020-2024. I dati 2024 sono preliminari e potrebbero essere rivisti da ISPRA.
-- **Popolazione**: i dati comunali con popolazione ≥ 100.000 abitanti sono un sottoinsieme dei comuni italiani; non rappresentano l'intero territorio nazionale.
+- **Popolazione**: i dati comunali con popolazione ≥ 100000 abitanti sono un sottoinsieme dei comuni italiani; non rappresentano l'intero territorio nazionale.
 - **Percentuale RD**: calcolata come rapporto tra totale RD e totale RU. Variazioni nella metodologia di calcolo ISPRA tra anni possono influenzare il dato.
 
 ---
