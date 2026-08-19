@@ -102,7 +102,7 @@ display(plot.plot({
   title: `5x1000 per categoria — ${anno}`,
   width: 800, height: 380, marginLeft: 240,
   y: {label: null, tickSize: 0},
-  x: {grid: true, tickFormat: (d) => "€" + plot.formatNumber(d)},
+  x: {grid: true, tickFormat: euroCompact},
   color: {scheme: "Set2"},
   marks: [
     plot.barX(per_categoria, {x: "importo_totale", y: "categoria", fill: "categoria", sort: {y: "-x"}, tip: true}),
@@ -125,7 +125,7 @@ const topBar = top10.map((r, i) => ({ rango: i + 1, ente: r.denominazione, regio
 display(plot.plot({
   title: `Top 10 enti per importo erogabile — ${anno}`,
   width: 800, height: 340, marginLeft: 40,
-  x: {grid: true, tickFormat: (d) => "€" + plot.formatNumber(d)},
+  x: {grid: true, tickFormat: euroCompact},
   y: {label: null, tickSize: 0},
   marks: [
     plot.barX(topBar, {x: "importo", y: "ente", fill: "#d95f0e", sort: {y: "-x"}, tip: true}),

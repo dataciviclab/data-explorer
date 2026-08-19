@@ -82,7 +82,7 @@ const lastComp = data.filter(d => d.anno === last).sort((a, b) => b.comp - a.com
 display(plot.plot({
   title: `Composizione delle entrate dello Stato — ${last}`,
   width: 800, height: 300, marginLeft: 240,
-  x: {grid: true, tickFormat: (d) => "€" + plot.formatNumber(d)},
+  x: {grid: true, tickFormat: euroCompact},
   y: {label: null, tickSize: 0},
   marks: [
     plot.barX(lastComp, {x: "comp", y: "titolo", fill: "#3182bd", sort: {y: "-x"}, tip: true}),

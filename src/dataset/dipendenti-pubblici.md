@@ -81,7 +81,7 @@ const plot = await import("npm:@observablehq/plot");
 display(plot.plot({
   title: `Dipendenti pubblici per comparto — ${last}`,
   width: 800, height: 360, marginLeft: 150,
-  x: {grid: true, tickFormat: plot.formatNumber},
+  x: {grid: true, tickFormat: (d) => numFix(d / 1e6, 1) + " M"},
   y: {label: null, tickSize: 0},
   marks: [
     plot.barX(stockLast, {x: "totale", y: "comparto", fill: "#3182bd", sort: {y: "-x"}, tip: true}),
