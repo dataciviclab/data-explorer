@@ -6,6 +6,7 @@ source_url: https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?ling
 period: "2022"
 last_modified: 2026-06-05
 dataset_slug: reparti_ricovero
+data_driven: true
 ---
 
 # Posti letto per disciplina ospedaliera
@@ -55,6 +56,8 @@ const totaleLettiDH = d3.sum(dataArricchiti, d => d.posti_letto_day_hospital);
 const totaleLettiDS = d3.sum(dataArricchiti, d => d.posti_letto_day_surgery);
 const totaleLettiUtil = d3.sum(dataArricchiti, d => d.posti_letto_utilizzati);
 ```
+
+**Le discipline con più letti ordinari sono Medicina Generale (${num(topDiscipline[0]?.letti_ordinari)} letti), Chirurgia e Ortopedia. Il tasso di occupazione medio è del ${pct(d3.mean(perDisciplina.filter(d => d.letti_ordinari > 500), d => d.tasso_medio))}.**
 
 <div class="grid grid-cols-4">
   <div class="card">
@@ -304,5 +307,6 @@ Inputs.table(dataArricchiti, {
 ## Risorse
 
 - [Ministero della Salute — Open Data Reparti di ricovero](https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?lingua=italiano&id=5551&area=Lea&menu=vuoto)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/reparti_ricovero/2022/reparti_ricovero_2022_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/reparti-ricovero)

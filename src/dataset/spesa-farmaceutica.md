@@ -6,6 +6,7 @@ source_url: https://www.aifa.gov.it/open-data
 period: "2018–2024"
 last_modified: 2026-05-26
 dataset_slug: aifa_spesa_consumo
+data_driven: true
 ---
 
 # Spesa farmaceutica convenzionata
@@ -15,7 +16,7 @@ Spesa e consumo della farmaceutica convenzionata SSN, disaggregati per regione, 
 **Fonte**: AIFA · **Periodo**: 2018–2024
 
 ```js
-import { num, euro, tableFormat } from "../import/format-utils.js";
+import { num, numFix, euro, euroCompact, tableFormat } from "../import/format-utils.js";
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 ```
 
@@ -50,10 +51,12 @@ const totaleSpesa = d3.sum(perRegione, d => d.spesa);
 const totaleConfezioni = d3.sum(perRegione, d => d.confezioni);
 ```
 
+**Nel ${String(annoSel)} la spesa farmaceutica convenzionata SSN ammonta a ${euroCompact(totaleSpesa)}, con ${numFix(totaleConfezioni / 1e6, 1)} milioni di confezioni.**
+
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Spesa totale</h3>
-    <span class="big">€ ${(totaleSpesa / 1e6).toFixed(1)} <small style="opacity:0.6">mln</small></span>
+    <span class="big">${euroCompact(totaleSpesa)}</span>
   </div>
   <div class="card">
     <h3>Confezioni</h3>
@@ -124,7 +127,7 @@ Plot.plot({
   projection: {type: "mercator", domain: regioniGeo},
   width: 800,
   height: 600,
-  color: {scheme: "Blues", legend: true, label: "Spesa (€)", type: "quantile"},
+  color: {scheme: "Blues", legend: true, label: "Spesa (€)", type: "quantile", tickFormat: d => euroCompact(d)},
   marks: [
     Plot.geo(regioniGeo, {
       fill: d => lookup.get(normalizzaReg(d.properties.DEN_REG)),

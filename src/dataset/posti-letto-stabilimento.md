@@ -6,6 +6,7 @@ source_url: https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?ling
 period: "2020–2023"
 last_modified: 2026-06-09
 dataset_slug: posti_letto_stabilimento
+data_driven: true
 ---
 
 # Posti letto ospedalieri
@@ -54,6 +55,8 @@ const perRegioneAnno = Array.from(d3.rollup(annoData, v => ({
 }), d => d.descrizione_regione), ([descrizione_regione, v]) => ({regione: descrizione_regione, ...v}))
   .sort((a,b) => b.letti - a.letti);
 ```
+
+**Nel ${String(annoSel)} gli ospedali italiani hanno ${num(perAnno.find(d => d.anno === annoSel).totale)} posti letto, di cui ${num(perAnno.find(d => d.anno === annoSel).ordinaria)} in degenza ordinaria.**
 
 <div class="grid grid-cols-4">
   <div class="card">
@@ -111,35 +114,35 @@ Plot.plot({
 ```
 
 ```js
-// Trend per regime di degenza
-const perAnnoRegime = perAnno.flatMap(d => [
-  {anno: d.anno, regime: "Ordinaria", letti: d.ordinaria},
-  {anno: d.anno, regime: "Day Hospital", letti: d.dh},
-  {anno: d.anno, regime: "Day Surgery", letti: d.ds},
+const stacked = perAnno.flatMap(d => [
+  {anno: d.anno, regime: "Ordinaria", y0: 0, y1: d.ordinaria},
+  {anno: d.anno, regime: "Day Hospital", y0: d.ordinaria, y1: d.ordinaria + d.dh},
+  {anno: d.anno, regime: "Day Surgery", y0: d.ordinaria + d.dh, y1: d.ordinaria + d.dh + d.ds},
 ]);
+const rColors = {"Ordinaria": "#e6550d", "Day Hospital": "#6baed6", "Day Surgery": "#74c476"};
 ```
 
 ```js
 Plot.plot({
-  title: "Trend per regime di degenza — 2020-2023",
+  title: "Posti letto per regime di degenza — 2020-2023",
   width: 800,
   height: 350,
-  x: {grid: true, label: null},
+  x: {tickFormat: d => String(d), label: null},
   y: {grid: true, label: "Posti letto", tickFormat: "~s"},
-  color: {legend: true},
   marks: [
-    Plot.line(perAnnoRegime, {
-      x: "anno",
-      y: "letti",
-      stroke: "regime",
-      strokeWidth: 2,
-      marker: true,
-      tip: {format: {y: d => num(d)}}
-    }),
+    Plot.areaY(stacked.filter(d => d.regime === "Ordinaria"), {x: "anno", y1: "y0", y2: "y1", fill: "#e6550d", fillOpacity: 0.7, tip: true}),
+    Plot.areaY(stacked.filter(d => d.regime === "Day Hospital"), {x: "anno", y1: "y0", y2: "y1", fill: "#6baed6", fillOpacity: 0.7, tip: true}),
+    Plot.areaY(stacked.filter(d => d.regime === "Day Surgery"), {x: "anno", y1: "y0", y2: "y1", fill: "#74c476", fillOpacity: 0.7, tip: true}),
     Plot.ruleY([0])
   ]
 })
 ```
+
+<div style="display:flex; gap:1.5em; font-size:0.85em; margin-top:-0.5em">
+  <span><span style="display:inline-block;width:12px;height:3px;background:#e6550d;margin-right:4px;vertical-align:middle"></span>Ordinaria</span>
+  <span><span style="display:inline-block;width:12px;height:3px;background:#6baed6;margin-right:4px;vertical-align:middle"></span>Day Hospital</span>
+  <span><span style="display:inline-block;width:12px;height:3px;background:#74c476;margin-right:4px;vertical-align:middle"></span>Day Surgery</span>
+</div>
 
 ---
 
@@ -152,7 +155,7 @@ Plot.plot({
   title: `Posti letto per tipo struttura — ${annoSel}`,
   width: 800,
   height: 350,
-  marginLeft: 220,
+  marginLeft: 260,
   y: {label: null, tickSize: 0},
   x: {grid: true, tickFormat: "~s"},
   color: {scheme: "Set2"},
@@ -213,5 +216,6 @@ Inputs.table(perRegioneAnno, {
 ## Risorse
 
 - [Ministero della Salute — Banca Dati Posti Letto](https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?lingua=italiano&id=5551&area=Lea&menu=vuoto)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/posti_letto_stabilimento/2023/posti_letto_stabilimento_2023_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/posti-letto-stabilimento)
