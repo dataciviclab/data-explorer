@@ -6,9 +6,12 @@ source_url: https://www.mef.gov.it/
 period: "2020–2023"
 last_modified: 2026-06-03
 dataset_slug: mef_partecipazioni
+data_driven: true
 ---
 
 # Partecipazioni pubbliche
+
+**Nel ${annoSel} la PA italiana detiene **${num(totPartecipate)}** partecipazioni in società, con ${num(totAddetti)} addetti e oneri dichiarati per **${euroCompact(totOneri)}**. La domanda che apre i dati: perché le poche partecipazioni di Regioni e Stato costano più delle molte dei Comuni?**
 
 Quante società sono controllate dalla PA italiana, quanto costano e quanti addetti impiegano? I dati MEF mostrano le partecipazioni pubbliche per categoria di amministrazione (Comuni, Regioni, Università, ecc.) e settore economico.
 
@@ -202,6 +205,10 @@ Inputs.table(perCategoria, {
 ```
 
 ---
+
+## La domanda che resta
+
+Il numero di società partecipate racconta solo metà della storia: le Regioni ne detengono poche ma con oneri elevati (sanità e trasporti), i Comuni molte ma leggere. Resta aperta la domanda di quanto questo portafoglio partecipato pesi davvero sui bilanci pubblici, e quanto valga la pena di mantenerlo così com'è.
 
 ## Limiti
 
