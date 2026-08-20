@@ -11,7 +11,7 @@ data_driven: true
 
 # Alunni per corso ed età
 
-**Nell'anno scolastico ${annoSel}/${annoSel + 1} le scuole statali contano **${numFix(totale / 1e6, 1)}** milioni di alunni in ${num(nRegioni)} regioni. La domanda che apre i dati: con la popolazione scolastica in calo, come cambia il sistema — meno plessi, più risorse per studente, o entrambe?**
+**Nell'anno scolastico ${annoSel}/${annoSel + 1} le scuole statali contano ${numFix(totale / 1e6, 1)} milioni di alunni in ${num(nRegioni)} regioni. La domanda che apre i dati: con la popolazione scolastica in calo, come cambia il sistema — meno plessi, più risorse per studente, o entrambe?**
 
 Alunni delle scuole statali italiane per ordine scolastico (primaria, secondaria I e II grado), regione e anno scolastico. I dati mostrano l'evoluzione della popolazione scolastica e la distribuzione tra territori e gradi di istruzione.
 

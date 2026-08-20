@@ -11,7 +11,7 @@ data_driven: true
 
 # Partecipazioni pubbliche
 
-**Nel ${annoSel} la PA italiana detiene **${num(totPartecipate)}** partecipazioni in società, con ${num(totAddetti)} addetti e oneri dichiarati per **${euroCompact(totOneri)}**. La domanda che apre i dati: perché le poche partecipazioni di Regioni e Stato costano più delle molte dei Comuni?**
+**Nel ${annoSel} la PA italiana detiene ${num(totPartecipate)} partecipazioni in società, con ${num(totAddetti)} addetti e oneri dichiarati per ${euroCompact(totOneri)}. La domanda che apre i dati: perché le poche partecipazioni di Regioni e Stato costano più delle molte dei Comuni?**
 
 Quante società sono controllate dalla PA italiana, quanto costano e quanti addetti impiegano? I dati MEF mostrano le partecipazioni pubbliche per categoria di amministrazione (Comuni, Regioni, Università, ecc.) e settore economico.
 

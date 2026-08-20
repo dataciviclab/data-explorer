@@ -11,7 +11,7 @@ data_driven: true
 
 # Pensioni Pubblica Amministrazione — DAG
 
-**Nel ${annoSel} risultano erogate **${num(totalePartite)}** partite pensionistiche del personale della PA, per ${euro(totaleImporti)} al mese (in media ${euro(importoMedio)} a partita). La domanda che apre i dati: quanto pesa questa spesa sul personale uscente della PA, e come evolverà col ricambio generazionale?**
+**Nel ${annoSel} risultano erogate ${num(totalePartite)} partite pensionistiche del personale della PA, per ${euro(totaleImporti)} al mese (in media ${euro(importoMedio)} a partita). La domanda che apre i dati: quanto pesa questa spesa sul personale uscente della PA, e come evolverà col ricambio generazionale?**
 
 Numero di partite pensionistiche e importo mensile erogato per la PA, disaggregati per microqualifica professionale, regione e anno. I dati coprono pensioni dirette, di reversibilità e altri trattamenti erogati dal Dipartimento dell'Amministrazione Generale.
 
