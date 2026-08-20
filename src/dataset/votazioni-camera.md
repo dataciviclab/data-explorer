@@ -6,22 +6,18 @@ source_url: https://dati.camera.it/
 period: "2018–2025"
 last_modified: 2026-05-30
 dataset_slug: camera_votazioni_sparql
+data_driven: true
 ---
 
-# Votazioni Camera dei Deputati
-
-Esito, conteggi e indicatori (favorevoli, contrari, astenuti, presenti, fiducia) delle votazioni della Camera dei Deputati, dalle legislature XVIII e XIX.
-
-**Fonte**: [Camera dei Deputati](https://dati.camera.it/) · **Periodo**: 2018–2025
+# Votazioni Camera dei Deputati — quante fiducie e quante approvazioni?
 
 ```js
-import { num, pct } from "../import/format-utils.js";
+import { num, pct, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
 const data = await FileAttachment("../data/votazioni-camera.json").json();
 
-// Estrai anno dalla data
 const conAnno = data.map(d => ({...d, anno: new Date(d.data).getFullYear()}));
 ```
 
@@ -32,37 +28,39 @@ const annoSel = view(Inputs.select(new Map(anni.map(a => [String(a), a])), {labe
 
 ```js
 const filtered = conAnno.filter(d => d.anno === annoSel);
-```
 
-```js
 const totVoti = filtered.length;
 const approvati = filtered.filter(d => d.approvato).length;
-const respinti = filtered.filter(d => !d.approvato).length;
 const fiducia = filtered.filter(d => d.richiesta_fiducia).length;
 const pctApprovati = totVoti > 0 ? Math.round(approvati / totVoti * 1000) / 10 : 0;
 ```
 
+**Nel ${String(annoSel)} la Camera ha votato ${num(totVoti)} volte, con ${pct(pctApprovati, 1)} di provvedimenti approvati e ${num(fiducia)} richieste di fiducia. La fiducia resta lo strumento-chiave del governo: quante volte lo costringe a puntare tutto su una singola votazione?**
+
+Le votazioni della Camera (legislature XVIII e XIX) registrano esito, conteggi e l'uso della questione di fiducia come indicatore della relazione governo-parlamento.
+
 <div class="grid grid-cols-3">
   <div class="card">
-    <h3>Votazioni</h3>
+    <h3>Votazioni ${String(annoSel)}</h3>
     <span class="big">${num(totVoti)}</span>
   </div>
   <div class="card">
-    <h3>Approvati</h3>
+    <h3>Tasso approvazione</h3>
     <span class="big">${pct(pctApprovati, 1)}</span>
     <small style="opacity:0.6">${num(approvati)} su ${num(totVoti)}</small>
   </div>
   <div class="card">
-    <h3>Fiducia</h3>
-    <span class="big">${fiducia}</span>
+    <h3>Fiducie</h3>
+    <span class="big">${num(fiducia)}</span>
+    <small style="opacity:0.6">${totVoti > 0 ? pct(fiducia / totVoti * 100, 1) : "—"} delle votazioni</small>
   </div>
 </div>
 
 ---
 
-## Esito delle votazioni per anno
+## 1. Come evolve l'attività legislativa anno per anno?
 
-Come evolve l'attività legislativa? Il numero di votazioni e la percentuale di approvati per anno mostrano il ritmo dei lavori parlamentari.
+Il numero di votazioni e la percentuale di approvati mostrano il ritmo dei lavori parlamentari: anni frenetici e anni più pigri si alternano a seconda della Agenda legislativa.
 
 ```js
 const perAnno = Array.from(
@@ -112,9 +110,9 @@ Plot.plot({
 
 ---
 
-## Questione di fiducia
+## 2. Quante volte il governo piazza la fiducia?
 
-Quante volte il governo ha posto la fiducia nelle legislature XVIII e XIX? I grafici mostrano l'evoluzione annuale delle votazioni con richiesta di fiducia.
+La fiducia comprime i tempi di approvazione ma elimina ogni possibilità di emendamento. L'andamento annuale rivela quanto spesso il governo sceglie la via del "tutto o niente".
 
 ```js
 const fiduciaAnno = Array.from(
@@ -149,8 +147,9 @@ Plot.plot({
 
 ## Dettaglio votazioni
 
+<small>Filtri per anno, esito e fiducia. La tabella mostra le singole votazioni con conteggi e indicatori.</small>
+
 ```js
-// Filtri aggiuntivi
 const esitoFilter = view(Inputs.select(["Tutte", "Approvate", "Respinte"], {label: "Esito"}));
 const fiduciaFilter = view(Inputs.checkbox(["Solo voti di fiducia"], {label: " "}));
 ```

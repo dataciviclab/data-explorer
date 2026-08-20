@@ -122,7 +122,7 @@ export default {
         "path": "/dataset/dipendenti-pubblici"
       },
       {
-        "name": "Pensioni INPS",
+        "name": "Pensioni INPS — da quali gestioni arrivano?",
         "path": "/dataset/pensioni-inps"
       },
       {
