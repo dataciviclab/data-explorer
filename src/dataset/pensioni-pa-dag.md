@@ -6,9 +6,12 @@ source_url: https://www.dag.mef.gov.it/aree-tematiche/dati-amministrativi/index.
 period: "2017–2022"
 last_modified: 2026-05-20
 dataset_slug: pensioni_pa_dag
+data_driven: true
 ---
 
 # Pensioni Pubblica Amministrazione — DAG
+
+**Nel ${annoSel} risultano erogate ${num(totalePartite)} partite pensionistiche del personale della PA, per ${euro(totaleImporti)} al mese (in media ${euro(importoMedio)} a partita). La domanda che apre i dati: quanto pesa questa spesa sul personale uscente della PA, e come evolverà col ricambio generazionale?**
 
 Numero di partite pensionistiche e importo mensile erogato per la PA, disaggregati per microqualifica professionale, regione e anno. I dati coprono pensioni dirette, di reversibilità e altri trattamenti erogati dal Dipartimento dell'Amministrazione Generale.
 
@@ -171,6 +174,10 @@ Inputs.table(data.filter(d => d.anno >= 2019), {
 ```
 
 ---
+
+## La domanda che resta
+
+La spesa per le pensioni della PA è una voce strutturale collegata al turnover del pubblico impiego: chi va in pensione lascia un posto (spesso da ricoprire) ma continua a pesare sul bilancio. Resta aperta la domanda di quanto il ricambio generazionale stia cambiando il rapporto tra lavoratori attivi e pensioni erogate.
 
 ## Limiti
 

@@ -6,9 +6,12 @@ source_url: https://commission.europa.eu/funding-tenders/financial-transparency-
 period: "2020–2024"
 last_modified: 2026-07-01
 dataset_slug: fts_eu_grants
+data_driven: true
 ---
 
 # FTS EU Grants — Finanziamenti UE in Italia
+
+**Nel ${annoSel} i finanziamenti UE tracciati al FTS in Italia valgono ${euroCompact(annoData?.importo_totale)}, distribuiti in ${num(annoData?.numero_grant)} operazioni a ${num(annoData?.beneficiari)} beneficiari. La domanda che apre i dati: questi flussi arrivano davvero dove sono dichiarati, o la sede del beneficiario nasconde la destinazione finale dei fondi?**
 
 Il Financial Transparency System della Commissione europea elenca i finanziamenti UE assegnati a beneficiari italiani. Il dataset copre il periodo 2020-2024 e permette di leggere importi, programmi, beneficiari e localizzazione dichiarata.
 
@@ -192,6 +195,10 @@ Inputs.table(beneficiari, {
 ```
 
 ---
+
+## La domanda che resta
+
+FTS è una fotografia dei fondi UE **diretti** in Italia (assegnati dalla Commissione), non dei fondi gestiti a livello nazionale. Le classifiche per città e programma servono a orientare la lettura, ma la sede del beneficiario non coincide sempre con la destinazione finale delle risorse. Resta aperta la domanda: quanto di questi fondi produce investimento nei territori dichiarati, e quanto è concentrato in un numero ristretto di soggetti attraverso programmi di grande scala come il Recovery and Resilience Facility?
 
 ## Limiti
 

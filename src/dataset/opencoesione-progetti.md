@@ -6,9 +6,12 @@ source_url: https://opencoesione.gov.it/
 period: "2000–2027"
 last_modified: 2026-06-04
 dataset_slug: opencoesione_progetti
+data_driven: true
 ---
 
 # OpenCoesione — Progetti delle politiche di coesione
+
+**Nel ciclo ${cicloSel} le politiche di coesione valgono ${euroCompact(totFinanziato)}, di cui pagati ${euroCompact(totPagato)} (${pct(tassoPagamento)}). La domanda che apre i dati: quanto del finanziamento programmato diventa davvero investimento sul territorio — e quante risorse restano in cassa?**
 
 Tutti i progetti finanziati dalle politiche di coesione italiane — fondi europei (FESR, FSE, FEASR, FEAMP) e Fondo per lo Sviluppo e la Coesione (FSC) — dal ciclo 2000-2006 al 2021-2027. I dati coprono finanziamento totale, impegni e pagamenti, con dettaglio per macroarea geografica e tema.
 
@@ -190,6 +193,10 @@ Inputs.table(perMacroareaCiclo, {
 ```
 
 ---
+
+## La domanda che resta
+
+Il Mezzogiorno è l'obiettivo dichiarato delle politiche di coesione, ma la capacità di spesa — il tasso di pagamento — decide se le risorse diventano davvero investimento. Resta aperta la domanda di quanto sia efficiente la macchina che deve trasformare i finanziamenti stanziati in opere e servizi sul territorio.
 
 ## Limiti
 

@@ -6,16 +6,19 @@ source_url: https://dati.istruzione.it/opendata/
 period: "2015–2025"
 last_modified: 2026-05-31
 dataset_slug: mim_alunni_corso_eta
+data_driven: true
 ---
 
 # Alunni per corso ed età
+
+**Nell'anno scolastico ${annoSel}/${annoSel + 1} le scuole statali contano ${numFix(totale / 1e6, 1)} milioni di alunni in ${num(nRegioni)} regioni. La domanda che apre i dati: con la popolazione scolastica in calo, come cambia il sistema — meno plessi, più risorse per studente, o entrambe?**
 
 Alunni delle scuole statali italiane per ordine scolastico (primaria, secondaria I e II grado), regione e anno scolastico. I dati mostrano l'evoluzione della popolazione scolastica e la distribuzione tra territori e gradi di istruzione.
 
 **Fonte**: [MIM](https://dati.istruzione.it/opendata/) · **Periodo**: 2015–2025
 
 ```js
-import { num, tableFormat } from "../import/format-utils.js";
+import { num, numFix, tableFormat } from "../import/format-utils.js";
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 ```
 
@@ -176,6 +179,10 @@ Inputs.table(pivot, {
 ```
 
 ---
+
+## La domanda che resta
+
+La secondaria di II grado è l'ordine con più iscritti, ma la demografia è in discesa. La domanda è come il sistema scolastico si adatterà al calo degli alunni: razionalizzazione dei plessi, maggiore dotazione per studente o ripensamento dell'offerta formativa.
 
 ## Limiti
 
