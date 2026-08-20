@@ -6,16 +6,13 @@ source_url: https://datiestatistiche.giustizia.it
 period: "2014–2025"
 last_modified: 2026-05-26
 dataset_slug: civile_flussi
+data_driven: true
 ---
 
-# Flussi della giustizia civile
-
-Dati del Ministero della Giustizia sui flussi civili nei tribunali distrettuali italiani. Sopravvenuti, definiti e pendenti per distretto.
-
-**Fonte**: Ministero della Giustizia · **Periodo**: 2014–2025
+# Flussi della giustizia civile — l'Italia sta smaltendo l'arretrato?
 
 ```js
-import { num, tableFormat } from "../import/format-utils.js";
+import { num, numFix, pct, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -35,12 +32,19 @@ const filtered = data
     ...d,
     rapporto_def_sop: Math.round(d.definiti_totale / d.sopravvenuti * 100) / 100
   }));
-```
 
-```js
 const totSopravvenuti = filtered.reduce((s, d) => s + d.sopravvenuti, 0);
 const totDefiniti = filtered.reduce((s, d) => s + d.definiti_totale, 0);
 const totPendenti = filtered.reduce((s, d) => s + d.pendenti_finali, 0);
+const raggioDefSop = totSopravvenuti > 0 ? totDefiniti / totSopravvenuti : null;
+```
+
+**Nel ${String(annoSel)} nei tribunali italiani sono sopravvenuti ${num(totSopravvenuti)} nuovi procedimenti civili e ne sono stati definiti ${num(totDefiniti)} — un rapporto di ${raggioDefSop?.toFixed(2) ?? "—"} a favore dello smaltimento. Con ${num(totPendenti)} procedimenti ancora pendenti, il sistema riesce a tenere il passo, ma il margine è sottile.**
+
+I flussi civili misurano l'ingresso (sopravvenuti), l'uscita (definiti) e lo stock (pendenti) di cause nei distretti di Corte d'Appello. Ogni numero di questa pagina è calcolato dal dato a build-time: il parquet collegato qui sotto alimenta KPI e grafici.
+
+```js
+const plot = await import("npm:@observablehq/plot");
 ```
 
 <div class="grid grid-cols-3">
@@ -55,17 +59,17 @@ const totPendenti = filtered.reduce((s, d) => s + d.pendenti_finali, 0);
   <div class="card">
     <h3>Pendenti finali</h3>
     <span class="big">${num(totPendenti)}</span>
+    <small style="opacity:0.6">rapporto D/S ${raggioDefSop?.toFixed(2) ?? "—"}</small>
   </div>
 </div>
 
 ---
 
-## Pendenti per distretto e anno
+## 1. Quanti pendenti restano in ciascun distretto?
 
-La heatmap mostra in un colpo solo l'evoluzione dei pendenti in tutti i distretti dal 2014 al 2025. Ogni cella è un distretto in un anno: più scura è la cella, più alto è il carico pendente. Si vede immediatamente quali distretti hanno più arretrato e come cambia nel tempo.
+La heatmap mostra l'evoluzione dei pendenti in tutti i distretti dal 2014 al 2025. Più scura è la cella, più alto è il carico arretrato: si vede subito quali distretti hanno più fatica e come cambia nel tempo.
 
 ```js
-// Dati per heatmap: exclude rows with missing distretto, aggregate if needed
 const heatmapData = data
   .filter(d => d.distretto)
   .map(d => ({...d, anno_str: String(d.anno)}))
@@ -101,9 +105,11 @@ Plot.plot({
 })
 ```
 
-Un rapporto > 1 significa che il distretto ha definito più cause di quante ne siano sopravvenute (smaltimento). &lt; 1 indica accumulo. I dettagli per anno selezionato sono nei blocchi seguenti.
+---
 
-## Rapporto definiti / sopravvenuti
+## 2. Chi smaltisce e chi accumula?
+
+Un rapporto D/S superiore a 1 indica che un distretto ha definito più cause di quante ne siano sopravvenute — sta smaltendo l'arretrato. Sotto 1, l'arretrato cresce.
 
 ```js
 const rapportoFiltered = [...filtered].sort((a, b) => a.rapporto_def_sop - b.rapporto_def_sop);
@@ -132,11 +138,13 @@ Plot.plot({
 })
 ```
 
-> **Nota**: un rapporto > 1 significa che il distretto ha definito più cause di quante ne siano sopravvenute (smaltimento). &lt; 1 indica accumulo.
+> **Nota**: la linea tratteggiata segna il punto di equilibrio. La distribuzione tra distretti che smaltiscono e quelli che accumulano è fortemente disomogenea.
 
 ---
 
 ## Dettaglio per distretto
+
+<small>Dati filtrati per l'anno selezionato. Il rapporto D/S sintetizza la capacity di smaltimento di ciascun distretto.</small>
 
 ```js
 const { header, format } = tableFormat({

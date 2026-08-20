@@ -6,17 +6,14 @@ source_url: https://bdap-opendata.rgs.mef.gov.it/
 period: "2019–2024"
 last_modified: 2026-06-10
 dataset_slug: bdap_lea
+data_driven: true
 ---
 
-# Spesa sanitaria regionale LEA
-
-I costi sostenuti dalle regioni italiane per garantire i Livelli Essenziali di Assistenza (LEA), disaggregati per regione, macro-area (prevenzione, distrettuale, ospedaliera, ricerca) e voce contabile.
-
-**Fonte**: [BDAP](https://bdap-opendata.rgs.mef.gov.it/) · **Periodo**: 2019–2024
+# Spesa sanitaria regionale LEA — quanta fasciatura e quanta prevenzione?
 
 ```js
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
-import { num, euroCompact, tableFormat } from "../import/format-utils.js";
+import { num, euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -41,21 +38,25 @@ const macroFiltered = macro.filter(d => d.anno === annoSel);
 const totSpesa = d3.sum(regFiltered, d => d.importo_totale);
 const nRegioni = regFiltered.length;
 
-// Per la mappa
 const regLookup = buildMapLookup(regFiltered, regioniGeo, "descrizione_regione", "importo_totale");
 
-// Trend spesa totale 2019-2024
 const trend = Array.from(
   d3.rollup(regioni, v => d3.sum(v, d => d.importo_totale), d => d.anno_riferimento),
   ([anno, spesa]) => ({anno, spesa})
 ).sort((a, b) => a.anno - b.anno);
 
-// Delta
 const annoMin = d3.min(regioni, d => d.anno_riferimento);
 const spesaMin = trend.find(d => d.anno === annoMin)?.spesa || 0;
 const spesaMax = trend.find(d => d.anno === annoSel)?.spesa || 0;
 const deltaPct = spesaMin ? Math.round((spesaMax - spesaMin) / spesaMin * 1000) / 10 : 0;
+
+const totMacro = d3.sum(macroFiltered, d => d.importo_totale);
+const prevenzionePct = totMacro > 0 ? macroFiltered.filter(d => d.descrizione_voce_contabile.startsWith("Prevenzione")).reduce((s, d) => s + d.importo_totale, 0) / totMacro * 100 : 0;
 ```
+
+**Nel ${String(annoSel)} le regioni italiane hanno speso ${euroCompact(totSpesa)} per i LEA, con una crescita di ${deltaPct > 0 ? "+" : ""}${deltaPct}% rispetto al ${String(annoMin)}. Ma quanto va in cura e quanto in prevenzione? La prevenzione resta marginalmente finanziata: meno del ${pct(prevenzionePct, 1)} della spesa totale.**
+
+I costi sostenuti dalle regioni per garantire i Livelli Essenziali di Assistenza, disaggregati per regione, macro-area (prevenzione, distrettuale, ospedaliera, ricerca) e voce contabile.
 
 <div class="grid grid-cols-3">
   <div class="card">
@@ -75,9 +76,9 @@ const deltaPct = spesaMin ? Math.round((spesaMax - spesaMin) / spesaMin * 1000) 
 
 ---
 
-## Evoluzione della spesa 2019-2024
+## 1. Come è cresciuta la spesa sanitaria LEA nel tempo?
 
-La spesa sanitaria LEA è in crescita costante, passando da ${euroCompact(spesaMin)} a ${euroCompact(spesaMax)} nel ${String(annoSel)} (+${deltaPct}%). L'incremento riflette sia l'inflazione sanitaria sia l'ampliamento progressivo dei LEA.
+L'incremento riflette sia l'inflazione sanitaria sia l'ampliamento progressivo dei livelli di assistenza garantiti. La traiettoria è costante e inesorabile.
 
 ```js
 Plot.plot({
@@ -97,12 +98,11 @@ Plot.plot({
 
 ---
 
-## Composizione per macro-area — ${String(annoSel)}
+## 2. Dove va la percentuale maggiore della spesa?
 
-L'assistenza distrettuale e ospedaliera assorbono oltre l'85% della spesa. La prevenzione e la ricerca pesano per meno del 5%.
+L'assistenza distrettuale e ospedaliera assorbono la quota dominante. La prevenzione e la ricerca pesano per una frazione minima del totale.
 
 ```js
-const totMacro = d3.sum(macroFiltered, d => d.importo_totale);
 const macroAggr = Array.from(
   d3.rollup(macroFiltered, v => d3.sum(v, d => d.importo_totale), d => d.descrizione_voce_contabile),
   ([area, importo]) => ({area, importo, pct: importo / totMacro * 100})
@@ -144,7 +144,7 @@ Plot.plot({
 
 ---
 
-## Distribuzione regionale — ${String(annoSel)}
+## 3. Come si distribuisce la spesa tra le regioni?
 
 Le regioni più popolose guidano la spesa assoluta, ma il dato pro capite — non ancora presente in questo dataset — darebbe un quadro più preciso dell'efficienza.
 
@@ -173,6 +173,8 @@ Plot.plot({
 ---
 
 ## Dettaglio regioni
+
+<small>Dettaglio voci contabili per regione nell'anno selezionato. Le colonne mostrano le principali categorie di spesa sanitaria.</small>
 
 ```js
 const { header, format } = tableFormat({

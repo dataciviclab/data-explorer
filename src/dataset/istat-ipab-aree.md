@@ -6,16 +6,13 @@ source_url: https://www.istat.it/it/archivio/16773
 period: "2010–2025"
 last_modified: 2026-05-26
 dataset_slug: istat_ipab_aree
+data_driven: true
 ---
 
-# Indice prezzi abitazioni (IPAB) per area
-
-L'indice dei prezzi delle abitazioni (IPAB) misura l'evoluzione dei prezzi delle abitazioni sul mercato italiano, disaggregato per macro-area e città (Milano, Roma, Torino).
-
-**Fonte**: ISTAT · **Periodo**: 2010–2025 · Dati trimestrali
+# Indice prezzi abitazioni (IPAB) per area — Milano accelera, il Mezzogiorno rallenta?
 
 ```js
-import { numFix } from "../import/format-utils.js";
+import { numFix, pct } from "../import/format-utils.js";
 ```
 
 ```js
@@ -31,28 +28,37 @@ const cittaData = data.filter(d => citta.includes(d.area));
 
 const ultimoTrimestre = [...new Set(data.map(d => d.trimestre))].sort().pop();
 const ultimiValori = data.filter(d => d.trimestre === ultimoTrimestre);
+
+const indiceItaly = ultimiValori.find(d => d.area === "Italy")?.indice_prezzi;
+const indiceMilano = ultimiValori.find(d => d.area === "Milano")?.indice_prezzi;
+const indiceMezzo = ultimiValori.find(d => d.area === "Mezzogiorno")?.indice_prezzi;
+const divarioMilanoMezzo = (indiceMilano && indiceMezzo) ? indiceMilano - indiceMezzo : null;
 ```
+
+**All'${ultimoTrimestre} l'indice IPAB per l'Italia è a ${indiceItaly?.toFixed(1) ?? "—"} (base 2010=100), ma Milano sfiora i ${indiceMilano?.toFixed(1) ?? "—"} — oltre il 60% in più del Mezzogiorno (${indiceMezzo?.toFixed(1) ?? "—"}). Il divario tra le due Italie immobiliari è di ${divarioMilanoMezzo?.toFixed(0) ?? "—"} punti.**
+
+L'indice dei prezzi delle abitazioni (IPAB) misura l'evoluzione dei prezzi delle abitazioni sul mercato italiano, disaggregato per macro-area e città. Base 2010=100: un valore a 150 significa che i prezzi sono cresciuti del 50% rispetto al 2010.
 
 <div class="grid grid-cols-3">
   <div class="card">
     <h3>Italia — ${ultimoTrimestre}</h3>
-    <span class="big">${ultimiValori.find(d => d.area === "Italy")?.indice_prezzi?.toFixed(1)}</span>
+    <span class="big">${indiceItaly?.toFixed(1) ?? "—"}</span>
   </div>
   <div class="card">
     <h3>Milano</h3>
-    <span class="big">${ultimiValori.find(d => d.area === "Milano")?.indice_prezzi?.toFixed(1)}</span>
+    <span class="big">${indiceMilano?.toFixed(1) ?? "—"}</span>
   </div>
   <div class="card">
     <h3>Mezzogiorno</h3>
-    <span class="big">${ultimiValori.find(d => d.area === "Mezzogiorno")?.indice_prezzi?.toFixed(1)}</span>
+    <span class="big">${indiceMezzo?.toFixed(1) ?? "—"}</span>
   </div>
 </div>
 
 ---
 
-## Andamento prezzi per macro-area
+## 1. Come si muovono i prezzi tra le macro-aree?
 
-Il divario Nord-Sud emerge chiaramente: mentre il Nord-ovest e il Nord-est superano la media nazionale, il Mezzogiorno resta stabilmente sotto. Milano viaggia ben distante da tutte.
+Il divario Nord-Sud emerge chiaramente: il Nord-ovest e il Nord-est superano la media nazionale, il Mezzogiorno resta stabilmente sotto. La convergenza non è in vista.
 
 ```js
 Plot.plot({
@@ -74,11 +80,13 @@ Plot.plot({
 })
 ```
 
+> **Nota**: la linea a 100 segna il livello del 2010. Ogni curva sopra la linea indica una crescita dei prezzi rispetto a quell'anno.
+
 ---
 
-## Prezzi nelle grandi città
+## 2. Cosa succede nelle grandi città?
 
-Milano si distacca nettamente da Roma e Torino, con un indice che sfiora 180 — quasi l'80% in più rispetto al 2010.
+Milano si distacca nettamente da Roma e Torino, con un indice che si avvicina a 180. Le due città mostrano traiettorie simili ma con un divario crescente rispetto alla capitale.
 
 ```js
 Plot.plot({
@@ -102,7 +110,9 @@ Plot.plot({
 
 ---
 
-## Ultimo trimestre — tutte le aree
+## Dettaglio — ultimo trimestre
+
+<small>Valori dell'indice per tutte le aree nell'ultimo trimestre disponibile.</small>
 
 ```js
 Inputs.table(ultimiValori, {
@@ -114,8 +124,6 @@ Inputs.table(ultimiValori, {
   width: "100%"
 })
 ```
-
----
 
 ---
 
