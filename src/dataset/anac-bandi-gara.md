@@ -40,10 +40,10 @@ const tipoPerAnno = Array.from(
 const tipoNorm = Array.from(
   d3.rollup(tipoPerAnno, v => {
     const tot = d3.sum(v, d => d.lotti);
-    return { anno: v[0].anno, tipo: v[0].tipo, pct: tot ? v[0].lotti / tot * 100 : 0 };
-  }),
-  ([k, v]) => ({ anno: k[0], tipo: k[1], pct: v.pct })
-).sort((a, b) => a.anno - b.anno);
+    return tot ? v[0].lotti / tot * 100 : 0;
+  }, d => d.anno, d => d.tipo),
+  ([anno, m]) => Array.from(m, ([tipo, pct]) => ({anno, tipo, pct}))
+).flat().sort((a, b) => a.anno - b.anno);
 const statoLast = perStato.filter(d => d.anno == last).sort((a, b) => b.n_lotti - a.n_lotti);
 const saLast = topSa.filter(d => d.anno == last).sort((a, b) => b.importo - a.importo).slice(0, 20);
 const mediaLotto = lastTrend.n_lotti > 0 ? lastTrend.importo_totale / lastTrend.n_lotti : null;
