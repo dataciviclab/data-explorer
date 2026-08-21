@@ -96,27 +96,25 @@ Non tutti i progetti PNRR sono uguali. Alcune submisure assorbono risorse enormi
 const subTop = data.per_submisura.slice(0, 8);
 const subPlot = subTop.map(d => ({
   ...d,
-  label: d.submisura.length > 35 ? d.submisura.slice(0, 35) + "…" : d.submisura,
+  label: d.submisura.length > 40 ? d.submisura.slice(0, 40) + "…" : d.submisura,
   pct: d.importo_mln > 0 ? Math.round(d.aggiudicato_mln / d.importo_mln * 100) : 0
 }));
 
 display(plot.plot({
   title: "Importo vs Aggiudicato per submisura (milioni €)",
-  width: 800, height: 320,
+  width: 800, height: 340,
   x: {grid: true, label: "Milioni €"},
   y: {label: null},
-  color: {domain: ["Importo", "Aggiudicato"], range: ["#3182bd", "#2ca02c"]},
   marks: [
-    plot.barY(subPlot.flatMap(d => [
-      {label: d.label, valore: d.importo_mln, tipo: "Importo"},
-      {label: d.label, valore: d.aggiudicato_mln, tipo: "Aggiudicato"}
-    ]), {y: "label", x: "valore", fill: "tipo", tip: true}),
+    plot.barX(subPlot, {y: "label", x: "importo_mln", fill: "#ddd", tip: true, title: d => `${d.submisura}\nImporto: €${d.importo_mln} M`}),
+    plot.barX(subPlot, {y: "label", x: "aggiudicato_mln", fill: "#2ca02c", tip: true, title: d => `${d.submisura}\nAggiudicato: €${d.aggiudicato_mln} M (${d.pct}%)`}),
+    plot.text(subPlot, {y: "label", x: d => d.importo_mln + 1500, text: d => `${d.pct}%`, fill: "#333", fontSize: 11, textAnchor: "start"}),
     plot.ruleX([0])
   ]
 }))
 ```
 
-> Il **Sistema duale** assorbe €86.6 mld ma ne aggiudica solo €22.7 mld (**26%**). Le **smart grid** funzionano meglio: €29.3 mld importo, €25.3 mld aggiudicati (**86%**). Il divario racconta la capacità di spesa di ciascuna area.
+> Le barre grigie sono l'importo totale, le verdi l'importo aggiudicato. Il **Sistema duale** assorbe €86.6 mld ma ne aggiudica solo €22.7 mld (**26%**). Le **smart grid** funzionano meglio: €29.3 mld, €25.3 aggiudicati (**86%**). Il divario racconta la capacità di spesa di ciascuna area.
 
 ---
 
@@ -127,6 +125,34 @@ Il **73% delle gare** (205.934 su 282.655) è affidamento diretto. Solo il **3.6
 ```js
 const topProc = data.per_procedura.slice(0, 5);
 const totalProc = topProc.reduce((s, d) => s + d.n_gare, 0);
+```
+
+```js
+display(plot.plot({
+  title: "Top 5 procedure per numero di gare",
+  width: 800, height: 280,
+  x: {grid: true, label: "Numero gare"},
+  y: {label: null},
+  color: {scheme: "Set2"},
+  marks: [
+    plot.barY(topProc, {
+      y: d => d.procedura.length > 45 ? d.procedura.slice(0, 45) + "…" : d.procedura,
+      x: "n_gare",
+      fill: "procedura",
+      tip: true,
+      sort: {y: "-x"}
+    }),
+    plot.text(topProc, {
+      y: d => d.procedura.length > 45 ? d.procedura.slice(0, 45) + "…" : d.procedura,
+      x: "n_gare",
+      text: d => `${d.n_gare.toLocaleString("it-IT")}`,
+      dx: 5,
+      textAnchor: "start",
+      fontSize: 11
+    }),
+    plot.ruleX([0])
+  ]
+}))
 ```
 
 Le prime 5 procedure coprono il ${Math.round(totalProc / data.kpi.n_gare * 100)}% delle gare. L'affidamento diretto domina — è la conseguenza delle soglie alzate dal nuovo Codice Appalti (D.Lgs. 36/2023).
