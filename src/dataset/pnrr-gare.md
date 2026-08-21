@@ -159,6 +159,15 @@ Le prime 5 procedure coprono il ${Math.round(totalProc / data.kpi.n_gare * 100)}
 
 ---
 
+## Vedi anche
+
+<div style="display:flex; flex-wrap:wrap; gap:0.5em">
+  <a href="/dataset/pnrr-pagamenti" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Pagamenti erogati</a>
+  <a href="/dataset/pnrr-progetti" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Progetti e stato di avanzamento</a>
+</div>
+
+---
+
 ## Limiti
 
 - **Fonte**: ReGiS/Italia Domani — dati pubblicati dalle PA aggiudicatrici
