@@ -22,7 +22,7 @@ const gap = data.kpi.fin_mld - data.kpi.pag_mld;
 
 # PNRR Pagamenti — quanto denaro parte davvero?
 
-**${numFix(data.kpi.fin_mld, 1)} mld di finanziamento previsti, ${numFix(data.kpi.pag_mld, 1)} mld effettivamente pagati (${data.kpi.pct_erogata}%).** Il PNRR prevede enormi investimenti, ma la capacita di spesa reale e molto inferiore a quella prevista. Quanto denaro e ancora fermo?
+**${numFix(data.kpi.fin_mld, 1)} mld di finanziamento previsti, ${numFix(data.kpi.pag_mld, 1)} mld effettivamente pagati (${data.kpi.pct_erogata}%).** Il PNRR prevede enormi investimenti, ma la capacità di spesa reale è molto inferiore a quella prevista. Quanto denaro è ancora fermo?
 
 I pagamenti PNRR sono le erogazioni effettive ai progetti. Ogni riga è un progetto con il suo finanziamento e quanto è stato effettivamente pagato. I dati mostrano il divario tra quanto previsto e quanto erogato, e chi sta effettivamente pagando.
 
@@ -39,7 +39,7 @@ I pagamenti PNRR sono le erogazioni effettive ai progetti. Ogni riga è un proge
 
 <div class="grid grid-cols-2">
   <div>
-    Il finanziamento PNRR totale e di ${numFix(data.kpi.fin_mld, 1)} mld, ma solo ${numFix(data.kpi.pag_mld, 1)} mld sono stati effettivamente pagati. Il divario di ${numFix(gap, 1)} mld rappresenta la capacita di spesa non ancora realizzata.
+    Il finanziamento PNRR totale e di ${numFix(data.kpi.fin_mld, 1)} mld, ma solo ${numFix(data.kpi.pag_mld, 1)} mld sono stati effettivamente pagati. Il divario di ${numFix(gap, 1)} mld rappresenta la capacità di spesa non ancora realizzata.
   </div>
   <div>
     Di quanto pagato, ${numFix(data.kpi.pag_pnrr_mld, 1)} mld proviene direttamente dai fondi PNRR. il resto e cofinanziato da Stato, UE e altre fonti.
