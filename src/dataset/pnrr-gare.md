@@ -135,7 +135,7 @@ display(plot.plot({
   y: {label: null},
   color: {scheme: "Set2"},
   marks: [
-    plot.barY(topProc, {
+    plot.barX(topProc, {
       y: d => d.procedura.length > 45 ? d.procedura.slice(0, 45) + "…" : d.procedura,
       x: "n_gare",
       fill: "procedura",
