@@ -24,7 +24,7 @@ const gap = data.kpi.fin_mld - data.kpi.pag_mld;
 
 **${numFix(data.kpi.fin_mld, 1)} mld di finanziamento previsti, ${numFix(data.kpi.pag_mld, 1)} mld effettivamente pagati (${data.kpi.pct_erogata}%).** Il PNRR prevede enormi investimenti, ma la capacita di spesa reale e molto inferiore a quella prevista. Quanto denaro e ancora fermo?
 
-I pagamenti PNRR sono le erogazioni effettive ai progetti. Ogni riga e un progetto con il suo finanziamento e quanto e stato effettivamente pagato. I dati mostrano il divario tra quanto previsto e quanto erogato, e chi sta effettivamente pagando.
+I pagamenti PNRR sono le erogazioni effettive ai progetti. Ogni riga è un progetto con il suo finanziamento e quanto è stato effettivamente pagato. I dati mostrano il divario tra quanto previsto e quanto erogato, e chi sta effettivamente pagando.
 
 ---
 
@@ -80,7 +80,7 @@ Pagato: €${d.pag_mln} M (${d.pct}%)`}),
 
 ## 3. Chi paga — le fonti di finanziamento
 
-I pagamenti non vengono tutti dalla stessa fonte. Lo Stato e il principale erogatore, ma anche UE, FPOP e regioni contribuiscono.
+I pagamenti non vengono tutti dalla stessa fonte. Lo Stato è il principale erogatore, ma anche UE, FPOP e regioni contribuiscono.
 
 ```js
 const fontiFiltro = data.fonti.filter(d => d.mld > 0);
@@ -106,7 +106,7 @@ display(plot.plot({
 }))
 ```
 
-> Lo Stato paga ${data.fonti[0].mld} mld, la fonte piu consistente. I fondi UE diretti sono ${data.fonti[1].mld} mld. Il FPOP (Prosecuzione Opere Pubbliche) contribuisce con ${data.fonti[2].mld} mld.
+> Lo Stato paga ${data.fonti[0].mld} mld, la fonte più consistente. I fondi UE diretti sono ${data.fonti[1].mld} mld. Il FPOP (Prosecuzione Opere Pubbliche) contribuisce con ${data.fonti[2].mld} mld.
 
 ---
 

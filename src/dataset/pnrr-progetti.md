@@ -23,7 +23,7 @@ const inCorsoPct = data.kpi.n_progetti > 0 ? Math.round(inCorsoN / data.kpi.n_pr
 
 # PNRR Progetti — quanti vanno avanti, quanti si bloccano?
 
-**${num(data.kpi.n_progetti)} progetti per ${numFix(data.kpi.fin_mld, 1)} mld di finanziamento totale.** Di questi, ${inCorsoN} sono "In Corso" (${inCorsoPct}%). Il PNRR e un piano enorme — ma quanti progetti stanno effettivamente andando avanti?
+**${num(data.kpi.n_progetti)} progetti per ${numFix(data.kpi.fin_mld, 1)} mld di finanziamento totale.** Di questi, ${inCorsoN} sono "In Corso" (${inCorsoPct}%). Il PNRR è un piano enorme — ma quanti progetti stanno effettivamente andando avanti?
 
 Ogni progetto PNRR ha un CUP, un amministrazione titolare, un finanziamento previsto e uno stato di avanzamento. Questi dati mostrano quanti progetti ci sono, dove sono concentrati e in che fase si trovano.
 
@@ -65,7 +65,7 @@ display(plot.plot({
 
 ## 2. Finanziamento per missione
 
-Il PNRR e diviso in 5 missioni. Queste sono le missioni con piu risorse assegnate.
+Il PNRR è diviso in 5 missioni. Queste sono le missioni con più risorse assegnate.
 
 ```js
 display(plot.plot({
@@ -121,7 +121,7 @@ display(plot.plot({
 }))
 ```
 
-> Le fasi piu comuni sono "Esecuzione" (progetti in realizzazione) e "Avvio" (progetti appena partiti). Le fasi "Definizione" e "Progettazione" mostrano i progetti ancora in fase preliminare.
+> Le fasi più comuni sono "Esecuzione" (progetti in realizzazione) e "Avvio" (progetti appena partiti). Le fasi "Definizione" e "Progettazione" mostrano i progetti ancora in fase preliminare.
 
 ---
 
@@ -137,7 +137,7 @@ display(plot.plot({
 ## Limiti
 
 - **Fonte**: ReGiS/Italia Domani — dati pubblicati dalle PA
-- **Aggregazione**: un progetto puo comparire piu volte se ha piu CUP
+- **Aggregazione**: un progetto può comparire più volte se ha più CUP
 - **Tempistica**: dati estratti al 2026; lo stato di avanzamento cambia continuamente
 - **Non include**: progetti non ancora inseriti nel sistema CUP
 
