@@ -51,7 +51,7 @@ display(plot.plot({
     }),
     plot.text(data.per_stato, {
       y: "stato", x: "n",
-      text: d => `${d.n.toLocaleString("it-IT")}`,
+      text: d => num(d.n),
       dx: 5, textAnchor: "start", fontSize: 11
     }),
     plot.ruleX([0])
@@ -113,7 +113,7 @@ display(plot.plot({
     }),
     plot.text(fasiPlot, {
       y: "fase", x: "n",
-      text: d => `${d.n.toLocaleString("it-IT")}`,
+      text: d => num(d.n),
       dx: 5, textAnchor: "start", fontSize: 11
     }),
     plot.ruleX([0])

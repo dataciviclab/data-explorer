@@ -114,13 +114,23 @@ display(plot.plot({
 }))
 ```
 
-> Le barre grigie sono l'importo totale, le verdi l'importo aggiudicato. Il **Sistema duale** assorbe €86.6 mld ma ne aggiudica solo €22.7 mld (**26%**). Le **smart grid** funzionano meglio: €29.3 mld, €25.3 aggiudicati (**86%**). Il divario racconta la capacità di spesa di ciascuna area.
+```js
+// Valori per narrativa submisure
+const subSistemaDuale = data.per_submisura.find(d => d.submisura.includes("duale")) || data.per_submisura[0];
+const subSmartGrid = data.per_submisura.find(d => d.submisura.includes("smart grid")) || data.per_submisura[2];
+const procAperta = data.per_procedura.find(d => d.procedura.includes("APERTA"));
+const pctProcAperta = procAperta ? (procAperta.n_gare / data.kpi.n_gare * 100).toFixed(1) : "0";
+const gareDirette = data.per_procedura.find(d => d.procedura === "AFFIDAMENTO DIRETTO");
+const pctDirette = gareDirette ? Math.round(gareDirette.n_gare / data.kpi.n_gare * 100) : 0;
+```
+
+> Le barre grigie sono l'importo totale, le verdi l'importo aggiudicato. Il **${subSistemaDuale.submisura.split(" ").slice(0,2).join(" ")}** assorbe ${numFix(subSistemaDuale.importo_mln / 1000, 1)} mld ma ne aggiudica solo ${numFix(subSistemaDuale.aggiudicato_mln / 1000, 1)} mld (**${subSistemaDuale.pct}%**). Le **smart grid** funzionano meglio: ${numFix(subSmartGrid.importo_mln / 1000, 1)} mld, ${numFix(subSmartGrid.aggiudicato_mln / 1000, 1)} aggiudicati (**${subSmartGrid.pct}%**). Il divario racconta la capacità di spesa di ciascuna area.
 
 ---
 
 ## 4. Affidamento diretto: semplificazione o frammentazione?
 
-Il **73% delle gare** (205.934 su 282.655) è affidamento diretto. Solo il **3.6%** è procedura aperta. Questo significa che la maggior parte dei bandi non passa da una gara vera e propria.
+Il **${pctDirette}% delle gare** (${num(gareDirette ? gareDirette.n_gare : 0)} su ${num(data.kpi.n_gare)}) è affidamento diretto. Solo il **${pctProcAperta}%** è procedura aperta. Questo significa che la maggior parte dei bandi non passa da una gara vera e propria.
 
 ```js
 const topProc = data.per_procedura.slice(0, 5);
@@ -145,7 +155,7 @@ display(plot.plot({
     plot.text(topProc, {
       y: d => d.procedura.length > 45 ? d.procedura.slice(0, 45) + "…" : d.procedura,
       x: "n_gare",
-      text: d => `${d.n_gare.toLocaleString("it-IT")}`,
+      text: d => num(d.n_gare),
       dx: 5,
       textAnchor: "start",
       fontSize: 11
