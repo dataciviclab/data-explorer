@@ -39,7 +39,7 @@ with safe_connect() as con:
         "max_data": str(kpi_row[5])[:10] if kpi_row[5] else None,
     }
 
-    # Trend gare per anno
+    # Trend gare per anno (con % aggiudicazione)
     trend_rows = con.sql(f"""
         SELECT EXTRACT(YEAR FROM data_pubblicazione_cig)::INT AS anno,
                COUNT(*) AS n_gare,
@@ -47,14 +47,20 @@ with safe_connect() as con:
                ROUND(COALESCE(SUM(importo_aggiudicazione), 0) / 1e9, 2) AS aggiudicato_mld
         FROM read_parquet('{url}')
         WHERE data_pubblicazione_cig IS NOT NULL
+          AND EXTRACT(YEAR FROM data_pubblicazione_cig) >= 2018
         GROUP BY 1 ORDER BY 1
     """).fetchall()
 
-    trend = [
-        {"anno": int(r[0]), "n_gare": int(r[1]),
-         "importo_mld": float(r[2]), "aggiudicato_mld": float(r[3])}
-        for r in trend_rows
-    ]
+    trend = []
+    for r in trend_rows:
+        imp = float(r[2])
+        agg = float(r[3])
+        pct = round(agg / imp * 100, 1) if imp > 0 else 0
+        trend.append({
+            "anno": int(r[0]), "n_gare": int(r[1]),
+            "importo_mld": imp, "aggiudicato_mld": agg,
+            "pct_aggiudicazione": pct
+        })
 
     # Top 10 submisure per importo
     sub_rows = con.sql(f"""
