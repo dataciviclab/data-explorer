@@ -15,7 +15,7 @@ const plot = await import("npm:@observablehq/plot");
 import { num, numFix, pct } from "../import/format-utils.js";
 ```
 
-# Elezioni Regionali — chi governa le 20 regioni?
+# Elezioni Regionali — affluenza e liste per regione
 
 **${data.kpi.tot_regioni} regioni con elezioni dal ${data.kpi.first_year} al ${data.kpi.last_year}. Affluenza media: ${data.kpi.aff_media}%.** Le regionali sono il voto che decide chi amministra le regioni — e spesso anticipa le tendenze nazionali.
 
