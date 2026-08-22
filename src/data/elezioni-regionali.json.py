@@ -45,26 +45,6 @@ with safe_connect() as con:
         for r in regioni
     ]
 
-    # 2. Presidenti eletti (per regione, candidato con più voti)
-    pres = con.sql(f"""
-        SELECT regione, candidato, lista, voti_candidato
-        FROM (
-            SELECT regione, candidato, FIRST(lista ORDER BY voti_lista DESC) AS lista,
-                   MAX(voti_candidato) AS voti_candidato,
-                   ROW_NUMBER() OVER (PARTITION BY regione ORDER BY MAX(voti_candidato) DESC) AS rk
-            FROM ({parquet_refs})
-            WHERE voti_candidato > 0
-            GROUP BY 1, 2
-        )
-        WHERE rk = 1
-        ORDER BY 3 DESC
-    """).fetchall()
-
-    presidenti = [
-        {"regione": r[0], "candidato": r[1], "lista": r[2], "voti": int(r[3])}
-        for r in pres
-    ]
-
     # 3. Top 5 liste per elezione
     liste = con.sql(f"""
         WITH ranked AS (
@@ -99,6 +79,5 @@ json.dump({
         "aff_media": aff_media,
     },
     "per_regione": per_regione,
-    "presidenti": presidenti,
     "per_lista": per_lista,
 }, sys.stdout, ensure_ascii=False)

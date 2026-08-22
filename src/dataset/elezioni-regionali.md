@@ -12,7 +12,7 @@ data_driven: true
 ```js
 const data = await FileAttachment("../data/elezioni-regionali.json").json();
 const plot = await import("npm:@observablehq/plot");
-import { num, numFix, pct, tableFormat } from "../import/format-utils.js";
+import { num, numFix, pct } from "../import/format-utils.js";
 ```
 
 # Elezioni Regionali — chi governa le 20 regioni?
@@ -89,27 +89,6 @@ display(plot.plot({
     plot.ruleX([0])
   ]
 }))
-```
-
----
-
-## 3. Presidenti eletti per regione
-
-```js
-const { header: tblHeader, format: tblFormat } = tableFormat({
-  regione: { label: "Regione", fmt: "string" },
-  candidato: { label: "Presidente", fmt: "string" },
-  lista: { label: "Lista", fmt: "string" },
-  voti: { label: "Voti", fmt: "num" }
-});
-```
-
-```js
-Inputs.table(data.presidenti, {
-  columns: ["regione", "candidato", "lista", "voti"],
-  header: tblHeader, format: tblFormat,
-  rows: 20, width: "100%", sort: "regione"
-})
 ```
 
 ---

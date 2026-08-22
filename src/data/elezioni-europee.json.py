@@ -41,9 +41,6 @@ with safe_connect() as con:
     ]
 
     # 2. Top 10 liste per elezione
-    url_first = https_url("clean", "clean_parquet", slug=slug, year=valid_years[0])
-    url_ref = f"read_parquet('{url_first}')"  # just for first query to get schema
-    # Actually use parquet_refs for all queries
     liste = con.sql(f"""
         WITH ranked AS (
             SELECT anno, lista, tot_voti,

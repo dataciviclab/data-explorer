@@ -12,7 +12,7 @@ data_driven: true
 ```js
 const data = await FileAttachment("../data/elezioni-europee.json").json();
 const plot = await import("npm:@observablehq/plot");
-import { num, numFix, pct, tableFormat } from "../import/format-utils.js";
+import { num, numFix, pct } from "../import/format-utils.js";
 ```
 
 ```js
