@@ -33,9 +33,13 @@ Risultati dei referendum abrogativi e costituzionali per comune: voti SI/NO, aff
 ## 1. Affluenza e esito
 
 <div class="grid grid-cols-3">
-  <div class="card"><h3>Quesiti</h3><span class="big">${data.kpi.tot_referendum}</span></div>
-  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first_year}–${data.kpi.last_year}</span></div>
-  <div class="card"><h3>Affluenza ultima</h3><span class="big">${last ? last.affluenza : "?"}%</span></div>
+  <div class="card"><h3>Quesiti</h3><span class="big">${data.kpi.tot_referendum}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first_year}–${data.kpi.last_year}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Affluenza ultima</h3><span class="big">${last ? last.affluenza : "?"}%</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 I referendum hanno affluenza più alta delle politiche — ma non sempre il Sì prevale. Il grafico mostra l'affluenza e la quota SI per ogni quesito.
@@ -122,6 +126,7 @@ Inputs.table(primoQuesito.map(d => ({
   <a href="/dataset/elezioni-politiche" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Politiche</a>
   <a href="/dataset/elezioni-comunali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Comunali</a>
   <a href="/dataset/elezioni-europee" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Europee</a>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 ---

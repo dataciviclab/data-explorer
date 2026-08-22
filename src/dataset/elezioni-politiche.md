@@ -32,10 +32,15 @@ Risultati delle elezioni politiche per Camera dei Deputati e Senato della Repubb
 ## 1. L'affluenza in calo
 
 <div class="grid grid-cols-4">
-  <div class="card"><h3>Elezioni</h3><span class="big">${data.kpi.tot_anni}</span></div>
-  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first}–${data.kpi.last}</span></div>
-  <div class="card"><h3>Affluenza ${data.kpi.first}</h3><span class="big">${data.kpi.affluenza_first}%</span></div>
-  <div class="card"><h3>Affluenza ${data.kpi.last}</h3><span class="big">${data.kpi.affluenza_last}%</span></div>
+  <div class="card"><h3>Elezioni</h3><span class="big">${data.kpi.tot_anni}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first}–${data.kpi.last}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Affluenza ${data.kpi.first}</h3><span class="big">${data.kpi.affluenza_first}%</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Affluenza ${data.kpi.last}</h3><span class="big">${data.kpi.affluenza_last}%</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 L'Italia vota sempre meno. Nel 1948 quasi 9 italiani su 10 andavano alle urne; nel 2022 meno di 2 su 3. Il calo è costante, con qualche inversione temporanea (2006, 2013).
@@ -147,6 +152,7 @@ display(plot.plot({
   <a href="/dataset/elezioni-europee" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Europee</a>
   <a href="/dataset/elezioni-referendum" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Referendum</a>
   <a href="/dataset/votazioni-camera" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Votazioni Camera</a>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 ---

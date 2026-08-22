@@ -26,10 +26,15 @@ Risultati delle elezioni comunali per sindaco: candidati, liste, voti, seggi e a
 ## 1. L'affluenza comunale
 
 <div class="grid grid-cols-4">
-  <div class="card"><h3>Comuni</h3><span class="big">${num(data.kpi.tot_comuni)}</span></div>
-  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first_year}–${data.kpi.last_year}</span></div>
-  <div class="card"><h3>Affluenza ${data.kpi.first_year}</h3><span class="big">${data.kpi.affluenza_first}%</span></div>
-  <div class="card"><h3>Affluenza ${data.kpi.last_year}</h3><span class="big">${data.kpi.affluenza_last}%</span></div>
+  <div class="card"><h3>Comuni</h3><span class="big">${num(data.kpi.tot_comuni)}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first_year}–${data.kpi.last_year}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Affluenza ${data.kpi.first_year}</h3><span class="big">${data.kpi.affluenza_first}%</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Affluenza ${data.kpi.last_year}</h3><span class="big">${data.kpi.affluenza_last}%</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 ```js
@@ -108,6 +113,7 @@ Inputs.table(data.top_sindaci, {
   <a href="/dataset/elezioni-politiche" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Politiche</a>
   <a href="/dataset/elezioni-europee" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Europee</a>
   <a href="/dataset/elezioni-referendum" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Referendum</a>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 ---

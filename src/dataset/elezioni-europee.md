@@ -30,10 +30,15 @@ Risultati delle elezioni europee per lista: voti, affluenza e tendenze per circo
 ## 1. L'affluenza in free fall
 
 <div class="grid grid-cols-4">
-  <div class="card"><h3>Elezioni</h3><span class="big">${data.trend.length}</span></div>
-  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first_year}–${data.kpi.last_year}</span></div>
-  <div class="card"><h3>Affluenza ${data.kpi.first_year}</h3><span class="big">${data.kpi.affluenza_first}%</span></div>
-  <div class="card"><h3>Affluenza ${data.kpi.last_year}</h3><span class="big">${data.kpi.affluenza_last}%</span></div>
+  <div class="card"><h3>Elezioni</h3><span class="big">${data.trend.length}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Periodo</h3><span class="big">${data.kpi.first_year}–${data.kpi.last_year}</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Affluenza ${data.kpi.first_year}</h3><span class="big">${data.kpi.affluenza_first}%</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <div class="card"><h3>Affluenza ${data.kpi.last_year}</h3><span class="big">${data.kpi.affluenza_last}%</span>  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
+</div>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 ```js
@@ -51,7 +56,12 @@ display(plot.plot({
 }))
 ```
 
-> Il picco è stato nel 1979 (85.4%), il minimo nel 2014 (40.9%). Nel 2024 c'è stata una leggera ripresa, ma siamo ancora sotto il 50%.
+```js
+const affMax = data.trend.reduce((a, b) => b.affluenza > a.affluenza ? b : a);
+const affMin = data.trend.reduce((a, b) => b.affluenza < a.affluenza ? b : a);
+```
+
+> Il picco è stato nel ${affMax.anno} (${affMax.affluenza}%), il minimo nel ${affMin.anno} (${affMin.affluenza}%). Nel 2024 c'è stata una leggera ripresa, ma siamo ancora sotto il 50%.
 
 ---
 
@@ -130,6 +140,7 @@ display(plot.plot({
   <a href="/dataset/elezioni-politiche" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Politiche</a>
   <a href="/dataset/elezioni-comunali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Comunali</a>
   <a href="/dataset/elezioni-referendum" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Referendum</a>
+  <a href="/dataset/elezioni-regionali" style="text-decoration:none; padding:0.4em 0.8em; border:1px solid #ccc; border-radius:6px; font-size:0.9em">Elezioni Regionali</a>
 </div>
 
 ---
