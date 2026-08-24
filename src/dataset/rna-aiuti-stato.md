@@ -128,7 +128,7 @@ display(plot.plot({
 
 ## 4. PMI vs Grande Impresa — come cambia nel tempo
 
-Le PMI (piccole e medie imprese) assorbono la maggior parte degli aiuti, ma la proporzione cambia con le crisi. Durante il COVID le grandi imprese hanno avuto accesso a garanzie di dimensioni maggiori (es. il programma SACE), riducendo la quota PMI. Ora torna a stabilizzarsi intorno al 70%.
+Le PMI (piccole e medie imprese) assorbono la maggior parte degli aiuti, ma la proporzione cambia con le crisi. Durante il COVID le grandi imprese hanno avuto accesso a garanzie di dimensioni maggiori (es. il programma SACE), riducendo la quota PMI. Ora torna a stabilizzarsi.
 
 ```js
 const tipoDomains = [...new Set(byTipoAnno.map(d => d.tipo))].filter(t => t !== "-");
@@ -148,7 +148,7 @@ display(plot.plot({
 
 ## 5. Procedimenti — Notifica, Esenzione, De Minimis
 
-Ogni aiuto deve essere autorizzato dalla Commissione Europea. La **Notifica** è l'autorizzazione preventiva per gli aiuti sopra la soglia europea — richiede valutazione caso per caso. L'**Esenione** copre categorie standardizzate (es. aiuti regionali sotto certi limiti). Il **De Minimis** sono micro-aiuti sotto la soglia europea che non richiedono notifica — sono piccoli ma capillari (il 28% delle operazioni).
+Ogni aiuto deve essere autorizzato dalla Commissione Europea. La **Notifica** è l'autorizzazione preventiva per gli aiuti sopra la soglia europea — richiede valutazione caso per caso. L'**Esenzione** copre categorie standardizzate (es. aiuti regionali sotto certi limiti). Il **De Minimis** sono micro-aiuti sotto la soglia europea che non richiedono notifica — sono piccoli ma capillari (il ${pct(d3.sum(byProcedimento.filter(d => d.procedimento === "De Minimis"), d => d.n) / d3.sum(byProcedimento, d => d.n) * 100)} delle operazioni).
 
 ```js
 const topProc = byProcedimento.slice(0, 5);
