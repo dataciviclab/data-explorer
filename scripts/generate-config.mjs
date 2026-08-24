@@ -15,7 +15,7 @@
  */
 
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -83,6 +83,34 @@ export function resolveThemePages(themes, hasPage) {
     .filter(Boolean);
 }
 
+function readCrossViewTitle(slug) {
+  /* Legge il title dal frontmatter YAML di una pagina cross-view. */
+  const pagePath = resolve(ROOT, `src/cross-views/${slug}.md`);
+  if (!existsSync(pagePath)) return slug;
+  const content = readFileSync(pagePath, "utf-8");
+  const match = content.match(/^title:\s*(.+)$/m);
+  if (!match) return slug;
+  // Rimuovi virgolette YAML
+  return match[1].trim().replace(/^["']|["']$/g, "");
+}
+
+function resolveCrossViewPagesSync() {
+  /* Scansiona src/cross-views/*.md e restituisce le pagine per la sidebar. */
+  const crossViewsDir = resolve(ROOT, "src/cross-views");
+  if (!existsSync(crossViewsDir)) return [];
+
+  const files = readdirSync(crossViewsDir).filter(f => f.endsWith(".md"));
+  if (files.length === 0) return [];
+
+  return files.map(f => {
+    const slug = f.replace(/\.md$/, "");
+    return {
+      name: readCrossViewTitle(slug),
+      path: `/cross-views/${slug}`,
+    };
+  });
+}
+
 function buildSidebar(themes, catalog) {
   const pages = resolveThemePages(themes, (slug) =>
     existsSync(resolve(ROOT, `src/dataset/${slug}.md`))
@@ -105,6 +133,16 @@ function buildSidebar(themes, catalog) {
         name: readPageTitle(d.url_slug),
         path: `/dataset/${d.url_slug}`,
       })),
+    });
+  }
+
+  // Cross-views: pagine che incrociano dati da più dataset
+  const crossViewPages = resolveCrossViewPagesSync();
+  if (crossViewPages.length > 0) {
+    pages.push({
+      name: "Visioni incrociate",
+      collapsible: true,
+      pages: crossViewPages,
     });
   }
 

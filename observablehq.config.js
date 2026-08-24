@@ -184,24 +184,12 @@ export default {
     ]
   },
   {
-    "name": "Politica",
+    "name": "Altri dataset",
     "collapsible": true,
     "pages": [
       {
-        "name": "Camera dei Deputati — Legislature e composizione",
-        "path": "/dataset/camera-deputati"
-      },
-      {
-        "name": "Attività in Aula — Camera dei Deputati",
-        "path": "/dataset/attivita-aula"
-      },
-      {
         "name": "Votazioni Camera dei Deputati",
         "path": "/dataset/votazioni-camera"
-      },
-      {
-        "name": "Voti dei Deputati — accountability parlamentare",
-        "path": "/dataset/voti-deputati"
       },
       {
         "name": "Elezioni Comunali",
@@ -222,6 +210,20 @@ export default {
       {
         "name": "Elezioni Regionali",
         "path": "/dataset/elezioni-regionali"
+      }
+    ]
+  },
+  {
+    "name": "Visioni incrociate",
+    "collapsible": true,
+    "pages": [
+      {
+        "name": "Entrate vs Spese — Il Bilancio dello Stato",
+        "path": "/cross-views/entrate-vs-spese"
+      },
+      {
+        "name": "Previsione vs Consuntivo per Missione",
+        "path": "/cross-views/previsione-vs-consuntivo"
       }
     ]
   }
