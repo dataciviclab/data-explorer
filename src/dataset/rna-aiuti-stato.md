@@ -105,7 +105,7 @@ display(plot.plot({
 }))
 ```
 
-La **Lombardia** assorbe ${euroCompact(byRegione[0].importo)}, un quinto del totale nazionale. Le prime 5 regioni totalizzano circa il ${pct(d3.sum(byRegione.slice(0, 5), d => d.importo) / totale)} delle erogazioni.
+La **Lombardia** assorbe ${euroCompact(byRegione[0].importo)}, un quinto del totale nazionale. Le prime 5 regioni totalizzano circa il ${pct(d3.sum(byRegione.slice(0, 5), d => d.importo) / totale * 100)} delle erogazioni.
 
 ## 3. Strumenti — garanzie, sovvenzioni e agevolazioni
 
@@ -113,7 +113,7 @@ La **Lombardia** assorbe ${euroCompact(byRegione[0].importo)}, un quinto del tot
 const topStrumenti = byStrumento.slice(0, 5);
 display(plot.plot({
   title: "Distribuzione per strumento",
-  width: 800, height: 300, marginLeft: 300,
+  width: 800, height: 300, marginLeft: 300, marginRight: 50,
   x: {grid: true, tickFormat: d => (d / 1e9).toFixed(0) + " B€"},
   y: {label: null, tickSize: 0},
   marks: [
@@ -148,7 +148,7 @@ display(plot.plot({
 const topProc = byProcedimento.slice(0, 5);
 display(plot.plot({
   title: "Distribuzione per procedimento",
-  width: 800, height: 260, marginLeft: 180,
+  width: 800, height: 260, marginLeft: 130, marginRight: 50,
   x: {grid: true, tickFormat: d => (d / 1e9).toFixed(0) + " B€"},
   y: {label: null, tickSize: 0},
   marks: [
@@ -165,7 +165,7 @@ display(plot.plot({
 const topConc = byConcedente.slice(0, 10);
 display(plot.plot({
   title: "Top 10 soggetti concedenti",
-  width: 800, height: 340, marginLeft: 300,
+  width: 800, height: 340, marginLeft: 200, marginRight: 50,
   x: {grid: true, tickFormat: d => (d / 1e9).toFixed(0) + " B€"},
   y: {label: null, tickSize: 0},
   marks: [
