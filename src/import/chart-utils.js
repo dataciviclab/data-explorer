@@ -41,25 +41,35 @@ function P() {
  * Barre orizzontali con etichette. Previene barY vs barX confusion.
  *
  * @param {Array} data
- * @param {Object} opts — { y, x, color?, label?, height?, marginLeft?, tip?, title? }
- * @example display(hBar(top10, { y: "amm", x: "spesa" }))
+ * @param {Object} opts — { y, x, color?, fill?, scheme?, label?, height?, marginLeft?, tip?, title?, rules? }
+ *   color: colore singolo (default "#3182bd")
+ *   fill: campo per colori per-categoria (es. "fonte") — richiede scheme o color implicito
+ *   scheme: schema colori Plot (es. "Set2")
+ *   rules: array di ruleY/opzioni per linee di riferimento [{ y: 0, stroke: "#888" }]
+ * @example
+ *   hBar(top10, { y: "amm", x: "spesa" })
+ *   hBar(mix, { y: "fonte", x: "gwh", fill: "fonte", scheme: "Set2" })
  */
 export function hBar(data, opts = {}) {
-  const { y, x, color = "#3182bd", label = "euroCompact", height, marginLeft, tip = true, title } = opts;
+  const { y, x, color = "#3182bd", fill, scheme, label = "euroCompact", height, marginLeft, tip = true, title, rules } = opts;
   const p = P();
   const fmt = labelFmt(label);
   const h = height ?? Math.max(200, data.length * 32 + 60);
   const ml = marginLeft ?? Math.min(350, Math.max(120,
     Math.max(...data.map((d) => String(d[y]).length)) * 7 + 30
   ));
+  const fillOpt = fill ? fill : color;
+  const colorConf = scheme ? { scheme } : undefined;
   return p.plot({
     title, width: W, height: h, marginLeft: ml,
     x: { grid: true, tickFormat: tickB, label: null },
     y: { label: null, tickSize: 0 },
+    color: colorConf,
     marks: [
-      p.barX(data, { x, y, fill: color, sort: { y: "-x" }, tip }),
+      p.barX(data, { x, y, fill: fillOpt, sort: { y: "-x" }, tip }),
       p.text(data, { x, y, text: (d) => ` ${fmt(d[x])}`, dx: 6, textAnchor: "start", fontSize: FONT, fill: "currentColor" }),
       p.ruleX([0]),
+      ...(rules || []).map((r) => p.ruleY([r.y], { stroke: r.stroke ?? "#888", strokeDasharray: r.dash ?? "4 4" })),
     ],
   });
 }
@@ -103,12 +113,16 @@ export function hBarGrouped(data, opts = {}) {
  * Linee temporali con punti. Supporta multi-serie.
  *
  * @param {Array} data
- * @param {Object} opts — { x, y, color?, colors?, labels?, height?, yFormat?, tip?, title? }
+ * @param {Object} opts — { x, y, color?, colors?, labels?, height?, yFormat?, tip?, title?,
+ *   rules?: [{ y, stroke?, dash? }], highlight?: { filter, fill, r } }
+ *   rules: linee di riferimento orizzontali
+ *   highlight: punto evidenziato (es. minimo, { filter: d => d.anno === min, fill: "#d95f0e", r: 4 })
  * @example
- * display(lineChart(rows, { x: "anno", y: ["entrate","spese"], colors: ["#2c7fb8","#d62728"], labels: ["Entrate","Spese"] }))
+ *   lineChart(rows, { x: "anno", y: "valore", color: "#3182bd" })
+ *   lineChart(rows, { x: "anno", y: "tot", color: "#2c7fb8", rules: [{ y: 0 }], highlight: { filter: d => d === min, fill: "#d95f0e" } })
  */
 export function lineChart(data, opts = {}) {
-  const { x, y, color = "#3182bd", colors, labels, height = 300, yFormat, tip = true, title } = opts;
+  const { x, y, color = "#3182bd", colors, labels, height = 300, yFormat, tip = true, title, rules, highlight } = opts;
   const p = P();
   const ys = Array.isArray(y) ? y : [y];
   const cls = colors || ys.map(() => color);
@@ -116,6 +130,13 @@ export function lineChart(data, opts = {}) {
   for (let i = 0; i < ys.length; i++) {
     marks.push(p.lineY(data, { x, y: ys[i], stroke: cls[i], strokeWidth: 2 }));
     marks.push(p.dot(data, { x, y: ys[i], fill: "#fff", stroke: cls[i], r: 3, tip }));
+  }
+  if (highlight) {
+    const filtered = typeof highlight.filter === "function" ? data.filter(highlight.filter) : [];
+    marks.push(p.dot(filtered, { x, y: ys[0], fill: highlight.fill ?? "#d95f0e", r: highlight.r ?? 4, tip: true }));
+  }
+  for (const r of (rules || [])) {
+    marks.push(p.ruleY([r.y], { stroke: r.stroke ?? "#888", strokeDasharray: r.dash ?? "4 4" }));
   }
   const yConf = { grid: true };
   if (yFormat) yConf.tickFormat = yFormat;
