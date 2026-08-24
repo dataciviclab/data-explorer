@@ -136,25 +136,35 @@ function checkDuckdbConnect(loaderPath, slug) {
 // ── Main ────────────────────────────────────────────────────────────────────
 
 const datasetDir = resolve(ROOT, "src/dataset");
+const crossViewsDir = resolve(ROOT, "src/cross-views");
 const dataDir = resolve(ROOT, "src/data");
 
 let count = 0;
-for (const slug of readdirSync(datasetDir)) {
-  if (!slug.endsWith(".md")) continue;
-  const name = slug.replace(".md", "");
-  const pagePath = resolve(datasetDir, slug);
-  const content = readFileSync(pagePath, "utf-8");
+const allDirs = [
+  { dir: datasetDir, type: "dataset" },
+  { dir: crossViewsDir, type: "cross-view" },
+];
+for (const { dir, type } of allDirs) {
+  if (!existsSync(dir)) continue;
+  for (const slug of readdirSync(dir)) {
+    if (!slug.endsWith(".md")) continue;
+    const name = slug.replace(".md", "");
+    const pagePath = resolve(dir, slug);
+    const content = readFileSync(pagePath, "utf-8");
 
-  checkNoToLocaleString(content, name);
-  checkTableFormatCell(content, name);
-  checkBuildMapLookup(content, name);
-  checkNoHardcodedNumbers(content, name);
+    checkNoToLocaleString(content, `${type}/${name}`);
+    checkTableFormatCell(content, `${type}/${name}`);
+    checkBuildMapLookup(content, `${type}/${name}`);
+    checkNoHardcodedNumbers(content, `${type}/${name}`);
 
-  // Loader corrispondente
-  const loaderPath = resolve(dataDir, `${name}.json.py`);
-  checkDuckdbConnect(loaderPath, name);
+    // Loader corrispondente (solo per dataset, non cross-view)
+    if (type === "dataset") {
+      const loaderPath = resolve(dataDir, `${name}.json.py`);
+      checkDuckdbConnect(loaderPath, name);
+    }
 
-  count++;
+    count++;
+  }
 }
 
 // Report

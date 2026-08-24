@@ -13,7 +13,7 @@ datasets:
 
 # Entrate vs Spese — il bilancio dello Stato in un'occhiata
 
-**Nel ${last.anno} le entrate dello Stato superano le spese di ${euroCompact(saldoLast)} — un avanzo di bilancio. Il ${worstRapporto.anno} è stato l'unico anno con un forte deficit (${euroCompact(Math.abs(worst.saldo))}), legato alle misure pandemiche. Da allora il bilancio è tornato in pareggio, anche se il surplus si è ridotto: ${euroCompact(avgPost)} nel periodo ${post2020[0].anno}–${last.anno}, contro ${euroCompact(avgPre)} nel ${pre2020[0].anno}–${pre2020[pre2020.length-1].anno}.**
+**Nel ${last.anno} le entrate dello Stato superano le spese di ${euroCompact(saldoLast)} — un avanzo di bilancio. I saldi negativi sono rari: si sono verificati in ${rows.filter(d => d.saldo < 0).length} anni su ${rows.length}, ma il ${worstRapporto.anno} ha registrato un deficit senza precedenti (${euroCompact(Math.abs(worst.saldo))}), legato alle misure pandemiche. Da allora il bilancio è tornato in pareggio, anche se il surplus si è ridotto: ${euroCompact(avgPost)} nel periodo ${post2020[0].anno}–${last.anno}, contro ${euroCompact(avgPre)} nel ${pre2020[0].anno}–${pre2020[pre2020.length-1].anno}.**
 
 Questa cross-view confronta le **entrate totali** (previsioni definitive, BDAP) con le **spese totali** per ogni anno dal ${first.anno} al ${last.anno}. Mostra il saldo di bilancio e il rapporto di copertura.
 
@@ -52,7 +52,7 @@ Nel ${last.anno} le entrate dello Stato valgono **${euroCompact(last.totale_entr
 
 ## 1. Entrate e Spese nel tempo — ${first.anno}–${last.anno}
 
-Il grafico mostra l'andamento delle entrate e delle spese dello Stato. Il ${worstRapporto.anno} è l'unico anno con un divario netto a favore delle spese (COVID); negli anni successivi entrate e spese sono tornate vicine, con le entrate leggermente superiori.
+Il grafico mostra l'andamento delle entrate e delle spese dello Stato. I saldi negativi si concentrano in due periodi: gli anni della crisi (${rows.filter(d => d.saldo < 0 && d.anno < 2020).map(d => d.anno).join(", ")}) e il ${worstRapporto.anno} (COVID). Negli anni successivi entrate e spese sono tornate vicine, con le entrate leggermente superiori.
 
 ```js
 const plot = await import("npm:@observablehq/plot");
@@ -104,7 +104,7 @@ L'anno peggiore è stato il **${worst.anno}** con un saldo di **${euroCompact(wo
 
 ## 3. Il rapporto spese/entrate — superare il 100%
 
-Quando il rapporto supera il 100%, le spese superano le entrate. Il ${worstRapporto.anno} è l'unico anno in cui il rapporto ha superato la parità in modo drammatico (${pct(worstRapporto.rapporto_spese_entrate * 100)}), legato alle misure pandemiche. Negli anni successivi il rapporto è tornato sotto la parità, con le entrate che superano le spese.
+Quando il rapporto supera il 100%, le spese superano le entrate. Il ${worstRapporto.anno} ha registrato il rapporto più alto della serie (${pct(worstRapporto.rapporto_spese_entrate * 100)}), ma non è stato l'unico anno sopra la parità: anche nel ${rows.filter(d => d.rapporto_spese_entrate > 1 && d.anno !== worstRapporto.anno).map(d => d.anno).join(" e nel ")} le spese hanno superato le entrate. Negli anni successivi al ${worstRapporto.anno} il rapporto è tornato sotto la parità.
 
 ```js
 display(plot.plot({
