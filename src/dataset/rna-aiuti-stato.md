@@ -109,6 +109,8 @@ La **Lombardia** assorbe ${euroCompact(byRegione[0].importo)}, un quinto del tot
 
 ## 3. Strumenti — garanzie, sovvenzioni e agevolazioni
 
+Gli aiuti non sono tutti uguali. Le **garanzie** (es. SACE) coprono il rischio di prestiti bancari — lo Stato non dà soldi, ma garantisce che se l'impresa non paga, paga lui. Le **sovvenzioni e contributi** sono trasferimenti diretti (crediti d'imposta, fondi a pioggia). Le **agevolazioni fiscali** riducono le tasse. Le garanzie dominano in valore ma il rischio è solo potenziale.
+
 ```js
 const topStrumenti = byStrumento.slice(0, 5);
 display(plot.plot({
@@ -126,13 +128,15 @@ display(plot.plot({
 
 ## 4. PMI vs Grande Impresa — come cambia nel tempo
 
+Le PMI (piccole e medie imprese) assorbono la maggior parte degli aiuti, ma la proporzione cambia con le crisi. Durante il COVID le grandi imprese hanno avuto accesso a garanzie di dimensioni maggiori (es. il programma SACE), riducendo la quota PMI. Ora torna a stabilizzarsi intorno al 70%.
+
 ```js
 const tipoDomains = [...new Set(byTipoAnno.map(d => d.tipo))].filter(t => t !== "-");
 display(plot.plot({
-  title: "Importo per tipo di beneficiario",
+  title: "Quota per tipo di beneficiario",
   width: 800, height: 320,
   x: {tickFormat: String},
-  y: {grid: true, tickFormat: d => (d / 1e9).toFixed(0) + " B€"},
+  y: {grid: true, label: "quota sul totale", tickFormat: ".0%"},
   color: {domain: tipoDomains, range: ["#2c7fb8", "#d62728", "#999"]},
   marks: [
     plot.barY(byTipoAnno.filter(d => tipoDomains.includes(d.tipo)), {
@@ -143,6 +147,8 @@ display(plot.plot({
 ```
 
 ## 5. Procedimenti — Notifica, Esenzione, De Minimis
+
+Ogni aiuto deve essere autorizzato dalla Commissione Europea. La **Notifica** è l'autorizzazione preventiva per gli aiuti sopra la soglia europea — richiede valutazione caso per caso. L'**Esenione** copre categorie standardizzate (es. aiuti regionali sotto certi limiti). Il **De Minimis** sono micro-aiuti sotto la soglia europea che non richiedono notifica — sono piccoli ma capillari (il 28% delle operazioni).
 
 ```js
 const topProc = byProcedimento.slice(0, 5);
@@ -160,6 +166,8 @@ display(plot.plot({
 ```
 
 ## 6. Top concedenti — chi eroga
+
+Non è lo Stato a dare i soldi direttamente. Gli aiuti passano attraverso **soggetti concedenti** — banche di sviluppo (MedioCredito Centrale, SACE), agenzie (GSE, Invitalia), ministeri. La concentrazione è altissima: pochi grandi erogatori gestiscono la maggior parte dei fondi.
 
 ```js
 const topConc = byConcedente.slice(0, 10);
