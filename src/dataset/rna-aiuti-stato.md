@@ -1,6 +1,6 @@
 ---
 title: "Aiuti di Stato — Registro Nazionale Aiuti (RNA)"
-description: "480 miliardi alle imprese italiane in 10 anni: trend, distribuzione regionale, strumenti e beneficiari degli aiuti pubblici (MIMIT)"
+description: "Oltre 480 miliardi alle imprese italiane in 10 anni: trend, distribuzione regionale, strumenti e beneficiari degli aiuti pubblici (MIMIT)"
 source: MIMIT — Registro Nazionale Aiuti di Stato
 source_url: https://www.rna.gov.it/
 period: "2017–2026"

@@ -212,7 +212,7 @@ export default {
         "path": "/dataset/elezioni-regionali"
       },
       {
-        "name": "\"Aiuti di Stato — Registro Nazionale Aiuti (RNA)\"",
+        "name": "Aiuti di Stato — Registro Nazionale Aiuti (RNA)",
         "path": "/dataset/rna-aiuti-stato"
       }
     ]

@@ -48,12 +48,13 @@ function readData(slug) {
 function readPageTitle(slug) {
   /* Legge il title: dal frontmatter YAML della pagina dataset.
    * I nomi editoriali (es. "Rifiuti urbani") sono lì.
+   * Rimuove virgolette YAML (es. '"Titolo"' → 'Titolo').
    * Fallback: lo slug. */
   const pagePath = resolve(ROOT, `src/dataset/${slug}.md`);
   if (!existsSync(pagePath)) return slug;
   const content = readFileSync(pagePath, "utf-8");
   const match = content.match(/^title:\s*(.+)$/m);
-  return match ? match[1].trim() : slug;
+  return match ? match[1].trim().replace(/^["']|["']$/g, "") : slug;
 }
 
 /**
