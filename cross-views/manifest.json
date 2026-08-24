@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "cross_views": [
+    {
+      "slug": "previsione-vs-consuntivo",
+      "title": "Previsione vs Consuntivo per Missione",
+      "description": "Quanto è stato previsto nel bilancio vs quanto è stato effettivamente pagato, per missione di spesa dello Stato",
+      "datasets": {
+        "spese": "bdap_spese_stato",
+        "pagamenti": "bdap_pagamenti_stato"
+      },
+      "sql_file": "defs/previsione-vs-consuntivo.sql",
+      "category": "finanza-pubblica",
+      "period": "2014–2024",
+      "join_key": "missione + anno",
+      "tags": ["bilancio", "previsione", "consuntivo", "esecuzione"]
+    },
+    {
+      "slug": "entrate-vs-spese",
+      "title": "Entrate vs Spese — Il Bilancio dello Stato",
+      "description": "Confronto aggregato tra entrate e spese dello Stato: saldo e rapporto di copertura per anno",
+      "datasets": {
+        "entrate": "bdap_entrate_stato",
+        "spese": "bdap_spese_stato"
+      },
+      "sql_file": "defs/entrate-vs-spese.sql",
+      "category": "finanza-pubblica",
+      "period": "2008–2024",
+      "join_key": "anno",
+      "tags": ["bilancio", "saldo", "macro"]
+    }
+  ]
+}
