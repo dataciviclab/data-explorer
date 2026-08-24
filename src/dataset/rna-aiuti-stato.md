@@ -13,7 +13,7 @@ dataset_slug: rna_aiuti_stato
 **Tra il ${first} e il ${last} lo Stato italiano ha concesso ${euroCompact(totale)} in aiuti alle imprese. Il biennio ${covidAnni}, da solo, vale il ${pct(covidShare)} del totale: lo shock COVID ha moltiplicato l'erogazione annuale, passando da ${euroCompact(trendFirst.importo)} (${trendFirst.anno}) a ${euroCompact(trendCovid[1]?.importo ?? 0)} (${trendCovid[1]?.anno}).**
 
 ```js
-import { num, euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js";
+import { euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js";
 ```
 
 ```js
@@ -24,8 +24,6 @@ const raw = await FileAttachment("../data/rna-aiuti-stato.json").json();
 const byAnno = Array.from(
   d3.rollup(raw, v => ({
     importo: d3.sum(v, d => d.elemento_aiuto),
-    n_aiuti: v.length,
-    n_imprese: new Set(v.map(d => d.codice_fiscale_beneficiario)).size,
   }), d => d.anno),
   ([anno, v]) => ({ anno, ...v })
 ).sort((a, b) => a.anno - b.anno);
@@ -35,13 +33,11 @@ const trendLast = byAnno[byAnno.length - 1];
 const first = trendFirst.anno;
 const last = trendLast.anno;
 const totale = d3.sum(byAnno, d => d.importo);
-const totAiuti = d3.sum(byAnno, d => d.n_aiuti);
-const totImprese = d3.sum(byAnno, d => d.n_imprese);
 
 const trendCovid = byAnno.filter(d => d.anno >= 2020 && d.anno <= 2021);
 const covidAnni = `${trendCovid[0]?.anno}–${trendCovid[1]?.anno}`;
 const covidImporto = d3.sum(trendCovid, d => d.importo);
-const covidShare = totale ? covidImporto / totale : null;
+const covidShare = totale ? (covidImporto / totale) * 100 : null;
 
 const byRegione = Array.from(
   d3.rollup(raw, v => ({ importo: d3.sum(v, d => d.elemento_aiuto), n: v.length }), d => d.regione_beneficiario),
@@ -69,10 +65,8 @@ const byConcedente = Array.from(
 ).sort((a, b) => b.importo - a.importo);
 ```
 
-<div class="grid grid-cols-4">
+<div class="grid grid-cols-2">
   <div class="card"><h3>Aiuti totali ${first}–${last}</h3><span class="big">${euroCompact(totale)}</span></div>
-  <div class="card"><h3>Numero aiuti</h3><span class="big">${num(totAiuti)}</span></div>
-  <div class="card"><h3>Imprese coinvolte</h3><span class="big">${num(totImprese)}</span></div>
   <div class="card"><h3>Picco COVID</h3><span class="big">${euroCompact(trendCovid[1]?.importo ?? 0)}</span></div>
 </div>
 
@@ -100,7 +94,7 @@ L'andamento mostra tre fasi: il regime **pre-COVID** (2017-2019, sotto i ${euroC
 const topRegioni = byRegione.slice(0, 10);
 display(plot.plot({
   title: `Top 10 regioni per importo aiuti — ${first}–${last}`,
-  width: 800, height: 340, marginLeft: 200,
+  width: 800, height: 340, marginLeft: 100, marginRight: 50,
   x: {grid: true, tickFormat: d => (d / 1e9).toFixed(0) + " B€"},
   y: {label: null, tickSize: 0},
   marks: [
