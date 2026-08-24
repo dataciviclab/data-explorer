@@ -39,6 +39,14 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
+      - name: Restore Observable Framework cache
+        uses: actions/cache@v4
+        with:
+          path: src/.observablehq/cache
+          key: observable-cache-${{ hashFiles('src/data/*.json.py') }}
+          restore-keys: |
+            observable-cache-
+
       - name: Lint
         run: npm run lint
 

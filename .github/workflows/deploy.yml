@@ -37,6 +37,14 @@ jobs:
       - name: Python setup
         uses: dataciviclab/.github/actions/python-setup@main
 
+      - name: Restore Observable Framework cache
+        uses: actions/cache@v4
+        with:
+          path: src/.observablehq/cache
+          key: observable-cache-${{ hashFiles('src/data/*.json.py') }}
+          restore-keys: |
+            observable-cache-
+
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
 
