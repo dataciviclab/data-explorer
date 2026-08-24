@@ -109,7 +109,7 @@ class TestThemesConfig:
 
     def test_theme_for_category_unmapped(self):
         assert theme_for_category("normativa") is None
-        assert theme_for_category("politica") is None
+        assert theme_for_category("politica") == "politica"
 
 
 class TestBuildThemes:
@@ -119,7 +119,7 @@ class TestBuildThemes:
             _registry_entry("capacita_rinnovabile", "energia"),    # → capacita-rinnovabile
             _registry_entry("incubante", "ambiente", stage="incubating"),  # pagina + cat mappata → incluso
             _registry_entry("senza_pagina", "ambiente"),           # senza pagina explorer → escluso
-            _registry_entry("politico", "politica"),               # category non mappata → escluso
+            _registry_entry("politico", "politica"),               # category mappata ma senza pagina → escluso
         ]}
         has_page = {"rifiuti-urbani", "capacita-rinnovabile", "incubante"}
         themes = build_themes(registry, page_exists=lambda s: s in has_page)

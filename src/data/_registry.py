@@ -68,6 +68,9 @@ URL_SLUG_OVERRIDES = {
     "terna_capacita_rinnovabile": "capacita-rinnovabile",   # editoriale: nome tema
     "terna_electricity_by_source": "produzione-elettrica-fonti",  # editoriale: nome tema
     "camera_votazioni_sparql": "votazioni-camera",          # editoriale: nome tema
+    "camera_deputati_legislature": "camera-deputati",       # editoriale: nome pagina
+    "camera_interventi": "attivita-aula",                   # editoriale: pagina combinata
+    "camera_voti": "voti-deputati",                         # editoriale: nome pagina
     "bdap_entrate_stato": "entrate-stato",                  # editoriale: nome tema
     "inps_pensioni_trimestrale": "pensioni-inps",           # editoriale: nome tema
     "ade_cinque_per_mille": "cinque-per-mille",             # editoriale: nome tema
