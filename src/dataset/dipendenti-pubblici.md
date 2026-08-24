@@ -16,6 +16,7 @@ data_driven: true
 Dati BDAP/RGS sul pubblico impiego per **comparto, genere e orario di lavoro**, dal 2010 al 2024. Ogni numero è calcolato dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
 ```js
+import { lineChart, initChartUtils } from "../import/chart-utils.js";
 import { num, pct, numFix, tableFormat } from "../import/format-utils.js";
 ```
 
@@ -78,6 +79,7 @@ Per natura, il pubblico impiego si divide in comparti di contrattazione. Il quad
 
 ```js
 const plot = await import("npm:@observablehq/plot");
+initChartUtils(plot);
 display(plot.plot({
   title: `Dipendenti pubblici per comparto — ${last}`,
   width: 800, height: 360, marginLeft: 150,

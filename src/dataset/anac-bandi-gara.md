@@ -16,6 +16,7 @@ data_driven: true
 Bandi di gara registrati dall'ANAC attraverso il sistema CIG (Codice Identificativo Gara), 2016-2025. I dati mostrano quanti bandi vengono pubblicati, a quanto ammontano, come si distribuiscono per procedura e categoria, e dove finisce la spesa. I numeri sono calcolati dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
 ```js
+import { lineChart, initChartUtils } from "../import/chart-utils.js";
 import { num, numFix, pct, euroCompact, tableFormat } from "../import/format-utils.js";
 ```
 
@@ -63,20 +64,11 @@ Dal ${first} al ${last} il numero di bandi pubblicati è cresciuto costantemente
 
 ```js
 const plot = await import("npm:@observablehq/plot");
+initChartUtils(plot);
 ```
 
 ```js
-display(plot.plot({
-  title: `Bandi di gara ANAC — lotti per anno (${first}–${last})`,
-  width: 800, height: 350,
-  x: {tickFormat: String, label: null},
-  y: {grid: true, label: "Lotti"},
-  marks: [
-    plot.lineY(trendN, {x: "anno", y: "lotti", stroke: "#3182bd", strokeWidth: 2, tip: true}),
-    plot.dot(trendN, {x: "anno", y: "lotti", fill: "#3182bd"}),
-    plot.ruleY([0])
-  ]
-}))
+display(lineChart(trendN, { x: "anno", y: "lotti", color: "#3182bd", title: `Bandi di gara ANAC — lotti per anno (${first}–${last})` }))
 ```
 
 La discontinuità dal 2023 riflette l'effetto del nuovo Codice Appalti (D.Lgs. 36/2023), che ha alzato le soglie per l'affidamento diretto, moltiplicando il numero di bandi mentre l'importo medio si dimezza.

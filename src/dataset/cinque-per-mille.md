@@ -16,6 +16,7 @@ data_driven: true
 Ogni anno i contribuenti italiani destinano il 5x1000 della propria IRPEF a enti del Terzo Settore, ricerca scientifica e sanitaria, comuni, associazioni sportive, beni culturali e aree protette. Questa pagina mostra come si distribuiscono i fondi per territorio, categoria e singolo ente. I numeri sono calcolati dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
 ```js
+import { hBar, lineChart, initChartUtils } from "../import/chart-utils.js";
 import { num, euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js";
 import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 ```
@@ -74,6 +75,7 @@ La distribuzione territoriale del 5x1000 è fortemente polarizzata. La mappa mos
 
 ```js
 const plot = await import("npm:@observablehq/plot");
+initChartUtils(plot);
 display(plot.plot({
   title: `Importi 5x1000 per regione — ${anno}`,
   projection: {type: "mercator", domain: regioniGeo},
@@ -122,16 +124,7 @@ const topBar = top10.map((r, i) => ({ rango: i + 1, ente: r.denominazione, regio
 ```
 
 ```js
-display(plot.plot({
-  title: `Top 10 enti per importo erogabile — ${anno}`,
-  width: 800, height: 340, marginLeft: 40,
-  x: {grid: true, tickFormat: euroCompact},
-  y: {label: null, tickSize: 0},
-  marks: [
-    plot.barX(topBar, {x: "importo", y: "ente", fill: "#d95f0e", sort: {y: "-x"}, tip: true}),
-    plot.ruleX([0])
-  ]
-}))
+display(hBar(topBar, { y: "ente", x: "importo", color: "#d95f0e", label: "euroCompact", title: `Top 10 enti per importo erogabile — ${anno}` }))
 ```
 
 Le prime ${num(top10.length)} fondazioni da sole valgono più dell'intero 5x1000 di molte regioni. È il segnale più chiaro di quanto il fondo sia, di fatto, un canale di finanziamento per un numero ristretto di soggetti nazionali.
