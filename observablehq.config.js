@@ -188,20 +188,20 @@ export default {
     "collapsible": true,
     "pages": [
       {
-        "name": "Camera dei Deputati — Legislature",
+        "name": "Camera dei Deputati — Legislature e composizione",
         "path": "/dataset/camera-deputati"
       },
       {
-        "name": "Attività in Aula",
+        "name": "Attività in Aula — Camera dei Deputati",
         "path": "/dataset/attivita-aula"
-      },
-      {
-        "name": "Voti dei Deputati",
-        "path": "/dataset/voti-deputati"
       },
       {
         "name": "Votazioni Camera dei Deputati",
         "path": "/dataset/votazioni-camera"
+      },
+      {
+        "name": "Voti dei Deputati — accountability parlamentare",
+        "path": "/dataset/voti-deputati"
       },
       {
         "name": "Elezioni Comunali",
