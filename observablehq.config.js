@@ -188,6 +188,18 @@ export default {
     "collapsible": true,
     "pages": [
       {
+        "name": "Camera dei Deputati — Legislature",
+        "path": "/dataset/camera-deputati"
+      },
+      {
+        "name": "Attività in Aula",
+        "path": "/dataset/attivita-aula"
+      },
+      {
+        "name": "Voti dei Deputati",
+        "path": "/dataset/voti-deputati"
+      },
+      {
         "name": "Votazioni Camera dei Deputati",
         "path": "/dataset/votazioni-camera"
       },
