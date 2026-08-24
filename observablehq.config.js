@@ -76,6 +76,22 @@ export default {
       {
         "name": "OpenCoesione — Progetti delle politiche di coesione",
         "path": "/dataset/opencoesione-progetti"
+      },
+      {
+        "name": "PNRR Gare — Italia Domani",
+        "path": "/dataset/pnrr-gare"
+      },
+      {
+        "name": "PNRR Pagamenti — Italia Domani",
+        "path": "/dataset/pnrr-pagamenti"
+      },
+      {
+        "name": "PNRR Progetti — Italia Domani",
+        "path": "/dataset/pnrr-progetti"
+      },
+      {
+        "name": "Bandi di gara pubblici ANAC",
+        "path": "/dataset/anac-bandi-gara"
       }
     ]
   },
@@ -168,12 +184,44 @@ export default {
     ]
   },
   {
-    "name": "Altri dataset",
+    "name": "Politica",
     "collapsible": true,
     "pages": [
       {
+        "name": "Camera dei Deputati — Legislature e composizione",
+        "path": "/dataset/camera-deputati"
+      },
+      {
+        "name": "Attività in Aula — Camera dei Deputati",
+        "path": "/dataset/attivita-aula"
+      },
+      {
         "name": "Votazioni Camera dei Deputati",
         "path": "/dataset/votazioni-camera"
+      },
+      {
+        "name": "Voti dei Deputati — accountability parlamentare",
+        "path": "/dataset/voti-deputati"
+      },
+      {
+        "name": "Elezioni Comunali",
+        "path": "/dataset/elezioni-comunali"
+      },
+      {
+        "name": "Elezioni Europee",
+        "path": "/dataset/elezioni-europee"
+      },
+      {
+        "name": "Elezioni Politiche Italiane",
+        "path": "/dataset/elezioni-politiche"
+      },
+      {
+        "name": "Elezioni Referendum",
+        "path": "/dataset/elezioni-referendum"
+      },
+      {
+        "name": "Elezioni Regionali",
+        "path": "/dataset/elezioni-regionali"
       }
     ]
   }
