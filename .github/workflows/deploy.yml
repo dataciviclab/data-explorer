@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: src/.observablehq/cache
-          key: observable-cache-${{ hashFiles('src/data/*.json.py') }}
+          key: observable-cache-${{ hashFiles('src/data/*.json.py', 'src/data/_registry.py') }}
           restore-keys: |
             observable-cache-
 
