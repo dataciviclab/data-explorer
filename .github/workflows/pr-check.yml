@@ -40,7 +40,7 @@ jobs:
       - run: npm ci --legacy-peer-deps
 
       - name: Restore Observable Framework cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: src/.observablehq/cache
           key: observable-cache-${{ hashFiles('src/data/*.json.py') }}
