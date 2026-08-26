@@ -90,6 +90,10 @@ export default {
         "path": "/dataset/pnrr-progetti"
       },
       {
+        "name": "Aiuti di Stato — Registro Nazionale Aiuti (RNA)",
+        "path": "/dataset/rna-aiuti-stato"
+      },
+      {
         "name": "Bandi di gara pubblici ANAC",
         "path": "/dataset/anac-bandi-gara"
       }
@@ -184,12 +188,24 @@ export default {
     ]
   },
   {
-    "name": "Altri dataset",
+    "name": "Politica",
     "collapsible": true,
     "pages": [
       {
+        "name": "Camera dei Deputati — Legislature e composizione",
+        "path": "/dataset/camera-deputati"
+      },
+      {
+        "name": "Attività in Aula — Camera dei Deputati",
+        "path": "/dataset/attivita-aula"
+      },
+      {
         "name": "Votazioni Camera dei Deputati",
         "path": "/dataset/votazioni-camera"
+      },
+      {
+        "name": "Voti dei Deputati — accountability parlamentare",
+        "path": "/dataset/voti-deputati"
       },
       {
         "name": "Elezioni Comunali",
@@ -210,10 +226,6 @@ export default {
       {
         "name": "Elezioni Regionali",
         "path": "/dataset/elezioni-regionali"
-      },
-      {
-        "name": "Aiuti di Stato — Registro Nazionale Aiuti (RNA)",
-        "path": "/dataset/rna-aiuti-stato"
       }
     ]
   },

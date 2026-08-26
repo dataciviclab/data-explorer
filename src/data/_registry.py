@@ -37,6 +37,8 @@ REGISTRY_REPOS = [
     "dcl-bologna",
     "open-siope",
     "rna-aiuti-stato",
+    "debito-pubblico-intelligence",
+    "senato-akn",
 ]
 
 REGISTRY_URL_TEMPLATE = (
@@ -121,6 +123,7 @@ def fuse_registries(repos: list[str] | None = None) -> dict:
     repos = repos or REGISTRY_REPOS
     seen: set[str] = set()
     datasets: list[dict] = []
+    signals_by_id: dict[str, dict] = {}
     updated_at: str | None = None
 
     for repo in repos:
@@ -135,6 +138,10 @@ def fuse_registries(repos: list[str] | None = None) -> dict:
                 continue
             seen.add(slug)
             datasets.append({**ds, "registry_source": repo})
+        for sig in payload.get("signals", []):
+            sid = sig["id"]
+            if sid not in signals_by_id and "run" in sig:
+                signals_by_id[sid] = sig["run"]
         repo_updated = payload.get("updated_at", "")
         if repo_updated and (updated_at is None or repo_updated > updated_at):
             updated_at = repo_updated
@@ -144,6 +151,7 @@ def fuse_registries(repos: list[str] | None = None) -> dict:
         "updated_at": updated_at or "",
         "repos": repos,
         "datasets": datasets,
+        "signals_by_id": signals_by_id,
     }
 
 
@@ -190,11 +198,15 @@ def build_catalog(registry: dict | None = None) -> dict:
     if registry is None:
         registry = load_registry()
 
+    signals = registry.get("signals_by_id", {})
+
     datasets = []
     for ds in registry.get("datasets", []):
         period = ds.get("period") or {}
         slug = ds["slug"]
         url_slug = resolve_url_slug(slug)
+        run = signals.get(slug, {})
+        clean_rows = run.get("output_rows", {}).get("clean")
         datasets.append({
             "slug": slug,
             "url_slug": url_slug,
@@ -208,6 +220,7 @@ def build_catalog(registry: dict | None = None) -> dict:
             "category": ds.get("category", ""),
             "tags": ds.get("tags", []),
             "registry_source": ds.get("registry_source", ""),
+            "clean_rows": clean_rows,
             "location": ds.get("location", {}),
             "columns": [
                 {
@@ -225,6 +238,7 @@ def build_catalog(registry: dict | None = None) -> dict:
         "total": len(datasets),
         "published": sum(1 for d in datasets if d["stage"] == "published"),
         "incubating": sum(1 for d in datasets if d["stage"] == "incubating"),
+        "total_clean_rows": sum(d["clean_rows"] or 0 for d in datasets),
         "datasets": datasets,
     }
 
@@ -271,6 +285,7 @@ def build_themes(registry: dict | None = None, page_exists=None) -> list[dict]:
         themes.append({
             "slug": theme["slug"],
             "name": theme["name"],
+            "icon": theme.get("icon", ""),
             "description": theme.get("description", ""),
             "datasets": datasets,
         })
