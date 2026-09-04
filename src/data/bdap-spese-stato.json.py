@@ -20,16 +20,16 @@ url = refs[0]
 
 with safe_connect() as con:
     rows = con.sql(f"""
-        SELECT esercizio_finanziario, amministrazione, missione,
+        SELECT esercizio_finanziario, macroaggregato, missione,
                SUM(previsioni_definitive_cp) AS spesa_cp,
                SUM(previsioni_definitive_cs) AS spesa_cs
         FROM read_parquet('{url}')
-        GROUP BY esercizio_finanziario, amministrazione, missione
-        ORDER BY esercizio_finanziario, amministrazione
+        GROUP BY esercizio_finanziario, macroaggregato, missione
+        ORDER BY esercizio_finanziario, macroaggregato
     """).fetchall()
 
 data = [
-    {"anno": int(r[0]), "amministrazione": r[1], "missione": r[2],
+    {"anno": int(r[0]), "macroaggregato": r[1], "missione": r[2],
      "spesa_cp": float(r[3]) if r[3] else 0,
      "spesa_cs": float(r[4]) if r[4] else 0}
     for r in rows
