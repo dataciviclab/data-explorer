@@ -1,8 +1,7 @@
-"""Test per _registry.py — registry multi-repo (fusion) → catalogo e temi.
+"""Test per _registry.py — catalogo e temi explorer.
 
 Contratto:
-  - fuse_registries(): merge dei registry repo, dedup per slug con priorità
-    = ordine lista, entry arricchite con registry_source
+  - load_registry(): carica topic_index.json da ACB, flat list + signals_by_id
   - resolve_url_slug(): slug DI (underscore) → URL slug (hyphen), con override editoriali
   - build_themes(): temi dinamici da category registry; entrano i dataset
     con pagina explorer e categoria mappata (lo stage registry è irrilevante)
@@ -16,7 +15,6 @@ from src.data._registry import (
     THEMES_CONFIG_PATH,
     build_catalog,
     build_themes,
-    fuse_registries,
     load_themes_config,
     resolve_url_slug,
     theme_for_category,
@@ -34,55 +32,50 @@ def _registry_entry(slug, category, stage="published", name=None):
     }
 
 
-class TestFuseRegistries:
-    def test_merges_and_tags_registry_source(self):
-        reg_a = {"updated_at": "2026-08-01", "datasets": [
-            _registry_entry("slug_a", "ambiente"),
-        ]}
-        reg_b = {"updated_at": "2026-08-10", "datasets": [
-            _registry_entry("slug_b", "sanita"),
-        ]}
-        with patch("src.data._registry.fetch_json", side_effect=[reg_a, reg_b]):
-            fused = fuse_registries(["repo-a", "repo-b"])
+class TestLoadRegistry:
+    def test_loads_from_acb_and_flattens(self):
+        """load_registry() fetches topic_index.json from ACB and flattens datasets."""
+        import src.data._registry as mod
+        # Reset cache
+        mod._REGISTRY_CACHE = None
 
-        assert len(fused["datasets"]) == 2
-        assert {d["slug"] for d in fused["datasets"]} == {"slug_a", "slug_b"}
-        assert fused["datasets"][0]["registry_source"] == "repo-a"
-        assert fused["datasets"][1]["registry_source"] == "repo-b"
+        fake_topic_index = {
+            "generated_at": "2026-09-04T10:00:00",
+            "datasets": {
+                "source-a": [
+                    {"slug": "ds_a", "name": "DS A", "stage": "published",
+                     "registry_source": "repo-a", "category": "ambiente",
+                     "location": {"type": "gcs", "path": "gs://b/ds_a"}},
+                ],
+                "source-b": [
+                    {"slug": "ds_b", "name": "DS B", "stage": "incubating",
+                     "registry_source": "repo-b", "category": "sanita"},
+                ],
+            },
+        }
+        with patch.object(mod, "fetch_json", return_value=fake_topic_index):
+            reg = mod.load_registry()
 
-    def test_dedup_first_repo_wins(self):
-        reg_a = {"updated_at": "2026-08-01", "datasets": [
-            _registry_entry("dupl", "ambiente", stage="published"),
-        ]}
-        reg_b = {"updated_at": "2026-08-05", "datasets": [
-            _registry_entry("dupl", "ambiente", stage="incubating"),
-            _registry_entry("unico_b", "sanita"),
-        ]}
+        assert len(reg["datasets"]) == 2
+        slugs = {d["slug"] for d in reg["datasets"]}
+        assert slugs == {"ds_a", "ds_b"}
+        # registry_source preserved
+        by_slug = {d["slug"]: d for d in reg["datasets"]}
+        assert by_slug["ds_a"]["registry_source"] == "repo-a"
+        assert by_slug["ds_b"]["registry_source"] == "repo-b"
+        # clean_rows not in signals when absent
+        assert "ds_a" not in reg["signals_by_id"]
 
-        with patch("src.data._registry.fetch_json", side_effect=[reg_a, reg_b]):
-            fused = fuse_registries(["repo-a", "repo-b"])
+    def test_cache_returns_same_object(self):
+        """load_registry() caches per process."""
+        import src.data._registry as mod
+        mod._REGISTRY_CACHE = None
 
-        assert len(fused["datasets"]) == 2
-        by_slug = {d["slug"]: d for d in fused["datasets"]}
-        assert by_slug["dupl"]["stage"] == "published"      # primo repo vince
-        assert by_slug["dupl"]["registry_source"] == "repo-a"
-        assert by_slug["unico_b"]["registry_source"] == "repo-b"
-
-    def test_updated_at_most_recent(self):
-        reg_a = {"updated_at": "2026-08-01", "datasets": []}
-        reg_b = {"updated_at": "2026-08-15", "datasets": []}
-        with patch("src.data._registry.fetch_json", side_effect=[reg_a, reg_b]):
-            fused = fuse_registries(["repo-a", "repo-b"])
-        assert fused["updated_at"] == "2026-08-15"
-
-    def test_skips_unreachable_repo(self):
-        reg_a = {"updated_at": "2026-08-01", "datasets": [
-            _registry_entry("slug_a", "ambiente"),
-        ]}
-        with patch("src.data._registry.fetch_json", side_effect=[reg_a, Exception("boom")]):
-            fused = fuse_registries(["repo-a", "repo-b"])
-        assert len(fused["datasets"]) == 1
-        assert fused["datasets"][0]["registry_source"] == "repo-a"
+        fake = {"generated_at": "t", "datasets": {"s": [{"slug": "x"}]}}
+        with patch.object(mod, "fetch_json", return_value=fake):
+            r1 = mod.load_registry()
+            r2 = mod.load_registry()
+        assert r1 is r2
 
 
 class TestResolveUrlSlug:
