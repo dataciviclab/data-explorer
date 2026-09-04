@@ -1,57 +1,41 @@
 #!/usr/bin/env python3
-"""Registry multi-repo (fusion) → catalogo e temi explorer.
+"""Registry fusion via ACB → catalogo e temi explorer.
 
 Helper condiviso dai data loader `catalog.json.py` e `themes.json.py`.
 
-Legge i registry fusion di TUTTI i repo del Lab (ogni repo committa
-`registry/registry.json`, fusion ADR), li fonde in un unico catalogo e
-risolve gli URL slug editoriali (URL_SLUG_OVERRIDES) e i temi dal campo
-`category` di ogni dataset usando la config editoriale `catalog/themes.json`
-(single source of truth).
+Consuma `topic_index.json` generato da agent-context-builder (ACB) come
+single source of truth per i dataset di TUTTI i repo del Lab. ACB fonde
+i registry.json di ogni repo, applica dedup e produce un indice aggregato.
 
-## Fusion e dedup
+Questo modulo aggiunge solo la logica editoriale-specifica di explorer:
+- URL_SLUG_OVERRIDES (slug URL pubblici che divergono dagli slug DI)
+- Temi da catalog/themes.json (config editoriale)
+- Risoluzione pagine esistenti in src/dataset/
 
-REGISTRY_REPOS è ordinato per priorità: in caso di slug duplicato tra repo
-(es. migrazioni dataset-incubator → open-politica), vince il repo che compare
-per primo. Ogni entry del catalogo porta `registry_source` (repo di provenienza).
+## Flusso dati
 
-Contratto registry (schema_version 1):
-  datasets[]: slug, name, description, source, source_id, period,
-              columns[] (name, type, role, semantic_type), location,
-              stage, tags, category, mart_refs, run
+ACB (context branch)
+  → topic_index.json (datasets{} raggruppati per source, con location, columns, registry_source)
+  → _registry.load_registry() (flat list + signals_by_id)
+  → build_catalog() / build_themes()
+  → catalog.json.py / themes.json.py (Observable Framework data loaders)
 """
 import json
 import os
 
 import requests
 
-# Repo con registry fusion (priorità decrescente in caso di slug duplicato).
-# dataset-incubator primo: è la fonte storica con stage published; gli altri
-# repo (dominio) entrano con i loro slug unici. Se un slug duplicato diventa
-# canonicale in un altro repo, sposta quel repo sopra in questa lista.
-REGISTRY_REPOS = [
-    "openbdap-saldi-storico-stato",
-    "dataset-incubator",
-    "open-politica",
-    "open-conto-annuale",
-    "eurostat",
-    "dcl-bologna",
-    "open-siope",
-    "rna-aiuti-stato",
-    "debito-pubblico-intelligence",
-    "senato-akn",
-]
-
-REGISTRY_URL_TEMPLATE = (
-    "https://raw.githubusercontent.com/dataciviclab/"
-    "{repo}/main/registry/registry.json"
-)
-
 # ROOT: repo root, calcolato da __file__ per non dipendere dal cwd
 # (questo file sta in src/data/, quindi 3 livelli sopra).
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 THEMES_CONFIG_PATH = os.path.join(ROOT, "catalog", "themes.json")
 PAGES_DIR = os.path.join(ROOT, "src", "dataset")
+
+# ACB topic_index.json — single source of truth per i registry fusion.
+ACB_TOPIC_INDEX_URL = (
+    "https://raw.githubusercontent.com/dataciviclab/"
+    "agent-context-builder/context/topic_index.json"
+)
 
 # URL_SLUG_OVERRIDES: mapping eccezioni per slug URL pubblici.
 #
@@ -83,7 +67,7 @@ URL_SLUG_OVERRIDES = {
     "popolazione_istat_comunale_2019_2025": "popolazione-istat",  # editoriale: slug pagina ereditato
 }
 
-# Cache di processo: i registry vengono caricati una volta per processo.
+# Cache di processo: il registry viene caricato una volta per processo.
 _REGISTRY_CACHE: dict | None = None
 
 
@@ -94,66 +78,43 @@ def fetch_json(url: str) -> dict:
     return r.json()
 
 
-def _registry_url(repo: str) -> str:
-    """URL raw del registry fusion di un repo."""
-    return REGISTRY_URL_TEMPLATE.format(repo=repo)
-
-
 def load_registry() -> dict:
-    """Carica e fonde i registry di tutti i repo (cache di processo).
+    """Carica topic_index.json da ACB e produce un flat registry (cache di processo).
 
-    Ritorna un dict con la stessa forma di un registry singolo (schema v1):
-      - datasets[]: dedup per slug, con priorità = ordine REGISTRY_REPOS,
-        ogni entry arricchita con `registry_source` (repo di provenienza)
-      - updated_at: il più recente tra i repo
-      - repos[]: lista dei repo letti
+    Ritorna un dict con la forma attesa da build_catalog() e build_themes():
+      - datasets[]: flat list con tutti i dataset, ognuno con
+        slug, name, description, stage, period, source, source_id,
+        category, tags, registry_source, location, columns, clean_rows
+      - signals_by_id: dict slug → run info (per clean_rows in build_catalog)
+      - updated_at: timestamp di generazione di topic_index.json
     """
     global _REGISTRY_CACHE
-    if _REGISTRY_CACHE is None:
-        _REGISTRY_CACHE = fuse_registries(REGISTRY_REPOS)
-    return _REGISTRY_CACHE
+    if _REGISTRY_CACHE is not None:
+        return _REGISTRY_CACHE
 
+    data = fetch_json(ACB_TOPIC_INDEX_URL)
 
-def fuse_registries(repos: list[str] | None = None) -> dict:
-    """Fonde i registry dei repo: dedup per slug, priorità = ordine lista.
+    # Flatten datasets: topic_index li raggruppa per source, noi serviamo flat
+    flat_datasets: list[dict] = []
+    for source, ds_list in data.get("datasets", {}).items():
+        for ds in ds_list:
+            flat_datasets.append(ds)
 
-    Il primo repo che contiene uno slug vince; alle entry vinte viene
-    aggiunto `registry_source` (nome repo). I repo senza registry.json
-    (non pubblicato o unreachable) vengono saltati senza errore.
-    """
-    repos = repos or REGISTRY_REPOS
-    seen: set[str] = set()
-    datasets: list[dict] = []
+    # Build signals_by_id per clean_rows (run.output_rows.clean)
     signals_by_id: dict[str, dict] = {}
-    updated_at: str | None = None
+    for source, ds_list in data.get("datasets", {}).items():
+        for ds in ds_list:
+            slug = ds.get("slug", "")
+            clean_rows = ds.get("clean_rows")
+            if clean_rows is not None:
+                signals_by_id[slug] = {"output_rows": {"clean": clean_rows}}
 
-    for repo in repos:
-        try:
-            payload = fetch_json(_registry_url(repo))
-        except Exception:
-            # Repo senza registry o unreachable: lo saltiamo, il resto funziona.
-            continue
-        for ds in payload.get("datasets", []):
-            slug = ds["slug"]
-            if slug in seen:
-                continue
-            seen.add(slug)
-            datasets.append({**ds, "registry_source": repo})
-        for sig in payload.get("signals", []):
-            sid = sig["id"]
-            if sid not in signals_by_id and "run" in sig:
-                signals_by_id[sid] = sig["run"]
-        repo_updated = payload.get("updated_at", "")
-        if repo_updated and (updated_at is None or repo_updated > updated_at):
-            updated_at = repo_updated
-
-    return {
-        "schema_version": 1,
-        "updated_at": updated_at or "",
-        "repos": repos,
-        "datasets": datasets,
+    _REGISTRY_CACHE = {
+        "datasets": flat_datasets,
         "signals_by_id": signals_by_id,
+        "updated_at": data.get("generated_at", ""),
     }
+    return _REGISTRY_CACHE
 
 
 def resolve_url_slug(di_slug: str) -> str:
