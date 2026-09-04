@@ -1,9 +1,8 @@
 ---
 title: "Entrate vs Spese — Il Bilancio dello Stato"
-description: "Confronto aggregato tra entrate e spese dello Stato: saldo e rapporto di copertura per anno, 2008–2024"
+description: "Confronto aggregato tra entrate e spese dello Stato: saldo e rapporto di copertura per anno, 2008–2025"
 source: MEF — RGS · BDAP
-source_url: https://bdap.rgs.mef.gov.it/
-period: "2008–2024"
+period: "2008–2025"
 data_driven: true
 cross_view: true
 datasets:

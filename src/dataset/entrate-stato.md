@@ -1,9 +1,9 @@
 ---
 title: Entrate dello Stato
-description: "Le previsioni definitive di entrata dello Stato per titolo, 2008-2024 — come si finanzia il bilancio (BDAP RGS MEF)"
+description: "Le previsioni definitive di entrata dello Stato per titolo, 2008-2025 — come si finanzia il bilancio (BDAP RGS MEF)"
 source: MEF — RGS · BDAP
 source_url: https://bdap.rgs.mef.gov.it/
-period: "2008–2024"
+period: "2008–2025"
 last_modified: 2026-05-26
 dataset_slug: bdap_entrate_stato
 data_driven: true
@@ -191,5 +191,5 @@ Inputs.table(table, {
 
 - [RGS · BDAP — fonte originale](https://bdap.rgs.mef.gov.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_entrate_stato/2024/bdap_entrate_stato_2024_clean.parquet)
-- [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/bdap-entrate-stato)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bilancio-pubblico/bdap_entrate_stato/2025/bdap_entrate_stato_2025_clean.parquet)
+- [Pipeline](https://github.com/dataciviclab/openbdap-saldi-storico-stato/tree/main/datasets/bdap-entrate-stato)

@@ -30,6 +30,7 @@ import requests
 # repo (dominio) entrano con i loro slug unici. Se un slug duplicato diventa
 # canonicale in un altro repo, sposta quel repo sopra in questa lista.
 REGISTRY_REPOS = [
+    "openbdap-saldi-storico-stato",
     "dataset-incubator",
     "open-politica",
     "open-conto-annuale",

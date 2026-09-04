@@ -1,9 +1,9 @@
 ---
 title: "Previsione vs Consuntivo per Missione"
-description: "Quanto è stato previsto nel bilancio dello Stato vs quanto è stato effettivamente pagato, per missione di spesa — tasso di esecuzione 2014–2024"
+description: "Quanto è stato previsto nel bilancio dello Stato vs quanto è stato effettivamente pagato, per missione di spesa — tasso di esecuzione 2014–2025"
 source: MEF — RGS · BDAP
 source_url: https://bdap.rgs.mef.gov.it/
-period: "2014–2024"
+period: "2014–2025"
 data_driven: true
 cross_view: true
 datasets:
@@ -171,7 +171,7 @@ Inputs.table(table, {
 ## Limiti
 
 - **Tempistica**: il consuntivo dei pagamenti ha un ritardo di circa un anno rispetto alla previsione; i dati più recenti potrebbero non avere ancora il consuntivo completo.
-- **Copertura**: i pagamenti coprono il 2014–2025; la previsione parte dal 2008. L'overlap effettivo è 2014–2024.
+- **Copertura**: i pagamenti coprono il 2014–2025; la previsione parte dal 2008. L'overlap effettivo è 2014–2025.
 - **Classificazione**: la missione di spesa segue la classificazione funzionale del bilancio, soggetta a riclassificazioni tra esercizi.
 
 ## Risorse

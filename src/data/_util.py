@@ -32,6 +32,25 @@ GCS_BASE = f"https://storage.googleapis.com/{CLEAN_BUCKET}"
 # Cache processo: manifest caricato una volta per loader (ogni loader è
 # un processo Python separato, quindi non serve thread safety).
 _MANIFEST: dict | None = None
+_LOCATION_CACHE: dict[str, dict | None] = {}
+
+
+def get_location(slug: str) -> dict | None:
+    """Load location for a slug from the fused registry (cached per process)."""
+    if slug in _LOCATION_CACHE:
+        return _LOCATION_CACHE[slug]
+    try:
+        from _registry import load_registry
+        reg = load_registry()
+        for ds in reg.get("datasets", []):
+            if ds.get("slug") == slug:
+                loc = ds.get("location")
+                _LOCATION_CACHE[slug] = loc
+                return loc
+    except Exception:
+        pass
+    _LOCATION_CACHE[slug] = None
+    return None
 
 # Regex per il segmento anno in un path (es. "/2024/", "/2026/").
 _YEAR_SEGMENT = re.compile(r"/(\d{4})/")

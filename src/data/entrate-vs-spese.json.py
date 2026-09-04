@@ -4,27 +4,26 @@
 Legge la definizione SQL da cross-views/defs/ e la esegue con DuckDB
 su parquet GCS di bdap_entrate_stato + bdap_spese_stato.
 
-Nota: entrambi i dataset hanno un UNICO file multi-anno (2024 contiene 2008-2024).
+Nota: entrambi i dataset hanno un UNICO file multi-anno (2025 contiene 2008-2025).
 """
 import json
 import pathlib
 import sys
 
 sys.path.insert(0, "src/data")
-from _util import _parquet_refs
+from _util import _parquet_refs, get_location
 from lab_connectors.duckdb import safe_connect
 
-# Entrambi i dataset hanno un unico file multi-anno (il 2024 contiene tutti gli anni)
-ENTRATE_YEARS = [2024]
-SPESE_YEARS = [2024]
+ENTRATE_YEARS = [2025]
+SPESE_YEARS = [2025]
 
 # Carica definizione SQL
 sql_path = pathlib.Path(__file__).resolve().parents[2] / "cross-views" / "defs" / "entrate-vs-spese.sql"
 sql_template = sql_path.read_text()
 
 # Costruisci CTE con UNION ALL (un file per dataset)
-entrate_refs = _parquet_refs("bdap_entrate_stato", ENTRATE_YEARS)
-spese_refs = _parquet_refs("bdap_spese_stato", SPESE_YEARS)
+entrate_refs = _parquet_refs("bdap_entrate_stato", ENTRATE_YEARS, get_location("bdap_entrate_stato"))
+spese_refs = _parquet_refs("bdap_spese_stato", SPESE_YEARS, get_location("bdap_spese_stato"))
 
 cte_entrate = " UNION ALL ".join(f"SELECT * FROM read_parquet('{r}')" for r in entrate_refs)
 cte_spese = " UNION ALL ".join(f"SELECT * FROM read_parquet('{r}')" for r in spese_refs)
