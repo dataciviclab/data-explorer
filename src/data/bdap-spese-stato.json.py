@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """Data loader: BDAP Spese Stato — previsioni definitive per amministrazione e missione.
 
-Singolo file parquet multi-anno (2008-2024)."""
+Singolo file parquet multi-anno (2008-2025)."""
 import sys; sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs import object_exists
-from lab_connectors.gcs.paths import https_url, CLEAN_BUCKET
 import json
 
 slug = "bdap_spese_stato"
-year = 2024
+year = 2025
+loc = get_location(slug)
 
-if not object_exists(CLEAN_BUCKET, f"{slug}/{year}/{slug}_{year}_clean.parquet"):
+if not _parquet_exists(slug, year, loc):
     json.dump([], sys.stdout)
     sys.exit(0)
 
-url = https_url("clean", "clean_parquet", slug=slug, year=year)
+refs = _parquet_refs(slug, [year], loc)
+url = refs[0]
 
 with safe_connect() as con:
     rows = con.sql(f"""
