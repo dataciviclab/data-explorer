@@ -22,6 +22,7 @@ ACB (context branch)
 """
 import json
 import os
+import time
 
 import requests
 
@@ -30,6 +31,11 @@ import requests
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 THEMES_CONFIG_PATH = os.path.join(ROOT, "catalog", "themes.json")
 PAGES_DIR = os.path.join(ROOT, "src", "dataset")
+
+# Local cache for topic_index.json — avoids N HTTP requests (one per loader).
+_CACHE_DIR = os.path.join(ROOT, ".observable", "cache")
+_CACHE_PATH = os.path.join(_CACHE_DIR, "topic_index.json")
+_CACHE_TTL = 3600  # 1 hour
 
 # ACB topic_index.json — single source of truth per i registry fusion.
 ACB_TOPIC_INDEX_URL = (
@@ -72,10 +78,31 @@ _REGISTRY_CACHE: dict | None = None
 
 
 def fetch_json(url: str) -> dict:
-    """Fetch JSON remoto via requests."""
+    """Fetch JSON with local file cache to avoid N HTTP requests per build."""
+    # Try local cache first
+    if os.path.exists(_CACHE_PATH):
+        try:
+            age = time.time() - os.path.getmtime(_CACHE_PATH)
+            if age < _CACHE_TTL:
+                with open(_CACHE_PATH, encoding="utf-8") as f:
+                    return json.load(f)
+        except Exception:
+            pass
+
+    # Fetch from remote
     r = requests.get(url, timeout=20)
     r.raise_for_status()
-    return r.json()
+    data = r.json()
+
+    # Write to cache (best-effort)
+    try:
+        os.makedirs(_CACHE_DIR, exist_ok=True)
+        with open(_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+    except Exception:
+        pass
+
+    return data
 
 
 def load_registry() -> dict:

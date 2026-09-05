@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: strutture e attività ASL — medici, pediatri, residenti, ricette."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="strutture_asl",
@@ -14,4 +14,5 @@ load_dataset(
         "euro_importo_ricette",
         "num_ricette_specialita_medicinali",
     ],
+    location=get_location("strutture_asl"),
 )

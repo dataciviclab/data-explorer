@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: ISTAT IPAB Aree — indice prezzi per area e trimestre."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="istat_ipab_aree",
@@ -9,4 +9,5 @@ load_dataset(
     group_cols=["area", "trimestre"],
     metric_cols=["indice_prezzi"],
     where="tipo_abitazione = 'EXST_DW'",
+    location=get_location("istat_ipab_aree"),
 )

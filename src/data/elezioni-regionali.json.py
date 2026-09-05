@@ -4,24 +4,21 @@
 Parquet multi-anno. Aggrega affluenza, presidenti eletti e top liste.
 """
 import sys; sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs import object_exists
-from lab_connectors.gcs.paths import https_url, CLEAN_BUCKET
 import json
 
 slug = "elezioni_regionali"
 years = [2018, 2020, 2024]
 
-valid_years = [y for y in years if object_exists(
-    CLEAN_BUCKET, f"{slug}/{y}/{slug}_{y}_clean.parquet")]
+location = get_location(slug)
+valid_years = [y for y in years if _parquet_exists(slug, y, location)]
 if not valid_years:
     json.dump({"error": "no data"}, sys.stdout)
     sys.exit(0)
 
 parquet_refs = " UNION ALL ".join(
-    f"SELECT * FROM read_parquet('{https_url('clean', 'clean_parquet', slug=slug, year=y)}')"
-    for y in valid_years
-)
+    f"SELECT * FROM read_parquet(\'{url}\')" for url in _parquet_refs(slug, valid_years, location))
 
 with safe_connect() as con:
     # 1. Affluenza per regione (ultima elezione disponibile per ogni regione)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: strutture di ricovero per ASL — personale, posti letto, ricoveri."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="strutture_ricovero_asl",
@@ -18,4 +18,5 @@ load_dataset(
         "infermieri",
         "ricoveri",
     ],
+    location=get_location("strutture_ricovero_asl"),
 )

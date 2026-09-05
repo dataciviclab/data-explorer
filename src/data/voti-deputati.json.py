@@ -8,36 +8,36 @@ Legge camera_voti (7.7M righe) e produce JSON con:
 - top_dissidenti: deputati più spesso contro il proprio gruppo
 """
 import sys; sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs, _load_manifest
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs.paths import https_url, CLEAN_BUCKET
-from _util import _load_manifest
+from lab_connectors.gcs.paths import CLEAN_BUCKET
 import json
 
 anni = [2022, 2023, 2024, 2025, 2026]
 
-def _find_parquet(slug, year):
-    """Cerca il parquet nel manifest: prima in root, poi sotto open-politica/."""
+def _find_mart(slug, year, mart_name):
+    """Cerca il mart nel manifest (MART_BUCKET, non CLEAN_BUCKET)."""
     manifest = _load_manifest()
-    root_key = f"{slug}/{year}/{slug}_{year}_clean.parquet"
-    op_key = f"open-politica/{slug}/{year}/{slug}_{year}_clean.parquet"
+    loc = get_location(slug)
+    if loc and loc.get("path", "").startswith("gs://"):
+        # Derive mart path from location prefix
+        path = loc["path"]
+        # Clean path: gs://bucket/prefix/slug/year/file → prefix/slug/year/file
+        key = path[len("gs://"):].partition("/")[2]
+        prefix = key.rpartition("/")[0].rpartition("/")[0]  # up to slug level
+        mart_key = f"{prefix}/{year}/{mart_name}.parquet"
+    else:
+        mart_key = f"{slug}/{year}/{mart_name}.parquet"
     for f in manifest.get("files", []):
-        if f["bucket"] == CLEAN_BUCKET and f["path"] in (root_key, op_key):
+        if f["bucket"] == CLEAN_BUCKET and f["path"] == mart_key:
             return f"https://storage.googleapis.com/{CLEAN_BUCKET}/{f['path']}"
     return None
 
-def _find_mart(slug, year, mart_name):
-    """Cerca il mart nel manifest."""
-    manifest = _load_manifest()
-    for prefix in ["", "open-politica/"]:
-        key = f"{prefix}{slug}/{year}/{mart_name}.parquet"
-        for f in manifest.get("files", []):
-            if f["bucket"] == CLEAN_BUCKET and f["path"] == key:
-                return f"https://storage.googleapis.com/{CLEAN_BUCKET}/{f['path']}"
-    return None
-
 # Trova parquet
-voti_url = _find_parquet("camera_voti", 2026)
-dep_url = _find_parquet("camera_deputati_legislature", 2026)
+voti_loc = get_location("camera_voti")
+dep_loc = get_location("camera_deputati_legislature")
+voti_url = _parquet_refs("camera_voti", [2026], voti_loc)[0] if _parquet_exists("camera_voti", 2026, voti_loc) else None
+dep_url = _parquet_refs("camera_deputati_legislature", [2026], dep_loc)[0] if _parquet_exists("camera_deputati_legislature", 2026, dep_loc) else None
 mart_url = _find_mart("camera_voti", 2026, "mart_sintesi")
 
 if not voti_url:

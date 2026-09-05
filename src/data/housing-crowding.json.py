@@ -2,11 +2,12 @@
 """Data loader: ISTAT Housing Crowding — densità abitativa per anno e titolo godimento."""
 import json, sys
 sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs.paths import https_url
 
 slug = "istat_housing_crowding"
-url = https_url("clean", "clean_parquet", slug=slug, year=2024)
+location = get_location(slug)
+url = _parquet_refs(slug, [2024], location)[0]
 
 with safe_connect() as con:
     rows = con.sql(f"""

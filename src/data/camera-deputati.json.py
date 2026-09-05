@@ -4,18 +4,19 @@
 Combina 3 dataset open-politica in un JSON unico per la pagina Camera.
 """
 import sys; sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs import object_exists
-from lab_connectors.gcs.paths import https_url, CLEAN_BUCKET
 import json
 
 def url(slug, year=2026):
-    return https_url("clean", "clean_parquet", slug=slug, year=year)
+    loc = get_location(slug)
+    return _parquet_refs(slug, [year], loc)[0]
 
 # Verifica parquet
 slugs = {"gruppi": ("camera_gruppi", 2026), "incarichi": ("camera_incarichi", 2026), "deputati": ("camera_deputati_legislature", 2026)}
 for name, (s, y) in slugs.items():
-    if not object_exists(CLEAN_BUCKET, f"{s}/{y}/{s}_{y}_clean.parquet"):
+    loc = get_location(s)
+    if not _parquet_exists(s, y, loc):
         json.dump({"error": f"parquet {name} not found"}, sys.stdout)
         sys.exit(0)
 
