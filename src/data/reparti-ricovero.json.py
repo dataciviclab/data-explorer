@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: reparti di ricovero — posti letto per disciplina e regione."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="reparti_ricovero",
@@ -15,4 +15,5 @@ load_dataset(
         "tasso_utilizzo",
         "degenza_media_ordinaria",
     ],
+    location=get_location("reparti_ricovero"),
 )

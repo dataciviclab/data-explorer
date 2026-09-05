@@ -5,19 +5,19 @@ Singolo file parquet (2022) con tutti i dati storici. Aggrega affluenza,
 top liste e tendenze per camera/senato.
 """
 import sys; sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs import object_exists
-from lab_connectors.gcs.paths import https_url, CLEAN_BUCKET
 import json
 
 slug = "elezioni_politiche"
 year = 2022
 
-if not object_exists(CLEAN_BUCKET, f"{slug}/{year}/{slug}_{year}_clean.parquet"):
+location = get_location(slug)
+if not _parquet_exists(slug, year, location):
     json.dump({"error": "parquet not found"}, sys.stdout)
     sys.exit(0)
 
-url = https_url("clean", "clean_parquet", slug=slug, year=year)
+url = _parquet_refs(slug, [year], location)[0]
 
 with safe_connect() as con:
     # 1. Affluenza per anno e camera/senato

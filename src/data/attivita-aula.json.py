@@ -7,33 +7,22 @@ Legge camera_interventi + camera_relatori (multi-anno) e produce JSON con:
 - top_relatori: deputati che relazionano di più
 """
 import sys; sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs.paths import CLEAN_BUCKET
-from _util import _load_manifest
 import json
 
 anni = [2022, 2023, 2024, 2025, 2026]
 
-def _find_parquet(slug, year):
-    manifest = _load_manifest()
-    root_key = f"{slug}/{year}/{slug}_{year}_clean.parquet"
-    op_key = f"open-politica/{slug}/{year}/{slug}_{year}_clean.parquet"
-    for f in manifest.get("files", []):
-        if f["bucket"] == CLEAN_BUCKET and f["path"] in (root_key, op_key):
-            return f"https://storage.googleapis.com/{CLEAN_BUCKET}/{f['path']}"
-    return None
+def _refs_for(slug, years):
+    """Refs HTTPS per anni validi di un dataset."""
+    loc = get_location(slug)
+    valid = [y for y in years if _parquet_exists(slug, y, loc)]
+    return _parquet_refs(slug, valid, loc)
 
-def _find_many(slug, years):
-    refs = []
-    for y in years:
-        url = _find_parquet(slug, y)
-        if url:
-            refs.append((y, url))
-    return refs
-
-inter_refs = _find_many("camera_interventi", anni)
-rel_refs = _find_many("camera_relatori", anni)
-dep_url = _find_parquet("camera_deputati_legislature", 2026)
+inter_refs = _refs_for("camera_interventi", anni)
+rel_refs = _refs_for("camera_relatori", anni)
+dep_loc = get_location("camera_deputati_legislature")
+dep_url = _parquet_refs("camera_deputati_legislature", [2026], dep_loc)[0] if _parquet_exists("camera_deputati_legislature", 2026, dep_loc) else None
 
 with safe_connect() as con:
     con.sql("SET preserve_insertion_order = false")
@@ -41,7 +30,7 @@ with safe_connect() as con:
 
     # --- Interventi ---
     if inter_refs:
-        inter_union = " UNION ALL ".join(f"SELECT * FROM read_parquet('{r}')" for _, r in inter_refs)
+        inter_union = " UNION ALL ".join(f"SELECT * FROM read_parquet('{r}')" for r in inter_refs)
         trend_inter = con.sql(f"""
             SELECT EXTRACT(YEAR FROM data) AS anno,
                    COUNT(*) AS n_interventi,
@@ -55,7 +44,7 @@ with safe_connect() as con:
 
     # --- Relatori ---
     if rel_refs:
-        rel_union = " UNION ALL ".join(f"SELECT * FROM read_parquet('{r}')" for _, r in rel_refs)
+        rel_union = " UNION ALL ".join(f"SELECT * FROM read_parquet('{r}')" for r in rel_refs)
         trend_rel = con.sql(f"""
             SELECT EXTRACT(YEAR FROM data) AS anno,
                    COUNT(*) AS n_relat,

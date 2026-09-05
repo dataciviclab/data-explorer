@@ -4,19 +4,18 @@ import json
 import sys
 
 sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_refs
 
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs.paths import https_url
 
 
 SLUG = "fts_eu_grants"
 YEARS = [2020, 2021, 2022, 2023, 2024]
 
 
+location = get_location(SLUG)
 parquet_refs = " UNION ALL ".join(
-    f"SELECT * FROM read_parquet('{https_url('clean', 'clean_parquet', slug=SLUG, year=y)}')"
-    for y in YEARS
-)
+    f"SELECT * FROM read_parquet(\'{url}\')" for url in _parquet_refs(SLUG, YEARS, location))
 
 
 PROGRAM_CASE = """

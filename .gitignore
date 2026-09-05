@@ -9,6 +9,8 @@ catalog/datasets.json
 
 # Observable Framework
 .observablehq/
+.observable/cache/
+src/.observablehq/
 dist/observable/
 __pycache__/
 # Le pagine .md sono manuali/editoriali — NON ignorarle

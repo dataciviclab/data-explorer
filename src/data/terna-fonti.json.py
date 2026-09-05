@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: Terna capacità rinnovabile — potenza netta per fonte e regione."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="terna_capacita_rinnovabile",
@@ -9,4 +9,5 @@ load_dataset(
     group_cols=["anno", "fonti", "regione"],
     metric_cols=["potenza_mw"],
     where="tipo_capacita = 'Netta'",
+    location=get_location("terna_capacita_rinnovabile"),
 )

@@ -6,14 +6,15 @@ gerarchico: la pagina deve distinguere i livelli invece di sommarli insieme.
 """
 import json
 import sys
-
+sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs.paths import https_url
 
 
 SLUG = "silos_infrastrutture"
 YEAR = 2024
-URL = https_url("clean", "clean_parquet", slug=SLUG, year=YEAR)
+location = get_location(SLUG)
+URL = _parquet_refs(SLUG, [YEAR], location)[0]
 
 
 def rows(con, query: str) -> list[dict]:

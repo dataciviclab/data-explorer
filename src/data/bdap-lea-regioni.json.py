@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: BDAP LEA — totale spesa per regione."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="bdap_lea",
@@ -19,4 +19,5 @@ load_dataset(
         "altri_costi",
     ],
     where="codice_ente_ssn not in ('000', '999')",
+    location=get_location("bdap_lea"),
 )

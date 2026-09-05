@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: ISPRA rifiuti urbani — comuni sopra 100k abitanti."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="ispra_ru_base",
@@ -9,4 +9,5 @@ load_dataset(
     group_cols=["anno", "regione", "comune", "popolazione"],
     metric_cols=["totale_ru_tonnellate", "totale_rd_tonnellate"],
     where="popolazione >= 100000",
+    location=get_location("ispra_ru_base"),
 )

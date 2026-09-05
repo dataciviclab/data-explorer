@@ -11,25 +11,20 @@ Legge tutti gli anni disponibili (2016-2025) e produce un JSON con:
 """
 import sys, json
 sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs import object_exists
-from lab_connectors.gcs.paths import https_url
 
 SLUG = "anac_bandi_gara"
 YEARS = list(range(2016, 2026))
 
-valid = [
-    y for y in YEARS
-    if object_exists("dataciviclab-clean", f"{SLUG}/{y}/{SLUG}_{y}_clean.parquet")
-]
+location = get_location(SLUG)
+valid = [y for y in YEARS if _parquet_exists(SLUG, y, location)]
 if not valid:
     json.dump({}, sys.stdout)
     sys.exit(0)
 
 refs = " UNION ALL ".join(
-    f"SELECT * FROM read_parquet('{https_url('clean', 'clean_parquet', slug=SLUG, year=y)}')"
-    for y in valid
-)
+    f"SELECT * FROM read_parquet('{url}')" for url in _parquet_refs(SLUG, valid, location))
 
 with safe_connect() as con:
     trend = [

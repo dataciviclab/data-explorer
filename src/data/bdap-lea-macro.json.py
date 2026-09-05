@@ -9,23 +9,20 @@ Deriva la macro-area dal primo carattere del codice voce contabile:
 """
 import json, sys
 sys.path.insert(0, "src/data")
+from _util import get_location, _parquet_exists, _parquet_refs
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs import object_exists
-from lab_connectors.gcs.paths import https_url
 
 slug = "bdap_lea"
 years = list(range(2019, 2025))
 
-valid_years = [y for y in years if object_exists(
-    "dataciviclab-clean", f"{slug}/{y}/{slug}_{y}_clean.parquet")]
+location = get_location(slug)
+valid_years = [y for y in years if _parquet_exists(slug, y, location)]
 if not valid_years:
     json.dump([], sys.stdout)
     sys.exit(0)
 
 parquet_refs = " UNION ALL ".join(
-    f"SELECT * FROM read_parquet('{https_url('clean', 'clean_parquet', slug=slug, year=y)}')"
-    for y in valid_years
-)
+    f"SELECT * FROM read_parquet(\'{url}\')" for url in _parquet_refs(slug, valid_years, location))
 
 with safe_connect() as con:
     rows = con.sql(f"""

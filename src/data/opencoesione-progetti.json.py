@@ -3,11 +3,12 @@
 Aggregato per ciclo di programmazione, macroarea, tema sintetico e stato.
 """
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="opencoesione_progetti",
     years=[2026],  # unico snapshot multi-ciclo
     group_cols=["OC_DESCR_CICLO", "OC_MACROAREA", "OC_TEMA_SINTETICO", "OC_STATO_PROGETTO"],
     metric_cols=["FINANZ_TOTALE_PUBBLICO", "TOT_PAGAMENTI", "OC_COSTO_COESIONE"],
+    location=get_location("opencoesione_progetti"),
 )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: posti letto per stabilimento ospedaliero — serie 2020-2023."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="posti_letto_stabilimento",
@@ -16,4 +16,5 @@ load_dataset(
         "posti_letto_day_hospital",
         "posti_letto_day_surgery",
     ],
+    location=get_location("posti_letto_stabilimento"),
 )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data loader: MIT incidentalità stradale — mensile nazionale."""
 import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset
+from _util import load_dataset, get_location
 
 load_dataset(
     slug="mit_incidentalita_mensile",
@@ -9,4 +9,5 @@ load_dataset(
     group_cols=["anno", "mese", "mese_numero"],
     metric_cols=["incidenti", "morti", "feriti", "incidenti_mortali",
                  "indice_mortalita", "indice_gravita", "indice_lesivita"],
+    location=get_location("mit_incidentalita_mensile"),
 )
