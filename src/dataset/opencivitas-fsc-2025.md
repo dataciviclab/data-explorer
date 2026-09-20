@@ -1,11 +1,11 @@
 ---
 title: Fondo di Solidarietà Comunale
-description: FSC 2022-2025 — capacità fiscale, fondo perequativo e dotazione finale per comune — OpenCivitas
+description: FSC 2017-2025 — capacità fiscale, fondo perequativo e dotazione finale per comune — OpenCivitas
 source: OpenCivitas / Sogei
 source_url: https://www.opencivitas.it/
-period: "2022–2025"
-last_modified: 2026-05-28
-dataset_slug: opencivitas_fsc_2025_rso
+period: "2017–2025"
+last_modified: 2026-09-20
+dataset_slug: opencivitas_fsc_rso
 data_driven: true
 ---
 
@@ -73,7 +73,7 @@ const trendFsc = Array.from(
 
 Fondo di Solidarietà Comunale (FSC) per comune: capacità fiscale, fondo perequativo, dotazione finale e risorse storiche. I dati mostrano come si distribuiscono le risorse tra i comuni italiani e quali territori contribuiscono o ricevono dalla perequazione. Ogni numero di questa pagina è calcolato dal dato a build-time.
 
-**Fonte**: [OpenCivitas](https://www.opencivitas.it/) · **Periodo**: 2022–2025
+**Fonte**: [OpenCivitas](https://www.opencivitas.it/) · **Periodo**: 2017–2025
 
 <div class="grid grid-cols-3">
   <div class="card">
@@ -219,7 +219,7 @@ Inputs.table(perRegione, {
 
 ## Limiti
 
-- **Copertura**: il dataset copre il periodo 2022-2025. Anni precedenti non sono disponibili.
+- **Copertura**: il dataset copre il periodo 2017-2025.
 - **Comuni RSO**: i dati si riferiscono ai comuni delle Regioni a Statuto Ordinario. Non include comuni delle Regioni a Statuto Speciale.
 - **Perequativo**: il fondo perequativo con segno negativo indica un comune contribuente netto (la sua capacità fiscale supera il fabbisogno standard).
 
@@ -229,5 +229,5 @@ Inputs.table(perRegione, {
 
 - [OpenCivitas (fonte originale)](https://www.opencivitas.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/opencivitas_fsc_2025_rso/2025/opencivitas_fsc_2025_rso_2025_clean.parquet)
-- [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/opencivitas-fsc-rso)
+- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/opencivitas/opencivitas_fsc_rso/2025/opencivitas_fsc_rso_2025_clean.parquet)
+- [Pipeline](https://github.com/dataciviclab/opencivitas/tree/main/candidates/opencivitas-fsc-rso)

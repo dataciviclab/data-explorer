@@ -69,7 +69,7 @@ URL_SLUG_OVERRIDES = {
     "ade_cinque_per_mille": "cinque-per-mille",             # editoriale: nome tema
     "istat_housing_crowding": "housing-crowding",           # editoriale: slug pagina ereditato
     "mit_incidentalita_mensile": "mit-incidentalita",       # editoriale: slug pagina ereditato
-    "opencivitas_fsc_2025_rso": "opencivitas-fsc-2025",     # editoriale: slug pagina ereditato
+    "opencivitas_fsc_rso": "opencivitas-fsc-2025",           # editoriale: slug pagina ereditato
     "popolazione_istat_comunale_2019_2025": "popolazione-istat",  # editoriale: slug pagina ereditato
 }
 

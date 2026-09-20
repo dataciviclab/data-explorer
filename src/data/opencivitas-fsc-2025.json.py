@@ -4,11 +4,11 @@ import sys; sys.path.insert(0, "src/data")
 from _util import load_dataset, get_location
 
 load_dataset(
-    slug="opencivitas_fsc_2025_rso",
-    years=[2022, 2023, 2024, 2025],
+    slug="opencivitas_fsc_rso",
+    years=[2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
     group_cols=["anno", "regione", "comune", "provincia", "popolazione"],
     metric_cols=["capacita_fiscale", "fondo_perequativo", "dotazione_finale_fsc",
                  "imu_tasi_standard", "totale_risorse_storiche"],
     where="regione != 'ITALIA' AND provincia IS NOT NULL AND provincia != ''",
-    location=get_location("opencivitas_fsc_2025_rso"),
+    location=get_location("opencivitas_fsc_rso"),
 )
