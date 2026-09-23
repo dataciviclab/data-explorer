@@ -272,7 +272,7 @@ Plot.plot({
   width: 800,
   height: 320,
   x: {tickFormat: d => String(d), label: null},
-  y: {grid: true, label: "morti ogni 100 incidenti", domain: [0, null]},
+  y: {grid: true, label: "morti ogni 100 incidenti"},
   marks: [
     Plot.ruleY([indiceBase], {stroke: "var(--theme-foreground-muted)", strokeDasharray: "4,4"}),
     Plot.lineY(serie, {x: "anno", y: "indice", stroke: "#4e79a7", strokeWidth: 2, tip: true}),
@@ -298,7 +298,7 @@ Plot.plot({
   width: 800,
   height: 300,
   marginLeft: 60,
-  x: {label: null},
+  x: {label: null, domain: stagionale.map(d => d.mese)},
   y: {grid: true, label: "morti al mese (media)"},
   marks: [
     Plot.barY(stagionale, {
@@ -319,8 +319,8 @@ Plot.plot({
   width: 800,
   height: 300,
   marginLeft: 60,
-  x: {label: null},
-  y: {grid: true, label: "morti ogni 100 incidenti", domain: [0, null]},
+  x: {label: null, domain: stagionale.map(d => d.mese)},
+  y: {grid: true, label: "morti ogni 100 incidenti"},
   marks: [
     Plot.lineY(stagionale, {x: "mese", y: "indice", stroke: "#9ecae1", strokeWidth: 2}),
     Plot.dot(stagionale, {
