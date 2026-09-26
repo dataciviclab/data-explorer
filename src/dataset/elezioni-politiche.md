@@ -169,5 +169,4 @@ display(plot.plot({
 
 - [open-politica](https://github.com/dataciviclab/open-politica)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/elezioni_politiche/2022/elezioni_politiche_2022_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/open-politica/tree/main/datasets/elezioni-politiche)

@@ -164,6 +164,5 @@ Inputs.table(searchQuery, {
 
 - [MEF · RGS · BDAP (fonte originale)](https://www.rgs.mef.gov.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bdap_spese_stato/2025/bdap_spese_stato_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/bilancio-pubblico/tree/main/datasets/bdap-spese-stato)
 La spesa è passata da **${euroCompact(d2008.spesa)}** nel ${first} a **${euroCompact(totLast)}** nel ${last}, toccando il minimo della serie nel **${minimo.anno}** (${euroCompact(minimo.spesa)}). Il **2020** segna lo scatto pandemico: da lì il livello non è più sceso. La crescita, però, è trainata soprattutto da voci "obbligate" concentrate al centro: ${top.macroaggregato.toLowerCase()} vale ${pct(topShare)} e debito+relazioni+previdenza pesano ${pct(voceShare)}.

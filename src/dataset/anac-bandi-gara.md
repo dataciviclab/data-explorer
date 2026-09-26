@@ -144,5 +144,5 @@ Il Codice Appalti 2023 ha semplificato le procedure, ma ha prodotto un effetto c
 ## Risorse
 
 - [ANAC - dati aperti](https://dati.anticorruzione.it/)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/anac_bandi_gara/2024/anac_bandi_gara_2024_clean.parquet)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/anac-bandi-gara)

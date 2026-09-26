@@ -151,5 +151,4 @@ Inputs.table(tabDiss, {
 
 - [Camera dei Deputati — Dati aperti](https://dati.camera.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/camera_voti/2026/camera_voti_2026_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/open-politica/tree/main/datasets/camera-voti)

@@ -313,6 +313,5 @@ Inputs.table(topInterventi, {
 
 - [SILOS — Infrastrutture strategiche](https://silos.infrastrutturestrategiche.it/)
 - [Dump dati.camera.it](https://dati.camera.it/ocd/dump/silos/PISRapportoCSV2024.zip)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/silos_infrastrutture/2024/silos_infrastrutture_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/silos-infrastrutture)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)

@@ -217,5 +217,4 @@ Inputs.table(perRegioneAnno, {
 
 - [Ministero della Salute — Banca Dati Posti Letto](https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?lingua=italiano&id=5551&area=Lea&menu=vuoto)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/posti_letto_stabilimento/2023/posti_letto_stabilimento_2023_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/posti-letto-stabilimento)
