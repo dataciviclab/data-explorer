@@ -148,5 +148,4 @@ Inputs.table(perGestione, {
 
 - [INPS Open Data (fonte originale)](https://www.inps.it/open-data)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/inps_pensioni_trimestrale/2024/inps_pensioni_trimestrale_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/inps-pensioni)

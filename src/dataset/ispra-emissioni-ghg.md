@@ -186,5 +186,4 @@ Inputs.table(data.slice().sort((a, b) => b.anno - a.anno), {
 
 - [ISPRA — Indicatori Ambientali (fonte originale)](https://indicatoriambientali.isprambiente.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/ispra_emissioni_ghg/2023/ispra_emissioni_ghg_2023_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/ispra-emissioni-ghg)

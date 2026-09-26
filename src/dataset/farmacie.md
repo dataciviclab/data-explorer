@@ -196,5 +196,4 @@ Inputs.table(per_provincia, {
 
 - [Ministero della Salute — Open Data](https://www.salute.gov.it/portale/lea/dettaglioContenutiLea.jsp?lingua=italiano&id=5551&area=Lea&menu=vuoto)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/farmacie/2026/farmacie_2026_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/farmacie)

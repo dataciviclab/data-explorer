@@ -225,5 +225,4 @@ Il numero di società partecipate racconta solo metà della storia: le Regioni n
 
 - [MEF — Partecipazioni Pubbliche](https://www.mef.gov.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/mef_partecipazioni/2023/mef_partecipazioni_2023_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/mef-partecipazioni)

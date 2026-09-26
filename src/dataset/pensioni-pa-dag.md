@@ -192,5 +192,5 @@ La spesa per le pensioni della PA è una voce strutturale collegata al turnover 
 
 - [Fonte originale — MEF DAG](https://www.dag.mef.gov.it/aree-tematiche/dati-amministrativi/index.html)
 - [Dati statistici spesa pensioni](https://datipensioni.mef.gov.it/)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/pensioni_pa_dag/2024/pensioni_pa_dag_2024_clean.parquet)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/pensioni-pa-dag)

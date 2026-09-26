@@ -184,7 +184,6 @@ Inputs.table(filtered, {
 
 - [Fonte originale]({source_url})
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/{slug_gcs}/{anno}/{slug_gcs}_{anno}_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/{slug_candidate})
 
 <!--
@@ -200,6 +199,6 @@ Inputs.table(filtered, {
   [ ] tableFormat e Inputs.table in celle separate
   [ ] Usa moduli condivisi da src/import/
   [ ] Sezione Limiti compilata
-  [ ] Link a fonte originale e parquet funzionanti
+  [ ] Link a fonte originale funzionante
   [ ] Pagina leggibile da un utente non tecnico
 -->

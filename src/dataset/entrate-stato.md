@@ -191,5 +191,4 @@ Inputs.table(table, {
 
 - [RGS · BDAP — fonte originale](https://bdap.rgs.mef.gov.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/bilancio-pubblico/bdap_entrate_stato/2025/bdap_entrate_stato_2025_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/openbdap-saldi-storico-stato/tree/main/datasets/bdap-entrate-stato)

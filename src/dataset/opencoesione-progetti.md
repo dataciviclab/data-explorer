@@ -209,6 +209,5 @@ Il Mezzogiorno è l'obiettivo dichiarato delle politiche di coesione, ma la capa
 ## Risorse
 
 - [OpenCoesione (fonte originale)](https://opencoesione.gov.it/)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/opencoesione_progetti/2026/opencoesione_progetti_2026_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/opencoesione-progetti)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)

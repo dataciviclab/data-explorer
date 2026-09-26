@@ -120,7 +120,5 @@ Inputs.table(topRel, {
 
 - [Camera dei Deputati — Dati aperti](https://dati.camera.it/)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito — interventi](https://storage.googleapis.com/dataciviclab-clean/open-politica/camera_interventi/2026/camera_interventi_2026_clean.parquet)
-- [Scarica il parquet pulito — relatori](https://storage.googleapis.com/dataciviclab-clean/open-politica/camera_relatori/2026/camera_relatori_2026_clean.parquet)
 - [Pipeline interventi](https://github.com/dataciviclab/open-politica/tree/main/datasets/camera-interventi)
 - [Pipeline relatori](https://github.com/dataciviclab/open-politica/tree/main/datasets/camera-relatori)

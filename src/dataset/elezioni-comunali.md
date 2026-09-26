@@ -130,5 +130,4 @@ Inputs.table(data.top_sindaci, {
 
 - [open-politica](https://github.com/dataciviclab/open-politica)
 - [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
-- [Scarica il parquet pulito](https://storage.googleapis.com/dataciviclab-clean/elezioni_comunali/2024/elezioni_comunali_2024_clean.parquet)
 - [Pipeline](https://github.com/dataciviclab/open-politica/tree/main/datasets/elezioni-comunali)

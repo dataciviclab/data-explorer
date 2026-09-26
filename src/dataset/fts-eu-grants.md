@@ -211,5 +211,5 @@ FTS è una fotografia dei fondi UE **diretti** in Italia (assegnati dalla Commis
 ## Risorse
 
 - [Financial Transparency System](https://commission.europa.eu/funding-tenders/financial-transparency-system_en)
-- [Scarica il parquet pulito 2024](https://storage.googleapis.com/dataciviclab-clean/fts_eu_grants/2024/fts_eu_grants_2024_clean.parquet)
+- [Esplora i dati con Query SQL](https://dataciviclab-dashboard.streamlit.app/Query_SQL)
 - [Pipeline](https://github.com/dataciviclab/dataset-incubator/tree/main/candidates/fts-eu-grants)
