@@ -21,7 +21,7 @@ datasets:
 
 **Nel ${last.anno} la quota lavoro sul valore aggiunto è ${pct(last.quota_lavoro_pct)}; nel ${first.anno} era ${pct(first.quota_lavoro_pct)}. Tra il ${base.anno} e il ${idx2023.anno} la produttività reale per persona è cresciuta del ${numFix(idx2023.produttivita - 100, 1)}%, mentre il salario reale per dipendente è cambiato del ${numFix(idx2023.salari - 100, 1)}%: un divario di ${numFix(gap2023, 1)} punti percentuali. Nel ${idx2024.anno} il divario si è ridotto a ${numFix(gap2024, 1)} punti.**
 
-Questa pagina mette insieme contabilità nazionale, dichiarazioni fiscali, retribuzioni INPS e statistiche d'impresa. L'obiettivo è separare tre cose che spesso vengono confuse: quanto cresce il valore aggiunto, come si divide tra lavoro e capitale, e quanto arriva davvero in busta paga. I numeri sono calcolati dal dato a build-time.
+Questa pagina mette insieme contabilità nazionale, statistiche d'impresa, dichiarazioni fiscali e cuneo fiscale. L'obiettivo è separare tre cose che spesso vengono confuse: quanto cresce il valore aggiunto, come si divide tra lavoro e capitale, e quanto arriva davvero in busta paga. I numeri sono calcolati dal dato a build-time.
 
 ```js
 import { num, euro, euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js";
@@ -70,6 +70,7 @@ const settoriGrowth = [...s2023.values()]
       settore_codice: d.nace_codice,
       settore_nace: d.nace,
       va_mila_eur: d.va_mila_eur,
+      va_mld: d.va_mila_eur / 1e6,
       va_growth: vaGrowth,
       cost_growth: costGrowth,
       gap: vaGrowth - costGrowth,
@@ -178,6 +179,8 @@ La linea grigia tratteggiata è la retribuzione complessiva (inclusi i contribut
 
 ## 3. Il divario è settoriale
 
+A livello aggregato il divario produttività-salari del ${idx2023.anno} era ${numFix(gap2023, 1)} punti; qui guardiamo quanto cambia per settore.
+
 Il settore con il divario maggiore è **${topGap.settore_nace}**: tra il ${s2014.get(topGap.settore_codice).anno} e il ${s2023.get(topGap.settore_codice).anno} il valore aggiunto reale per ora è cresciuto del ${numFix(topGap.va_growth, 1)}%, il costo del lavoro reale per ora è cambiato del ${numFix(topGap.cost_growth, 1)}%. All'estremo opposto **${bottomGap.settore_nace}**: VA reale per ora ${numFix(bottomGap.va_growth, 1)}%, costo del lavoro reale ${numFix(bottomGap.cost_growth, 1)}%.
 
 ```js
@@ -198,11 +201,12 @@ display(plot.plot({
 }))
 ```
 
-<small>Il colore indica il gap (rosso = valore aggiunto cresciuto più del costo del lavoro; blu = il contrario). La tabella sotto riporta i valori per tutti i settori.</small>
+<small>Il colore indica il gap (rosso = valore aggiunto cresciuto più del costo del lavoro; blu = il contrario). La tabella sotto riporta i valori per tutti i settori; il settore citato nel titolo è scelto tra quelli rilevanti per dimensione, per evitare che settori molto piccoli o volatili dominino la lettura.</small>
 
 ```js
 const { header, format } = tableFormat({
   settore_nace: { label: "Settore", fmt: "string" },
+  va_mld: { label: "VA 2023 (mld €)", fmt: "num", decimals: 1 },
   va_per_ora: { label: "VA/ora 2023", fmt: "euro" },
   costo_lavoro_per_ora: { label: "Costo lavoro/ora 2023", fmt: "euro" },
   quota_lavoro: { label: "Quota lavoro 2023", fmt: "pct" },
@@ -216,7 +220,7 @@ const { header, format } = tableFormat({
 Inputs.table(
   [...settoriGrowth].sort((a, b) => b.gap - a.gap),
   {
-    columns: ["settore_nace", "va_per_ora", "costo_lavoro_per_ora", "quota_lavoro", "va_growth", "cost_growth", "gap"],
+    columns: ["settore_nace", "va_mld", "va_per_ora", "costo_lavoro_per_ora", "quota_lavoro", "va_growth", "cost_growth", "gap"],
     header,
     format,
     rows: 20,
@@ -228,6 +232,33 @@ Inputs.table(
 ```
 
 > **Nota di lettura**: sopra la diagonale il valore aggiunto reale per ora cresce più del costo del lavoro reale; sotto, il contrario. Valore aggiunto e costo del lavoro vengono dalla stessa fonte (SBS, settore privato di mercato) e sono entrambi per ora, deflazionati con il deflatore GVA dell'aggregato NACE più vicino. Il confronto reale si ferma al ${s2023.get(settoriGrowth[0].settore_codice).anno}: il mart contiene anche il 2024, ma il deflatore GVA 2024 non è disponibile per tutti i settori. La finanza e la PA non sono coperte.
+
+### Redditività e investimenti
+
+Il GOS/VA è un proxy di redditività lorda; gli investimenti/VA dicono quanto di quel valore viene reinvestito. Un GOS alto non implica investimenti alti: guardare le due colonne insieme. GOS non è profitto netto.
+
+```js
+const { header: headerRed, format: formatRed } = tableFormat({
+  settore_nace: { label: "Settore", fmt: "string" },
+  gos_su_va: { label: "GOS/VA 2023", fmt: "pct" },
+  investimenti_su_va: { label: "Investimenti/VA 2023", fmt: "pct" },
+});
+```
+
+```js
+Inputs.table(
+  [...settoriGrowth].sort((a, b) => b.gos_su_va - a.gos_su_va),
+  {
+    columns: ["settore_nace", "gos_su_va", "investimenti_su_va"],
+    header: headerRed,
+    format: formatRed,
+    rows: 20,
+    width: "100%",
+    sort: "gos_su_va",
+    reverse: true,
+  }
+)
+```
 
 ## 4. Le imprese e i redditi dichiarati
 
