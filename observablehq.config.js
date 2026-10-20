@@ -234,6 +234,10 @@ export default {
     "collapsible": true,
     "pages": [
       {
+        "name": "Chi cattura la crescita? Produttività, salari e imprese",
+        "path": "/cross-views/chi-cattura-la-crescita"
+      },
+      {
         "name": "Entrate vs Spese — Il Bilancio dello Stato",
         "path": "/cross-views/entrate-vs-spese"
       },
