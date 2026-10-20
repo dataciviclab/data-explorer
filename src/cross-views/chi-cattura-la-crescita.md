@@ -30,6 +30,7 @@ import { num, euro, euroCompact, pct, numFix, tableFormat } from "../import/form
 ```js
 const macro = await FileAttachment("../data/chi-cattura-la-crescita-macro.json").json();
 const settori = await FileAttachment("../data/chi-cattura-la-crescita-settori.json").json();
+const dentro = await FileAttachment("../data/chi-cattura-la-crescita-dentro-settori.json").json();
 const imprese = await FileAttachment("../data/chi-cattura-la-crescita-imprese.json").json();
 const cuneo = await FileAttachment("../data/chi-cattura-la-crescita-cuneo.json").json();
 ```
@@ -96,6 +97,21 @@ const labelSectors = new Set(
 const minAxis = Math.min(...settoriGrowth.flatMap(d => [d.va_growth, d.cost_growth]));
 const maxAxis = Math.max(...settoriGrowth.flatMap(d => [d.va_growth, d.cost_growth]));
 const diag = [{ x: minAxis, y: minAxis }, { x: maxAxis, y: maxAxis }];
+
+const sizeOrder = ["0-9", "10-19", "20-49", "50-249", "250+"];
+const sizeManif = (dentro.size || [])
+  .filter(d => d.nace_codice === "C")
+  .sort((a, b) => sizeOrder.indexOf(a.size_class) - sizeOrder.indexOf(b.size_class));
+const sizeLong = sizeManif.flatMap(d => [
+  { size_class: d.size_class, tipo: "VA/ora", valore: d.va_per_ora_eur },
+  { size_class: d.size_class, tipo: "Costo lavoro/ora", valore: d.costo_lavoro_per_ora_eur },
+]);
+const distSel = (dentro.distribuzione || []).filter(d => ["C", "F", "G", "M", "J"].includes(d.nace_codice));
+const distRatio = distSel.flatMap(d => [
+  { settore: d.nace, tipo: "VA/addetto", ratio: d.rapporto_q3_q1_va },
+  { settore: d.nace, tipo: "Costo/dipendente", ratio: d.rapporto_q3_q1_costo },
+]);
+const cDist = distSel.find(d => d.nace_codice === "C");
 ```
 
 ```js
@@ -177,7 +193,7 @@ display(plot.plot({
 
 La linea grigia tratteggiata è la retribuzione complessiva (inclusi i contributi datoriali); la linea arancione è il salario. Il divario si apre nel ${gapYear.anno}, quando la produttività recupera e i salari reali restano indietro; nel ${idx2024.anno} si riduce.
 
-## 3. Il divario è settoriale
+## 3. Il divario è settoriale e dentro i settori
 
 A livello aggregato il divario produttività-salari del ${idx2023.anno} era ${numFix(gap2023, 1)} punti; qui guardiamo quanto cambia per settore.
 
@@ -196,7 +212,7 @@ display(plot.plot({
     plot.ruleY([0], {stroke: "#aaa"}),
     plot.line(diag, {x: "x", y: "y", stroke: "#aaa", strokeDasharray: "4 4"}),
     plot.dot(settoriGrowth, {x: "cost_growth", y: "va_growth", r: 5, fill: "gap", fillOpacity: 0.9, tip: true}),
-    plot.text(settoriGrowth.filter(d => labelSectors.has(d.settore_codice)), {x: "cost_growth", y: "va_growth", text: "settore_nace", dx: 7, fontSize: 9, fill: "#333", textAnchor: "start"})
+    plot.text(settoriGrowth.filter(d => labelSectors.has(d.settore_codice)), {x: "cost_growth", y: "va_growth", text: "settore_nace", dx: 7, fontSize: 11, fontWeight: 600, fill: "#111", stroke: "#fff", strokeWidth: 3, textAnchor: "start"})
   ]
 }))
 ```
@@ -259,6 +275,95 @@ Inputs.table(
   }
 )
 ```
+
+### Dentro i settori: dimensioni e dispersione
+
+**Grandi vs piccole (manifattura 2023).** Il VA/ora passa da ${euro(sizeManif[0]?.va_per_ora_eur)} nella classe ${sizeManif[0]?.size_class} a ${euro(sizeManif[4]?.va_per_ora_eur)} nella classe ${sizeManif[4]?.size_class}; il costo del lavoro/ora da ${euro(sizeManif[0]?.costo_lavoro_per_ora_eur)} a ${euro(sizeManif[4]?.costo_lavoro_per_ora_eur)}.
+
+```js
+display(plot.plot({
+  title: "Manifattura 2023: VA/ora e costo del lavoro/ora per classe dimensionale",
+  width: 800, height: 320,
+  x: {label: "Classe dimensionale (addetti)", domain: sizeOrder},
+  y: {grid: true, label: "€/ora"},
+  color: {domain: ["VA/ora", "Costo lavoro/ora"], range: ["#2c7fb8", "#d95f0e"], legend: true},
+  marks: [
+    plot.line(sizeLong, {x: "size_class", y: "valore", stroke: "tipo", strokeWidth: 2.5, tip: true}),
+    plot.dot(sizeLong, {x: "size_class", y: "valore", fill: "tipo", r: 4, tip: true})
+  ]
+}))
+```
+
+```js
+const { header: headerSize, format: formatSize } = tableFormat({
+  size_class: { label: "Classe", fmt: "string" },
+  va_per_ora_eur: { label: "VA/ora", fmt: "euro" },
+  costo_lavoro_per_ora_eur: { label: "Costo lavoro/ora", fmt: "euro" },
+  quota_lavoro_pct: { label: "Quota lavoro", fmt: "pct" },
+  gos_su_va_pct: { label: "GOS/VA", fmt: "pct" },
+  investimenti_su_va_pct: { label: "Investimenti/VA", fmt: "pct" },
+});
+```
+
+```js
+Inputs.table(
+  sizeManif,
+  {
+    columns: ["size_class", "va_per_ora_eur", "costo_lavoro_per_ora_eur", "quota_lavoro_pct", "gos_su_va_pct", "investimenti_su_va_pct"],
+    header: headerSize,
+    format: formatSize,
+    rows: 10,
+    width: "100%",
+  }
+)
+```
+
+**La forbice Q3/Q1.** In manifattura il VA per addetto del terzo quartile è ${numFix(cDist?.rapporto_q3_q1_va, 2)} volte quello del primo, mentre il costo per dipendente è ${numFix(cDist?.rapporto_q3_q1_costo, 2)} volte. La dispersione della produttività è più ampia di quella delle retribuzioni.
+
+```js
+display(plot.plot({
+  title: "Dispersione dentro il settore: Q3/Q1 di VA per addetto e costo per dipendente — 2023",
+  width: 800, height: 360,
+  marginLeft: 120,
+  x: {grid: true, label: "Q3/Q1 (x)", domain: [1, 3.6]},
+  y: {label: null},
+  color: {domain: ["VA/addetto", "Costo/dipendente"], range: ["#2c7fb8", "#d95f0e"], legend: true},
+  marks: [
+    plot.ruleX([1], {stroke: "#aaa", strokeDasharray: "4 4"}),
+    plot.dot(distRatio, {x: "ratio", y: "settore", fill: "tipo", r: 6, tip: true}),
+    plot.text(distRatio, {x: "ratio", y: "settore", text: d => ` ${numFix(d.ratio, 2)}x`, dx: 8, fontSize: 11, fontWeight: 600, fill: "#111", stroke: "#fff", strokeWidth: 3, textAnchor: "start"})
+  ]
+}))
+```
+
+```js
+const { header: headerDist, format: formatDist } = tableFormat({
+  nace: { label: "Settore", fmt: "string" },
+  va_per_addetto_q1: { label: "VA/addetto Q1", fmt: "euro" },
+  va_per_addetto_q3: { label: "VA/addetto Q3", fmt: "euro" },
+  costo_personale_dipendente_q1: { label: "Costo/dip. Q1", fmt: "euro" },
+  costo_personale_dipendente_q3: { label: "Costo/dip. Q3", fmt: "euro" },
+  rapporto_q3_q1_va: { label: "Q3/Q1 VA", fmt: "num", decimals: 2 },
+  rapporto_q3_q1_costo: { label: "Q3/Q1 costo", fmt: "num", decimals: 2 },
+});
+```
+
+```js
+Inputs.table(
+  [...distSel].sort((a, b) => b.rapporto_q3_q1_va - a.rapporto_q3_q1_va),
+  {
+    columns: ["nace", "va_per_addetto_q1", "va_per_addetto_q3", "costo_personale_dipendente_q1", "costo_personale_dipendente_q3", "rapporto_q3_q1_va", "rapporto_q3_q1_costo"],
+    header: headerDist,
+    format: formatDist,
+    rows: 10,
+    width: "100%",
+    sort: "rapporto_q3_q1_va",
+    reverse: true,
+  }
+)
+```
+
+> **Nota di lettura**: i quartili sono calcolati sulle imprese del settore, non sono un panel: non dicono se le stesse imprese migliorano nel tempo. Le classi dimensionali sono solo nazionali; nelle classi piccole una quota lavoro sopra il 100% può capitare per VA molto basso o arrotondamenti.
 
 ## 4. Le imprese e i redditi dichiarati
 
@@ -341,6 +446,7 @@ display(plot.plot({
 
 **Possiamo dire**:
 - in quali settori il valore aggiunto reale per ora è cresciuto più del costo del lavoro reale;
+- quanto è ampia la dispersione di produttività e retribuzioni dentro i settori;
 - come è cambiata la quota lavoro dal ${first.anno};
 - quanto del gap tra costo azienda e netto è cuneo fiscale;
 - come si sono mossi i redditi dichiarati delle imprese e dei lavoratori.
@@ -358,6 +464,7 @@ display(plot.plot({
 - **GOS è un risultato lordo**, non profitto netto.
 - **Deflatore settoriale approssimato**: usiamo il deflatore GVA dell'aggregato NACE più vicino; per B/D/E, G/H/I, M/N, P/Q, R/S non è esatto.
 - **Confronto reale 2014–2023**: il mart SBS contiene il 2024, ma il deflatore GVA 2024 non è completo per tutti i settori; il confronto reale si ferma al 2023.
+- **Quartili e classi dimensionali**: solo nazionale; i quartili coprono 2013–2024 e non sono un panel di imprese. Nelle classi piccole le quote possono superare il totale.
 - **Deflatore PIL, non CPI**: i salari reali macro sono una stima; con il CPI il potere d'acquisto sarebbe probabilmente più basso.
 - **IVA 2024 esclusa**: il file 2025 cambia copertura; il margine si ferma al ${iva2023.anno}.
 - **Nessun dato firm-level**: le dichiarazioni e i dati settoriali non permettono di attribuire il comportamento a singole imprese.
