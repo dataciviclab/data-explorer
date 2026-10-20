@@ -1,7 +1,7 @@
 ---
 title: "Chi cattura la crescita? Produttività, salari e imprese"
 description: "Quota lavoro, salari reali, produttività e margini per settore in Italia, 1995-2024"
-source: "Eurostat · INPS · ISTAT · MEF · OECD"
+source: "Eurostat · ISTAT · MEF · OECD"
 period: "1995-2024"
 data_driven: true
 cross_view: true
@@ -9,9 +9,8 @@ datasets:
   - eurostat_nama10_gdp
   - eurostat_labour_productivity_nuts3
   - eurostat_emp_nuts3
-  - inps_retribuzioni
+  - eurostat_gva_nuts3
   - istat_sbs_imprese
-  - istat_asia_imprese_addetti
   - ires_redditi_regione
   - irpef_comunale
   - iva_sez_attivita
@@ -59,35 +58,42 @@ const gapYearValue = gapYear.produttivita - gapYear.salari;
 ```
 
 ```js
-const s2014 = new Map(settori.filter(d => d.anno === 2014).map(d => [d.settore_codice, d]));
-const s2023 = new Map(settori.filter(d => d.anno === 2023).map(d => [d.settore_codice, d]));
+const s2014 = new Map(settori.filter(d => d.anno === 2014).map(d => [d.nace_codice, d]));
+const s2023 = new Map(settori.filter(d => d.anno === 2023).map(d => [d.nace_codice, d]));
 const settoriGrowth = [...s2023.values()]
   .map(d => {
-    const a = s2014.get(d.settore_codice);
-    if (!a || !a.va_per_addetto || !a.retribuzione_media_settimana) return null;
-    const vaGrowth = (d.va_per_addetto / a.va_per_addetto - 1) * 100;
-    const wageGrowth = (d.retribuzione_media_settimana / a.retribuzione_media_settimana - 1) * 100;
+    const a = s2014.get(d.nace_codice);
+    if (!a || !a.va_per_ora_reale || !a.costo_lavoro_per_ora_reale) return null;
+    const vaGrowth = (d.va_per_ora_reale / a.va_per_ora_reale - 1) * 100;
+    const costGrowth = (d.costo_lavoro_per_ora_reale / a.costo_lavoro_per_ora_reale - 1) * 100;
     return {
-      settore_codice: d.settore_codice,
-      settore_nace: d.settore_nace,
+      settore_codice: d.nace_codice,
+      settore_nace: d.nace,
+      va_mila_eur: d.va_mila_eur,
       va_growth: vaGrowth,
-      wage_growth: wageGrowth,
-      gap: vaGrowth - wageGrowth,
-      va_per_addetto: d.va_per_addetto,
-      retribuzione_media_settimana: d.retribuzione_media_settimana,
-      n_lavoratori: d.n_lavoratori,
+      cost_growth: costGrowth,
+      gap: vaGrowth - costGrowth,
+      va_per_ora: d.va_per_ora_eur,
+      costo_lavoro_per_ora: d.costo_lavoro_per_ora_eur,
+      salario_per_ora: d.salario_per_ora_eur,
+      quota_lavoro: d.quota_lavoro_pct,
+      quota_lavoro_2014: a.quota_lavoro_pct,
+      gos_su_va: d.gos_su_va_pct,
+      investimenti_su_va: d.investimenti_su_va_pct,
     };
   })
   .filter(Boolean);
-const topGap = [...settoriGrowth].sort((a, b) => b.gap - a.gap)[0];
-const bottomGap = [...settoriGrowth].sort((a, b) => a.gap - b.gap)[0];
+// Esclude i settori molto piccoli/volatili dal titolo (es. estrazione).
+const settoriRilevanti = settoriGrowth.filter(d => d.va_mila_eur >= 20000000);
+const topGap = [...settoriRilevanti].sort((a, b) => b.gap - a.gap)[0];
+const bottomGap = [...settoriRilevanti].sort((a, b) => a.gap - b.gap)[0];
 const labelSectors = new Set(
   [...settoriGrowth].sort((a, b) => b.gap - a.gap).slice(0, 5)
     .concat([...settoriGrowth].sort((a, b) => a.gap - b.gap).slice(0, 3))
     .map(d => d.settore_codice)
 );
-const minAxis = Math.min(...settoriGrowth.flatMap(d => [d.va_growth, d.wage_growth]));
-const maxAxis = Math.max(...settoriGrowth.flatMap(d => [d.va_growth, d.wage_growth]));
+const minAxis = Math.min(...settoriGrowth.flatMap(d => [d.va_growth, d.cost_growth]));
+const maxAxis = Math.max(...settoriGrowth.flatMap(d => [d.va_growth, d.cost_growth]));
 const diag = [{ x: minAxis, y: minAxis }, { x: maxAxis, y: maxAxis }];
 ```
 
@@ -172,35 +178,37 @@ La linea grigia tratteggiata è la retribuzione complessiva (inclusi i contribut
 
 ## 3. Il divario è settoriale
 
-Il settore con il divario maggiore è **${topGap.settore_nace}**: tra il ${s2014.get(topGap.settore_codice).anno} e il ${s2023.get(topGap.settore_codice).anno} il valore aggiunto per addetto è cresciuto del ${numFix(topGap.va_growth, 1)}%, la retribuzione media per settimana del ${numFix(topGap.wage_growth, 1)}%. All'estremo opposto **${bottomGap.settore_nace}**: valore aggiunto per addetto ${numFix(bottomGap.va_growth, 1)}%, retribuzioni ${numFix(bottomGap.wage_growth, 1)}%.
+Il settore con il divario maggiore è **${topGap.settore_nace}**: tra il ${s2014.get(topGap.settore_codice).anno} e il ${s2023.get(topGap.settore_codice).anno} il valore aggiunto reale per ora è cresciuto del ${numFix(topGap.va_growth, 1)}%, il costo del lavoro reale per ora è cambiato del ${numFix(topGap.cost_growth, 1)}%. All'estremo opposto **${bottomGap.settore_nace}**: VA reale per ora ${numFix(bottomGap.va_growth, 1)}%, costo del lavoro reale ${numFix(bottomGap.cost_growth, 1)}%.
 
 ```js
 display(plot.plot({
-  title: `Valore aggiunto per addetto vs retribuzione per settimana — crescita ${s2014.get(settoriGrowth[0].settore_codice).anno}–${s2023.get(settoriGrowth[0].settore_codice).anno}`,
+  title: `Valore aggiunto reale per ora vs costo del lavoro reale per ora — crescita ${s2014.get(settoriGrowth[0].settore_codice).anno}–${s2023.get(settoriGrowth[0].settore_codice).anno}`,
   width: 860, height: 540,
-  marginLeft: 60, marginRight: 30,
-  x: {grid: true, label: "Δ retribuzione media per settimana (%)", domain: [minAxis - 5, maxAxis + 5]},
-  y: {grid: true, label: "Δ valore aggiunto per addetto (%)", domain: [minAxis - 5, maxAxis + 5]},
-  color: {scheme: "RdBu", domain: [-20, 65], legend: true, label: "Gap VA - salari (pp)"},
+  marginLeft: 70, marginRight: 30,
+  x: {grid: true, label: "Δ costo del lavoro reale per ora (%)", domain: [minAxis - 5, maxAxis + 5]},
+  y: {grid: true, label: "Δ valore aggiunto reale per ora (%)", domain: [minAxis - 5, maxAxis + 5]},
+  color: {scheme: "RdBu", domain: [-10, 35], legend: true, label: "Gap VA - costo lavoro (pp)"},
   marks: [
     plot.ruleX([0], {stroke: "#aaa"}),
     plot.ruleY([0], {stroke: "#aaa"}),
     plot.line(diag, {x: "x", y: "y", stroke: "#aaa", strokeDasharray: "4 4"}),
-    plot.dot(settoriGrowth, {x: "wage_growth", y: "va_growth", r: 5, fill: "gap", fillOpacity: 0.9, tip: true}),
-    plot.text(settoriGrowth.filter(d => labelSectors.has(d.settore_codice)), {x: "wage_growth", y: "va_growth", text: "settore_nace", dx: 7, fontSize: 9, fill: "#333", textAnchor: "start"})
+    plot.dot(settoriGrowth, {x: "cost_growth", y: "va_growth", r: 5, fill: "gap", fillOpacity: 0.9, tip: true}),
+    plot.text(settoriGrowth.filter(d => labelSectors.has(d.settore_codice)), {x: "cost_growth", y: "va_growth", text: "settore_nace", dx: 7, fontSize: 9, fill: "#333", textAnchor: "start"})
   ]
 }))
 ```
 
-<small>Il colore indica il gap (rosso = valore aggiunto cresciuto più delle retribuzioni; blu = il contrario). La tabella sotto riporta i valori per tutti i settori.</small>
+<small>Il colore indica il gap (rosso = valore aggiunto cresciuto più del costo del lavoro; blu = il contrario). La tabella sotto riporta i valori per tutti i settori.</small>
 
 ```js
 const { header, format } = tableFormat({
   settore_nace: { label: "Settore", fmt: "string" },
-  va_growth: { label: "Δ VA/addetto", fmt: "num", decimals: 1 },
-  wage_growth: { label: "Δ retribuzione/settimana", fmt: "num", decimals: 1 },
+  va_per_ora: { label: "VA/ora 2023", fmt: "euro" },
+  costo_lavoro_per_ora: { label: "Costo lavoro/ora 2023", fmt: "euro" },
+  quota_lavoro: { label: "Quota lavoro 2023", fmt: "pct" },
+  va_growth: { label: "Δ VA/ora reale", fmt: "num", decimals: 1 },
+  cost_growth: { label: "Δ costo/ora reale", fmt: "num", decimals: 1 },
   gap: { label: "Gap (pp)", fmt: "num", decimals: 1 },
-  n_lavoratori: { label: "Lavoratori 2023", fmt: "num" },
 });
 ```
 
@@ -208,7 +216,7 @@ const { header, format } = tableFormat({
 Inputs.table(
   [...settoriGrowth].sort((a, b) => b.gap - a.gap),
   {
-    columns: ["settore_nace", "va_growth", "wage_growth", "gap", "n_lavoratori"],
+    columns: ["settore_nace", "va_per_ora", "costo_lavoro_per_ora", "quota_lavoro", "va_growth", "cost_growth", "gap"],
     header,
     format,
     rows: 20,
@@ -219,7 +227,7 @@ Inputs.table(
 )
 ```
 
-> **Nota di lettura**: sopra la linea diagonale il valore aggiunto per addetto cresce più della retribuzione; sotto, il contrario. Il valore aggiunto viene da SBS+ASIA (industria e servizi di mercato), le retribuzioni da INPS (settore privato non agricolo). Sono universi diversi: il confronto è descrittivo, non una misura di sfruttamento. La finanza non è coperta da SBS.
+> **Nota di lettura**: sopra la diagonale il valore aggiunto reale per ora cresce più del costo del lavoro reale; sotto, il contrario. Valore aggiunto e costo del lavoro vengono dalla stessa fonte (SBS, settore privato di mercato) e sono entrambi per ora, deflazionati con il deflatore GVA dell'aggregato NACE più vicino. Il confronto reale si ferma al ${s2023.get(settoriGrowth[0].settore_codice).anno}: il mart contiene anche il 2024, ma il deflatore GVA 2024 non è disponibile per tutti i settori. La finanza e la PA non sono coperte.
 
 ## 4. Le imprese e i redditi dichiarati
 
@@ -301,7 +309,7 @@ display(plot.plot({
 ## Cosa possiamo dire e cosa no
 
 **Possiamo dire**:
-- in quali settori il valore aggiunto per addetto è cresciuto più delle retribuzioni;
+- in quali settori il valore aggiunto reale per ora è cresciuto più del costo del lavoro reale;
 - come è cambiata la quota lavoro dal ${first.anno};
 - quanto del gap tra costo azienda e netto è cuneo fiscale;
 - come si sono mossi i redditi dichiarati delle imprese e dei lavoratori.
@@ -314,17 +322,18 @@ display(plot.plot({
 ## Limiti
 
 - **IRES non è profitto**: è reddito imponibile netto (redditi meno perdite), sensibile a deduzioni e cambi di base. Il dato ${lastImp.anno} è provvisorio.
-- **SBS copre industria e servizi di mercato**: la finanza non è inclusa, la PA nemmeno. Il confronto settoriale è descrittivo.
-- **INPS è settore privato non agricolo**: `n_lavoratori` non è FTE; il salario per settimana è una media, non un salario orario.
-- **Deflatore PIL, non CPI**: i salari reali sono una stima; con il CPI il potere d'acquisto sarebbe probabilmente più basso.
-- **Rottura 2019 INPS**: obs 347 e 492 sono due tavole; la serie è utilizzabile con nota.
+- **SBS copre industria, costruzioni, commercio e servizi di mercato**: finanza e PA non sono incluse. Il confronto settoriale è descrittivo.
+- **Ore lavorate = dipendenti**: non includono gli autonomi; il costo del lavoro include salari e contributi sociali.
+- **GOS è un risultato lordo**, non profitto netto.
+- **Deflatore settoriale approssimato**: usiamo il deflatore GVA dell'aggregato NACE più vicino; per B/D/E, G/H/I, M/N, P/Q, R/S non è esatto.
+- **Confronto reale 2014–2023**: il mart SBS contiene il 2024, ma il deflatore GVA 2024 non è completo per tutti i settori; il confronto reale si ferma al 2023.
+- **Deflatore PIL, non CPI**: i salari reali macro sono una stima; con il CPI il potere d'acquisto sarebbe probabilmente più basso.
 - **IVA 2024 esclusa**: il file 2025 cambia copertura; il margine si ferma al ${iva2023.anno}.
 - **Nessun dato firm-level**: le dichiarazioni e i dati settoriali non permettono di attribuire il comportamento a singole imprese.
 
 ## Risorse
 
-- [Eurostat — NAMA10, produttività e occupazione](https://ec.europa.eu/eurostat/)
-- [INPS — Osservatori Statistici](https://servizi2.inps.it/servizi/osservatoristatistici/)
-- [ISTAT — SBS e ASIA](https://esploradati.istat.it/)
+- [Eurostat — NAMA10, produttività, GVA e occupazione](https://ec.europa.eu/eurostat/)
+- [ISTAT — Structural Business Statistics (SBS)](https://esploradati.istat.it/)
 - [MEF — Dichiarazioni fiscali](https://www1.finanze.gov.it/)
 - [OECD — Taxing Wages](https://www.oecd.org/tax/taxing-wages.htm)
