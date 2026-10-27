@@ -2,7 +2,9 @@
 """Cross-view: Chi cattura la crescita — imprese e redditi dichiarati.
 
 Confronta reddito imponibile IRES (imprese), reddito da lavoro dipendente
-IRPEF e margine IVA (fatturato vs valore aggiunto fiscale), 2015-2024.
+IRPEF e margine IVA (fatturato vs valore aggiunto fiscale).
+La finestra temporale è definita dai filtri nel template SQL
+(`anno` = anno d'imposta): IRES 2014-2023, IRPEF 2015-2024, IVA 2014-2024.
 """
 
 import json
@@ -13,10 +15,12 @@ sys.path.insert(0, "src/data")
 from _util import _parquet_exists, _parquet_refs, get_location
 from lab_connectors.duckdb import safe_connect
 
+# Anni di PUBBLICAZIONE: selezionano le cartelle dei parquet (il file 2024
+# contiene l'anno d'imposta 2023). La colonna `anno` esposta dai dataset è
+# l'anno d'imposta: i filtri sui valori sono nel template SQL, non qui.
 IRES_YEARS = list(range(2015, 2025))
 IRPEF_YEARS = list(range(2015, 2025))
-# I file sono per anno di pubblicazione: il file 2024 contiene l'anno di
-# imposta 2023. Il file 2025 (anno 2024) è escluso per il cambio di copertura.
+# iva_sez_attivita: cartelle 2015-2024 → anno d'imposta 2014-2023
 IVA_YEARS = list(range(2015, 2025))
 
 ires_loc = get_location("ires_redditi_regione")

@@ -1,6 +1,9 @@
 -- Chi cattura la crescita — imprese e redditi dichiarati
 -- Dataset: ires_redditi_regione, irpef_comunale, iva_sez_attivita
--- Anni: 2015-2024 (IRES/IRPEF), 2014-2023 (IVA)
+-- Anni (anno d'imposta): IRES 2014-2023, IRPEF 2015-2024, IVA 2014-2024.
+-- Nota: i parquet sono per anno di PUBBLICAZIONE (il file 2024 = a.i. 2023),
+-- ma la colonna `anno` espone l'anno d'imposta in tutti e tre i dataset
+-- (IRES/IRAP allineati a maggio 2026): i filtri qui sotto sono su `anno`.
 --
 -- Il consumer definisce le CTE {cte_ires}, {cte_irpef}, {cte_iva}.
 
@@ -10,7 +13,7 @@ WITH ires AS (
         SUM(reddito_totale_eur) - SUM(perdita_totale_eur) AS ires_netto,
         SUM(n_dichiarazioni) AS dichiarazioni
     FROM ({cte_ires})
-    WHERE anno BETWEEN 2015 AND 2024
+    WHERE anno BETWEEN 2014 AND 2023
     GROUP BY anno
 ),
 irpef AS (
