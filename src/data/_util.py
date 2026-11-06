@@ -22,16 +22,19 @@ import re
 import sys
 
 from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs.manifest import read_manifest
-from lab_connectors.gcs.paths import CLEAN_BUCKET, https_url
+from lab_connectors.gcs import object_exists
+from lab_connectors.gcs.paths import (
+    CLEAN_BUCKET,
+    https_url,
+    location_urls,
+    parse_gs_url,
+    resolve,
+)
 
 # GCS_BASE: backward compat per data loader che lo importano direttamente.
 # Calcolato dal contratto invece che hardcoded.
 GCS_BASE = f"https://storage.googleapis.com/{CLEAN_BUCKET}"
 
-# Cache processo: manifest caricato una volta per loader (ogni loader è
-# un processo Python separato, quindi non serve thread safety).
-_MANIFEST: dict | None = None
 _LOCATION_CACHE: dict[str, dict | None] = {}
 
 
@@ -53,124 +56,59 @@ def get_location(slug: str) -> dict | None:
     return None
 
 # Regex per il segmento anno in un path (es. "/2024/", "/2026/").
-_YEAR_SEGMENT = re.compile(r"/(\d{4})/")
+_LOCATION_YEAR = re.compile(r"/(\d{4})/")
 
 
-def _load_manifest() -> dict:
-    """Carica gcs_manifest.json da GCS, con cache di processo."""
-    global _MANIFEST
-    if _MANIFEST is not None:
-        return _MANIFEST
-    try:
-        _MANIFEST = read_manifest()
-    except Exception:
-        _MANIFEST = {"files": []}
-    return _MANIFEST
+def _location_path(location: dict | None) -> str:
+    """Path ``gs://`` di una voce location del registry (o stringa vuota)."""
+    if not location:
+        return ""
+    return str(location.get("path") or "")
 
 
-def _target_path(slug: str, year: int, location: dict | None = None) -> str:
-    """Key GCS (relativa al bucket) del parquet per un anno.
+def _year_of(url: str) -> int | None:
+    """Anno dal segmento ``/YYYY/`` di un URL (None se assente)."""
+    match = _LOCATION_YEAR.search(url)
+    return int(match.group(1)) if match else None
 
-    Fallback: pattern canonico ``{slug}/{year}/{slug}_{year}_clean.parquet``.
-    Con ``location`` dal registry: deriva la key dal path reale (prefix
-    per repo e multi_file glob ``*`` → sostituzione con l'anno).
-    """
-    if location:
-        path = (location.get("path") or "")
-        if path.startswith("gs://"):
-            key = path[len("gs://"):].partition("/")[2]  # via il bucket
-            if location.get("multi_file") and "*" in key:
-                return key.replace("*", str(year))
-            m = _YEAR_SEGMENT.search(key)
-            if m:
-                prefix = key[: m.start()]
-                return f"{prefix}/{year}/{slug}_{year}_clean.parquet"
-            if key.endswith("/"):
-                return f"{key}{slug}_{year}_clean.parquet"
-            return key
-    return f"{slug}/{year}/{slug}_{year}_clean.parquet"
+
+def _canonical_exists(slug: str, year: int) -> bool:
+    """HEAD sul path canonico ``{slug}/{year}/{slug}_{year}_clean.parquet``."""
+    key = resolve("clean_parquet", slug=slug, year=year)
+    return object_exists(CLEAN_BUCKET, key)
 
 
 def _parquet_exists(slug: str, year: int, location: dict | None = None) -> bool:
-    """Verifica se il parquet esiste su GCS.
+    """True se il parquet dell'anno esiste su GCS.
 
-    Fast path: gcs_manifest.json (una GET, lookup in memoria) —
-    se il manifest contiene il file, esiste sicuro.
-    Slow path (su miss del manifest): object_exists() via HEAD.
-    Il fallback evita falsi negativi quando un parquet è stato
-    pubblicato dopo l'ultimo refresh del manifest (daily).
-
-    Con ``location`` (dal registry) la verifica usa il path reale del
-    repo (gestisce prefix tipo ``conto-annuale/...``, ``siope/...``).
+    Con ``location`` del registry non serve il manifest: path puntuale → HEAD
+    sul file, glob → una listing per dataset e match sull'anno. Se la listing
+    fallisce si ricade su HEAD del singolo anno.
     """
-    target_path = _target_path(slug, year, location)
-
-    manifest = _load_manifest()
-    if manifest.get("files"):
-        if any(
-            f["bucket"] == CLEAN_BUCKET and f["path"] == target_path
-            for f in manifest["files"]
-        ):
-            return True
-        # Non trovato nel manifest — potrebbe essere stato appena
-        # pubblicato. Cadiamo nel fallback GCS live.
-
-    from lab_connectors.gcs import object_exists
-
-    return object_exists(
-        CLEAN_BUCKET,
-        target_path,
-    )
-
-
-def _location_https_prefix(location: dict, slug: str) -> str | None:
-    """Prefix HTTPS base di un dataset dal location registry.
-
-    Converte ``location.path`` (gs://.../{slug}/{year}/file.parquet) nel
-    prefix HTTPS fino alla dir dell'anno (esclusa): le refs per-anno si
-    ottengono appendendo ``{year}/{slug}_{year}_clean.parquet``.
-
-    Returns:
-        Str prefix (es. ``https://storage.googleapis.com/dataciviclab-clean/conto-annuale/anzianita``)
-        o ``None`` se il location non è utilizzabile.
-    """
-    path = (location or {}).get("path") or ""
-    if not path.startswith("gs://"):
-        return None
-    key = path[len("gs://"):]
-    # Rimuovi il bucket (primo segmento) e tieni il resto.
-    _, sep, rest = key.partition("/")
-    if not sep:
-        return None
-    m = _YEAR_SEGMENT.search(rest)
-    if m:
-        rest = rest[: m.start()]  # taglia via "/{year}/..."
-    rest = rest.rstrip("/")
-    return f"https://storage.googleapis.com/{CLEAN_BUCKET}/{rest}" if rest else GCS_BASE
+    path = _location_path(location)
+    if path.startswith("gs://"):
+        if "*" not in path:
+            return object_exists(*parse_gs_url(path))
+        try:
+            urls = location_urls(location)
+        except Exception:
+            return object_exists(*parse_gs_url(path.replace("*", str(year))))
+        return any(_year_of(url) == year for url in urls)
+    return _canonical_exists(slug, year)
 
 
 def _parquet_refs(slug: str, years: list[int], location: dict | None = None) -> list[str]:
-    """Refs HTTPS per-anno dei parquet del dataset.
+    """Refs HTTPS dei parquet per gli anni richiesti.
 
-    Se ``location`` è fornito (dal registry) deriva le refs dal path reale
-    (gestisce prefix per repo e multi_file glob ``*``); altrimenti fallback
-    al pattern canonico ``{slug}/{year}/{slug}_{year}_clean.parquet``.
+    Con ``location`` del registry delega a ``location_urls`` (path puntuale,
+    glob per anno o glob espanso). Senza location usa il pattern canonico.
     """
-    if location:
-        path = (location.get("path") or "")
-        if path.startswith("gs://"):
-            base = "https://storage.googleapis.com/" + path[len("gs://"):]
-            # multi_file: glob con * → sostituiamo ogni * con l'anno.
-            if location.get("multi_file"):
-                return [base.replace("*", str(y)) for y in years]
-            # Path con segmento anno → deriviamo il prefix e appendiamo per-anno.
-            prefix = _location_https_prefix(location, slug)
-            if prefix:
-                return [f"{prefix}/{year}/{slug}_{year}_clean.parquet" for year in years]
-    return [
-        https_url("clean", "clean_parquet", slug=slug, year=year)
-        for year in years
-    ]
+    path = _location_path(location)
+    if path.startswith("gs://"):
+        if "*" not in path:
+            return [location_urls(location)[0]]
+        return location_urls(location, years=years)
+    return [https_url("clean", "clean_parquet", slug=slug, year=year) for year in years]
 
 
 def load_dataset(

@@ -37,7 +37,7 @@ alimentano index, pagine tema e sidebar:
 
 - `_registry.py` — logica condivisa e testata: `fuse_registries()` (dedup per
   slug, priorità = ordine `REGISTRY_REPOS`, entry con `registry_source`),
-  `resolve_url_slug()` (URL_SLUG_OVERRIDES), `build_catalog()`, `build_themes()`
+  `resolve_url_slug()` → `lab_connectors.registry.to_url_slug`, `build_catalog()`, `build_themes()`
 - `catalog/themes.json` (repo root) — config editoriale dei temi: mappa `categories`
   del registry → tema pubblico. Single source of truth, consumata da `_registry.py`.
 

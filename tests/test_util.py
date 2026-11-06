@@ -16,115 +16,69 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from lab_connectors.gcs.paths import CLEAN_BUCKET
 
 # ── _parquet_exists ──────────────────────────────────────────────────────────
 
 
-def _make_manifest(paths: list[str]) -> dict:
-    """Crea un manifest finto con i path indicati."""
-    return {
-        "files": [
-            {"bucket": CLEAN_BUCKET, "path": p}
-            for p in paths
-        ]
-    }
-
-
 class TestParquetExists:
-    """Contratto: _parquet_exists usa gcs_manifest.json o fallback object_exists."""
+    """Contratto: HEAD sul file (canonico o location); glob derivato dal registry."""
 
-    def _patch_manifest(self, manifest: dict):
-        """Patch _load_manifest per restituire un manifest controllato."""
-        return patch("src.data._util._load_manifest", return_value=manifest)
-
-    def test_exists_returns_true_when_in_manifest(self):
-        """Path presente nel manifest → esiste."""
-        manifest = _make_manifest(["test-slug/2023/test-slug_2023_clean.parquet"])
-        with self._patch_manifest(manifest):
+    def test_canonical_fallback_uses_head(self):
+        with patch("src.data._util.object_exists", return_value=True) as mock_exists:
             from src.data._util import _parquet_exists
 
             assert _parquet_exists("test-slug", 2023) is True
-
-    def test_missing_returns_false_when_not_in_manifest_and_not_on_gcs(self):
-        """Path assente dal manifest E assente su GCS → non esiste."""
-        manifest = _make_manifest(["altro-slug/2023/altro-slug_2023_clean.parquet"])
-        with patch("lab_connectors.gcs.object_exists", return_value=False):
-            with self._patch_manifest(manifest):
-                from src.data._util import _parquet_exists
-
-                assert _parquet_exists("test-slug", 2023) is False
-
-    def test_fallback_to_object_exists_when_manifest_empty(self):
-        """Manifest senza files → fallback a object_exists()."""
-        with patch("lab_connectors.gcs.object_exists", return_value=True):
-            with self._patch_manifest({"files": []}):
-                from src.data._util import _parquet_exists
-
-                assert _parquet_exists("test-slug", 2023) is True
-
-    def test_missing_in_manifest_falls_back_to_gcs(self):
-        """Path non nel manifest ma presente su GCS → esiste (evita falso negativo).
-
-        Un parquet appena pubblicato (dopo l'ultimo refresh del manifest)
-        non deve risultare assente.
-        """
-        manifest = _make_manifest(["altro-slug/2023/altro-slug_2023_clean.parquet"])
-        with patch("lab_connectors.gcs.object_exists", return_value=True):
-            with self._patch_manifest(manifest):
-                from src.data._util import _parquet_exists
-
-                assert _parquet_exists("test-slug", 2023) is True
-
-    def test_fallback_passes_correct_params(self):
-        """Fallback chiama object_exists con bucket e key corretti."""
-        with patch("lab_connectors.gcs.object_exists") as mock_exists:
-            mock_exists.return_value = True
-            with self._patch_manifest({}):
-                from src.data._util import _parquet_exists
-
-                _parquet_exists("test-slug", 2023)
-                called_bucket, called_key = mock_exists.call_args[0]
-                assert called_bucket == CLEAN_BUCKET
-                assert called_key == "test-slug/2023/test-slug_2023_clean.parquet"
-
-
-# ── location / _parquet_refs ────────────────────────────────────────────────
-
-
-class TestLocationHttpsPrefix:
-    """Contratto: _location_https_prefix deriva il prefix HTTPS dal location registry."""
-
-    def _prefix(self, location):
-        from src.data._util import _location_https_prefix
-
-        return _location_https_prefix(location, "test-slug")
-
-    def test_no_location_returns_none(self):
-        assert self._prefix(None) is None
-        assert self._prefix({}) is None
-
-    def test_non_gs_path_returns_none(self):
-        assert self._prefix({"path": "https://example.com/x"}) is None
-
-    def test_simple_slug(self):
-        loc = {"path": f"gs://{CLEAN_BUCKET}/test-slug/2023/test-slug_2023_clean.parquet"}
-        assert self._prefix(loc) == (
-            f"https://storage.googleapis.com/{CLEAN_BUCKET}/test-slug"
+        mock_exists.assert_called_once_with(
+            CLEAN_BUCKET, "test-slug/2023/test-slug_2023_clean.parquet"
         )
 
-    def test_prefixed_repo(self):
-        loc = {"path": f"gs://{CLEAN_BUCKET}/conto-annuale/anzianita/2023/anzianita_2023_clean.parquet"}
-        assert self._prefix(loc) == (
-            f"https://storage.googleapis.com/{CLEAN_BUCKET}/conto-annuale/anzianita"
+    def test_canonical_missing(self):
+        with patch("src.data._util.object_exists", return_value=False):
+            from src.data._util import _parquet_exists
+
+            assert _parquet_exists("test-slug", 2023) is False
+
+    def test_single_file_location_head_on_concrete_path(self):
+        loc = {
+            "path": f"gs://{CLEAN_BUCKET}/siope/siope_x/2026/siope_x_2026_clean.parquet"
+        }
+        with patch("src.data._util.object_exists", return_value=True) as mock_exists:
+            from src.data._util import _parquet_exists
+
+            assert _parquet_exists("siope_x", 2026, loc) is True
+        mock_exists.assert_called_once_with(
+            CLEAN_BUCKET, "siope/siope_x/2026/siope_x_2026_clean.parquet"
         )
 
-    def test_year_in_middle(self):
-        loc = {"path": f"gs://{CLEAN_BUCKET}/a/b/2020/c/d.parquet"}
-        assert self._prefix(loc) == (
-            f"https://storage.googleapis.com/{CLEAN_BUCKET}/a/b"
-        )
+    def test_glob_location_uses_one_listing(self):
+        loc = {
+            "path": f"gs://{CLEAN_BUCKET}/p/s/*/s_*_clean.parquet",
+            "multi_file": True,
+        }
+        urls = [
+            f"https://storage.googleapis.com/{CLEAN_BUCKET}/p/s/{year}/s_{year}_clean.parquet"
+            for year in (2023, 2024)
+        ]
+        with patch("src.data._util.location_urls", return_value=urls) as mock_urls:
+            from src.data._util import _parquet_exists
+
+            assert _parquet_exists("s", 2024, loc) is True
+            assert _parquet_exists("s", 2022, loc) is False
+        # una sola listing per dataset, non una per anno
+        mock_urls.assert_called()
+
+    def test_glob_listing_failure_falls_back_to_head(self):
+        loc = {
+            "path": f"gs://{CLEAN_BUCKET}/p/s/*/s_*_clean.parquet",
+            "multi_file": True,
+        }
+        with patch("src.data._util.location_urls", side_effect=RuntimeError("rete")):
+            with patch("src.data._util.object_exists", return_value=True) as mock_exists:
+                from src.data._util import _parquet_exists
+
+                assert _parquet_exists("s", 2024, loc) is True
+        mock_exists.assert_called_once_with(CLEAN_BUCKET, "p/s/2024/s_2024_clean.parquet")
 
 
 class TestParquetRefs:
@@ -159,31 +113,6 @@ class TestParquetRefs:
             f"https://storage.googleapis.com/{CLEAN_BUCKET}/conto-annuale/anzianita/2023/anzianita_2023_clean.parquet",
             f"https://storage.googleapis.com/{CLEAN_BUCKET}/conto-annuale/anzianita/2024/anzianita_2024_clean.parquet",
         ]
-
-
-class TestTargetPath:
-    """Contratto: _target_path deriva la key GCS dal location (prefix e multi_file)."""
-
-    def _path(self, slug, year, location=None):
-        from src.data._util import _target_path
-
-        return _target_path(slug, year, location)
-
-    def test_canonical_fallback(self):
-        assert self._path("test-slug", 2023) == "test-slug/2023/test-slug_2023_clean.parquet"
-
-    def test_prefixed(self):
-        loc = {"path": f"gs://{CLEAN_BUCKET}/siope/siope_x/2026/siope_x_2026_clean.parquet"}
-        assert self._path("siope_x", 2026, loc) == "siope/siope_x/2026/siope_x_2026_clean.parquet"
-
-    def test_multi_file(self):
-        loc = {
-            "path": f"gs://{CLEAN_BUCKET}/conto-annuale/anzianita/*/anzianita_*_clean.parquet",
-            "multi_file": True,
-        }
-        assert self._path("anzianita", 2024, loc) == (
-            "conto-annuale/anzianita/2024/anzianita_2024_clean.parquet"
-        )
 
 
 class TestRawSample:
