@@ -2,8 +2,8 @@
 Test per _util.py — data loader condiviso per Observable Framework.
 
 Contratto:
-  - _parquet_exists(): verifica esistenza parquet su GCS via gcs_manifest.json
-    con fallback a object_exists() (HEAD) se manifest non disponibile
+  - _parquet_exists(): verifica esistenza del parquet su GCS da location.path
+    (HEAD per file singolo, listing+match anno per glob)
   - load_dataset(): produce JSON valido su stdout con aggregazioni corrette,
     salta anni senza parquet, gestisce where clause
 
@@ -13,6 +13,7 @@ può rompere tutti i data loader senza preavviso.
 import io
 import json
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -51,7 +52,19 @@ class TestParquetExists:
             CLEAN_BUCKET, "siope/siope_x/2026/siope_x_2026_clean.parquet"
         )
 
-    def test_glob_location_uses_one_listing(self):
+    def test_single_file_location_e_year_aware(self):
+        loc = {
+            "path": f"gs://{CLEAN_BUCKET}/open-politica/camera_voti/2025/camera_voti_2025_clean.parquet"
+        }
+        with patch("src.data._util.object_exists", return_value=True) as mock_exists:
+            from src.data._util import _parquet_exists
+
+            assert _parquet_exists("camera_voti", 2024, loc) is False
+            assert _parquet_exists("camera_voti", 2025, loc) is True
+        # l'anno sbagliato non fa nemmeno la HEAD
+        mock_exists.assert_called_once()
+
+    def test_glob_location_matches_year(self):
         loc = {
             "path": f"gs://{CLEAN_BUCKET}/p/s/*/s_*_clean.parquet",
             "multi_file": True,
@@ -60,13 +73,11 @@ class TestParquetExists:
             f"https://storage.googleapis.com/{CLEAN_BUCKET}/p/s/{year}/s_{year}_clean.parquet"
             for year in (2023, 2024)
         ]
-        with patch("src.data._util.location_urls", return_value=urls) as mock_urls:
+        with patch("src.data._util.location_urls", return_value=urls):
             from src.data._util import _parquet_exists
 
             assert _parquet_exists("s", 2024, loc) is True
             assert _parquet_exists("s", 2022, loc) is False
-        # una sola listing per dataset, non una per anno
-        mock_urls.assert_called()
 
     def test_glob_listing_failure_falls_back_to_head(self):
         loc = {
@@ -393,3 +404,15 @@ class TestLoadDataset:
         assert "SUM(quantita) AS quantita" in sql_call
         assert "GROUP BY regione" in sql_call
         assert "ORDER BY regione" in sql_call
+
+
+class TestLoaderCompat:
+    """I loader non devono importare simboli privati rimossi dal refactor."""
+
+    def test_loader_non_usano_simboli_rimossi(self):
+        data_dir = Path(__file__).resolve().parents[1] / "src" / "data"
+        removed = ("_load_manifest", "_target_path", "_location_https_prefix")
+        for loader in sorted(data_dir.glob("*.json.py")):
+            text = loader.read_text(encoding="utf-8")
+            for symbol in removed:
+                assert symbol not in text, f"{loader.name} usa {symbol}"

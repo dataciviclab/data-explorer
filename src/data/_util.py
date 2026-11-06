@@ -88,6 +88,11 @@ def _parquet_exists(slug: str, year: int, location: dict | None = None) -> bool:
     path = _location_path(location)
     if path.startswith("gs://"):
         if "*" not in path:
+            # File singolo: copre l'anno nel suo path (es. .../2025/...).
+            # Senza anno nel path (layout flat) vale per tutti gli anni.
+            path_year = _year_of(path)
+            if path_year is not None and path_year != year:
+                return False
             return object_exists(*parse_gs_url(path))
         try:
             urls = location_urls(location)

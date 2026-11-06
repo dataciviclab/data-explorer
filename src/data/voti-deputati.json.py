@@ -8,40 +8,41 @@ Legge camera_voti (7.7M righe) e produce JSON con:
 - top_dissidenti: deputati più spesso contro il proprio gruppo
 """
 import sys; sys.path.insert(0, "src/data")
-from _util import get_location, _parquet_exists, _parquet_refs, _load_manifest
-from lab_connectors.duckdb import safe_connect
-from lab_connectors.gcs.paths import CLEAN_BUCKET
 import json
+
+from _util import _parquet_exists, _parquet_refs, get_location
+from lab_connectors.duckdb import safe_connect
+from lab_connectors.gcs import object_exists
+from lab_connectors.gcs.paths import MART_BUCKET, https_url, resolve
 
 anni = [2022, 2023, 2024, 2025, 2026]
 
-def _find_mart(slug, year, mart_name):
-    """Cerca il mart nel manifest (MART_BUCKET, non CLEAN_BUCKET)."""
-    manifest = _load_manifest()
-    loc = get_location(slug)
-    if loc and loc.get("path", "").startswith("gs://"):
-        # Derive mart path from location prefix
-        path = loc["path"]
-        # Clean path: gs://bucket/prefix/slug/year/file → prefix/slug/year/file
+def _mart_url(slug, year, table):
+    """URL del mart pubblicato, derivando il prefix dalla location clean."""
+    loc = get_location(slug) or {}
+    path = loc.get("path", "")
+    prefix = ""
+    if path.startswith("gs://"):
         key = path[len("gs://"):].partition("/")[2]
-        prefix = key.rpartition("/")[0].rpartition("/")[0]  # up to slug level
-        mart_key = f"{prefix}/{year}/{mart_name}.parquet"
-    else:
-        mart_key = f"{slug}/{year}/{mart_name}.parquet"
-    for f in manifest.get("files", []):
-        if f["bucket"] == CLEAN_BUCKET and f["path"] == mart_key:
-            return f"https://storage.googleapis.com/{CLEAN_BUCKET}/{f['path']}"
-    return None
+        idx = key.find(f"/{slug}/")
+        if idx >= 0:
+            prefix = key[: idx + 1]
+    key = resolve("mart_parquet", prefix=prefix, slug=slug, year=year, table=table)
+    if not object_exists(MART_BUCKET, key):
+        return None
+    return https_url(
+        "mart", "mart_parquet", prefix=prefix, slug=slug, year=year, table=table
+    )
 
 # Trova parquet
 voti_loc = get_location("camera_voti")
 dep_loc = get_location("camera_deputati_legislature")
 voti_url = _parquet_refs("camera_voti", [2026], voti_loc)[0] if _parquet_exists("camera_voti", 2026, voti_loc) else None
 dep_url = _parquet_refs("camera_deputati_legislature", [2026], dep_loc)[0] if _parquet_exists("camera_deputati_legislature", 2026, dep_loc) else None
-mart_url = _find_mart("camera_voti", 2026, "mart_sintesi")
+mart_url = _mart_url("camera_voti", 2026, "mart_sintesi")
 
 if not voti_url:
-    json.dump({"error": "camera_voti parquet not found in manifest"}, sys.stdout)
+    json.dump({"error": "camera_voti parquet not found on GCS"}, sys.stdout)
     sys.exit(0)
 
 with safe_connect() as con:
