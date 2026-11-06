@@ -8,7 +8,7 @@ single source of truth per i dataset di TUTTI i repo del Lab. ACB fonde
 i registry.json di ogni repo, applica dedup e produce un indice aggregato.
 
 Questo modulo aggiunge solo la logica editoriale-specifica di explorer:
-- URL_SLUG_OVERRIDES (slug URL pubblici che divergono dagli slug DI)
+- URL slug pubblici (override editoriali) — fonte unica: lab_connectors.registry.to_url_slug
 - Temi da catalog/themes.json (config editoriale)
 - Risoluzione pagine esistenti in src/dataset/
 
@@ -25,6 +25,7 @@ import os
 import time
 
 import requests
+from lab_connectors.registry import to_url_slug
 
 # ROOT: repo root, calcolato da __file__ per non dipendere dal cwd
 # (questo file sta in src/data/, quindi 3 livelli sopra).
@@ -42,36 +43,6 @@ ACB_TOPIC_INDEX_URL = (
     "https://raw.githubusercontent.com/dataciviclab/"
     "agent-context-builder/context/topic_index.json"
 )
-
-# URL_SLUG_OVERRIDES: mapping eccezioni per slug URL pubblici.
-#
-# La regola di default converte meccanicamente lo slug DI (underscore)
-# in URL slug (hyphen):  "aifa_spesa_consumo" → "aifa-spesa-consumo".
-#
-# Per i dataset ereditati dalla fase Evidence, gli slug URL sono stati
-# scelti editorialmente e NON seguono lo slug DI. Ogni entry qui sotto
-# documenta questa divergenza.
-#
-# Per i NUOVI dataset: se l'URL slug meccanico va bene, non serve aggiungere
-# nulla qui. Se serve un nome URL diverso, aggiungi l'override con commento.
-URL_SLUG_OVERRIDES = {
-    "aifa_spesa_consumo": "spesa-farmaceutica",             # editoriale: nome tema
-    "ispra_ru_base": "rifiuti-urbani",                      # editoriale: nome tema
-    "civile_flussi": "flussi-giustizia-civile",             # editoriale: specifica tema
-    "terna_capacita_rinnovabile": "capacita-rinnovabile",   # editoriale: nome tema
-    "terna_electricity_by_source": "produzione-elettrica-fonti",  # editoriale: nome tema
-    "camera_votazioni_sparql": "votazioni-camera",          # editoriale: nome tema
-    "camera_deputati_legislature": "camera-deputati",       # editoriale: nome pagina
-    "camera_interventi": "attivita-aula",                   # editoriale: pagina combinata
-    "camera_voti": "voti-deputati",                         # editoriale: nome pagina
-    "bdap_entrate_stato": "entrate-stato",                  # editoriale: nome tema
-    "inps_pensioni_trimestrale": "pensioni-inps",           # editoriale: nome tema
-    "ade_cinque_per_mille": "cinque-per-mille",             # editoriale: nome tema
-    "istat_housing_crowding": "housing-crowding",           # editoriale: slug pagina ereditato
-    "mit_incidentalita_mensile": "mit-incidentalita",       # editoriale: slug pagina ereditato
-    "opencivitas_fsc_rso": "opencivitas-fsc-2025",           # editoriale: slug pagina ereditato
-    "popolazione_istat_comunale_2019_2025": "popolazione-istat",  # editoriale: slug pagina ereditato
-}
 
 # Cache di processo: il registry viene caricato una volta per processo.
 _REGISTRY_CACHE: dict | None = None
@@ -145,12 +116,12 @@ def load_registry() -> dict:
 
 
 def resolve_url_slug(di_slug: str) -> str:
-    """Risolve lo slug DI (underscore) in URL slug (hyphen).
+    """Risolve lo slug DI (underscore) in URL slug pubblico.
 
-    Default: sostituzione meccanica _ → -.
-    Override: se presente in URL_SLUG_OVERRIDES.
+    Fonte unica: ``lab_connectors.registry.to_url_slug`` (meccanico _ → -,
+    con gli override editoriali). Alias mantenuto per i consumer interni.
     """
-    return URL_SLUG_OVERRIDES.get(di_slug, di_slug.replace("_", "-"))
+    return to_url_slug(di_slug)
 
 
 def load_themes_config() -> list[dict]:
@@ -178,7 +149,7 @@ def has_explorer_page(url_slug: str) -> bool:
 def build_catalog(registry: dict | None = None) -> dict:
     """Costruisce il catalogo explorer (output di catalog.json.py).
 
-    Ogni entry espone slug DI + url_slug DE (URL_SLUG_OVERRIDES), stato,
+    Ogni entry espone slug DI + url_slug DE (to_url_slug), stato,
     periodo, metadati editoriali (category, tags), il repo di provenienza
     (registry_source), il location GCS e le colonne (con role/semantic_type)
     per il rendering data-driven delle pagine.
