@@ -8,5 +8,9 @@ load_dataset(
     years=list(range(2019, 2024)),
     group_cols=["anno_di_imposta", "regione"],
     metric_cols=["numero_contribuenti", "reddito_imponibile_eur", "imposta_netta_eur"],
+    # La riga aggregata dei comuni non riconosciuti ha codice ISTAT '0' e
+    # cambia etichetta negli anni ('Non indicato' / 'Mancante/errata'):
+    # si esclude per codice, non per nome.
+    where="codice_istat_comune <> '0'",
     location=get_location("irpef_comunale"),
 )

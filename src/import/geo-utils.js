@@ -28,6 +28,32 @@ export function normalizzaReg(nome) {
 }
 
 /**
+ * Riconosce una riga di provincia autonoma del Trentino-Alto Adige.
+ *
+ * Le fonti la scrivono in almeno tre modi, e tutti normalizzano in modo
+ * diverso con `normalizzaReg`:
+ *   "Trentino Alto Adige (P.A. Bolzano)"        → …-(P.A.-BOLZANO)
+ *   "Trentino Alto Adige(P.A.Bolzano)"          → …(P.A.BOLZANO)
+ *   "Trentino Alto Adige (Prov. Aut. Bolzano)"  → …-(PROV.-AUT.-BOLZANO)
+ *   "P. A. BOLZANO" (BDAP)                      → P.-A.-BOLZANO
+ *
+ * Quindi non si può confrontare la stringa normalizzata: si cercano i nomi
+ * delle due province. Da usare quando le P.A. vanno fuse nella regione ISTAT
+ * (`buildRegLookupWithTrentino`) o escluse.
+ *
+ * Nota: "TRENTINO" non contiene "TRENTO" (T-R-E-N-T-I-N-O), quindi una riga
+ * "Trentino Alto Adige" senza provincia non viene riconosciuta — ed è corretto.
+ *
+ * @param {string} nome — etichetta regione come arriva dalla fonte
+ * @returns {boolean}
+ */
+export function isTrentinoPA(nome) {
+  if (!nome) return false;
+  const n = normalizzaReg(String(nome));
+  return n.includes("BOLZANO") || n.includes("TRENTO");
+}
+
+/**
  * Mappa di fallback per regioni con nomi non standard nei dataset.
  * I dataset spesso usano "VALLE-DAOSTA" senza apostrofo, o
  * "TRENTINO-ALTO-ADIGE" senza lo slash "/SÜDTIROL".
@@ -222,20 +248,22 @@ export function buildRegLookupWithTrentino(
   aggregateFn,
   trentinoKey = "P.A.",
 ) {
+  // `trentinoKey` resta per compatibilità: alcune fonti (ISTAT Gini) usano
+  // un prefisso tipo "Provincia Autonoma", che non contiene il nome della
+  // provincia. `isTrentinoPA` copre invece le grafie con Bolzano/Trento.
+  const isPA = (label) =>
+    isTrentinoPA(label) ||
+    (!!trentinoKey && normalizzaReg(String(label ?? "")).includes(normalizzaReg(trentinoKey)));
+
   const lookup = buildRegLookup(
-    data.filter((d) => normalizzaReg(d[keyField]) !== normalizzaReg(trentinoKey)),
+    data.filter((d) => !isPA(d[keyField])),
     keyField,
     null,
     aggregateFn ? (d) => aggregateFn([d]) : null,
   );
 
   // Trova e aggrega le P.A. Trentino
-  const trentinoItems = data.filter(
-    (d) =>
-      normalizzaReg(d[keyField]).includes(normalizzaReg(trentinoKey)) ||
-      normalizzaReg(d[keyField]).includes("BOLZANO") ||
-      normalizzaReg(d[keyField]).includes("TRENTO"),
-  );
+  const trentinoItems = data.filter((d) => isPA(d[keyField]));
 
   if (trentinoItems.length > 0 && aggregateFn) {
     const trentinoVal = aggregateFn(trentinoItems);
