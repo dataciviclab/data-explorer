@@ -302,3 +302,92 @@ describe("buildRegLookup()", () => {
     assert.ok(!lookup.has("LOMBARDIA"), "non deve matchare senza token comune");
   });
 });
+
+describe("isTrentinoPA()", () => {
+  it("riconosce tutte le grafie usate dalle fonti", async () => {
+    const { isTrentinoPA } = await import("../src/import/geo-utils.js");
+    const varianti = [
+      "Trentino Alto Adige (P.A. Bolzano)",
+      "Trentino Alto Adige (P.A. Trento)",
+      "Trentino Alto Adige(P.A.Bolzano)",
+      "Trentino Alto Adige(P.A.Trento)",
+      "Trentino Alto Adige (Prov. Aut. Bolzano)",
+      "Trentino Alto Adige (Prov. Aut. Trento)",
+      "P. A. BOLZANO",
+      "P. A. TRENTO",
+      "Provincia Autonoma di Bolzano",
+      "PROVINCIA AUTONOMA DI TRENTO",
+    ];
+    for (const v of varianti) {
+      assert.equal(isTrentinoPA(v), true, `non riconosciuta: ${v}`);
+    }
+  });
+
+  it("non confonde la regione intera con una provincia", async () => {
+    const { isTrentinoPA } = await import("../src/import/geo-utils.js");
+    // "TRENTINO" non contiene "TRENTO": la riga aggregata non è una P.A.
+    assert.equal(isTrentinoPA("Trentino Alto Adige"), false);
+    assert.equal(isTrentinoPA("Trentino-Alto Adige/Südtirol"), false);
+  });
+
+  it("non matcha altre regioni e gestisce input vuoti", async () => {
+    const { isTrentinoPA } = await import("../src/import/geo-utils.js");
+    assert.equal(isTrentinoPA("Lombardia"), false);
+    assert.equal(isTrentinoPA(""), false);
+    assert.equal(isTrentinoPA(null), false);
+    assert.equal(isTrentinoPA(undefined), false);
+  });
+});
+
+describe("buildRegLookupWithTrentino()", () => {
+  const somma = (items) => items.reduce((s, d) => s + d.valore, 0);
+
+  it("fonde le due P.A. su una riga sola, in ogni grafia", async () => {
+    const { buildRegLookupWithTrentino } = await import(
+      "../src/import/geo-utils.js"
+    );
+    const grafie = [
+      ["Trentino Alto Adige (P.A. Bolzano)", "Trentino Alto Adige (P.A. Trento)"],
+      ["Trentino Alto Adige(P.A.Bolzano)", "Trentino Alto Adige(P.A.Trento)"],
+      [
+        "Trentino Alto Adige (Prov. Aut. Bolzano)",
+        "Trentino Alto Adige (Prov. Aut. Trento)",
+      ],
+    ];
+    for (const [bz, tn] of grafie) {
+      const data = [
+        { regione: bz, valore: 10 },
+        { regione: tn, valore: 32 },
+        { regione: "Lombardia", valore: 100 },
+      ];
+      const lookup = buildRegLookupWithTrentino(data, "regione", somma);
+      assert.equal(
+        lookup.get("TRENTINO-ALTO-ADIGE/SÜDTIROL"),
+        42,
+        `non fusa: ${bz}`,
+      );
+      assert.equal(lookup.get("LOMBARDIA"), 100);
+      // Le P.A. non devono restare come chiavi separate
+      assert.ok(!lookup.has("TRENTINO-ALTO-ADIGE-(P.A.-BOLZANO)"));
+    }
+  });
+
+  it("mantiene il parametro trentinoKey per le fonti con prefisso", async () => {
+    const { buildRegLookupWithTrentino } = await import(
+      "../src/import/geo-utils.js"
+    );
+    const data = [
+      { regione: "Provincia Autonoma di Bolzano", valore: 7 },
+      { regione: "Provincia Autonoma di Trento", valore: 5 },
+      { regione: "Veneto", valore: 50 },
+    ];
+    const lookup = buildRegLookupWithTrentino(
+      data,
+      "regione",
+      somma,
+      "Provincia Autonoma",
+    );
+    assert.equal(lookup.get("TRENTINO-ALTO-ADIGE/SÜDTIROL"), 12);
+    assert.equal(lookup.get("VENETO"), 50);
+  });
+});

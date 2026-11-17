@@ -17,7 +17,7 @@ Ogni anno i contribuenti italiani dichiarano redditi all'IRPEF (imposta personal
 
 ```js
 import { num, euro, euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js";
-import { normalizzaReg, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
+import { normalizzaReg, isTrentinoPA, loadItalianRegions, buildMapLookup } from "../import/geo-utils.js";
 ```
 
 ```js
@@ -38,20 +38,23 @@ const primo = anni[0];
 ```
 
 ```js
-// Esclude le righe di somma/errore e tiene solo l'ultimo anno
-const regOk = regioniRaw.filter(d => !/MANCANTE|ERRATA/.test(d.regione.toUpperCase()));
-const regLast = regOk.filter(d => d.anno_di_imposta === anno);
+// Il loader esclude già la riga aggregata dei comuni non riconosciuti
+// (codice ISTAT '0'): il filtro sta lì perché l'etichetta cambia negli anni
+// ('Non indicato' fino al 2017, 'Mancante/errata' dal 2018).
+const regLast = regioniRaw.filter(d => d.anno_di_imposta === anno);
 ```
 
 ```js
-// Unisce le due P.A. Trentino (come nel TopoJSON ISTAT), con media pesata per contribuenti
-const adige = regLast.filter(r => /P\.A\./.test(r.regione));
+// Unisce le due P.A. Trentino (come nel TopoJSON ISTAT), con media pesata per contribuenti.
+// Il riconoscimento usa isTrentinoPA: le fonti scrivono la provincia in almeno tre modi
+// ("(P.A. Bolzano)", "(P.A.Bolzano)", "(Prov. Aut. Bolzano)") e un regex su "P.A." ne perde una.
+const adige = regLast.filter(r => isTrentinoPA(r.regione));
 const aggre = (l) => ({
   reddito: d3.sum(l, r => r.reddito_imponibile_eur),
   contribuenti: d3.sum(l, r => r.numero_contribuenti)
 });
 const perRegione = [
-  ...regLast.filter(r => !/P\.A\./.test(r.regione)).map(r => ({ regione: r.regione, reddito_medio: r.numero_contribuenti ? r.reddito_imponibile_eur / r.numero_contribuenti : null })),
+  ...regLast.filter(r => !isTrentinoPA(r.regione)).map(r => ({ regione: r.regione, reddito_medio: r.numero_contribuenti ? r.reddito_imponibile_eur / r.numero_contribuenti : null })),
   ...(adige.length ? [(() => { const a = aggre(adige); return { regione: "TRENTINO-ALTO-ADIGE", reddito_medio: a.contribuenti ? a.reddito / a.contribuenti : null }; })()] : [])
 ];
 const lookup = buildMapLookup(perRegione, regioniGeo, "regione", "reddito_medio");
@@ -69,7 +72,7 @@ const impostaNaz = d3.sum(regLast, r => r.imposta_netta_eur);
 ```js
 // Serie storica del reddito medio nazionale + crescita dal primo anno
 const aggAnno = (a) => {
-  const r = regOk.filter(d => d.anno_di_imposta === a);
+  const r = regioniRaw.filter(d => d.anno_di_imposta === a);
   const c = d3.sum(r, q => q.numero_contribuenti);
   return { anno: a, contribuenti: c, reddito_tot: d3.sum(r, q => q.reddito_imponibile_eur), reddito_medio: c ? d3.sum(r, q => q.reddito_imponibile_eur) / c : null };
 };
