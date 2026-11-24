@@ -19,6 +19,11 @@ Dataset puliti (clean parquet) pubblicati dal Lab, organizzati per tema:
 
 Il catalogo completo è sulla [home page live](https://explorer.dataciviclab.org), con ricerca per tema e stato di pubblicazione.
 
+Alcuni dataset hanno una **scheda** (`/schede/<slug>`) con KPI, serie, mappa e
+classifiche generati dai mart: metadati dal catalogo, un file editoriale di
+poche righe, nessuna query a GCS durante il build. Le pagine curate restano su
+`/dataset/<slug>`.
+
 ## Per chi è
 
 - **Cittadini e giornalisti** — esplorano i dati pubblici senza scrivere codice
@@ -38,6 +43,7 @@ Apri http://localhost:3000
 ## Come funziona
 
 - **Data loader**: script Python in `src/data/` leggono i parquet da GCS via DuckDB a build time e producono JSON aggregato
+- **Schede dataset** (`/schede/<slug>`): un produttore fuori build (`npm run cards`) legge i mart e scrive un JSON statico; il build non interroga GCS. L'editoriale vive in `catalog/cards/*.yml`
 - **Deploy**: GitHub Pages via CI (`npm run build` → `observable build` → `explorer.dataciviclab.org`)
 
 ## Stack

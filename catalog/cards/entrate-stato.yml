@@ -1,0 +1,37 @@
+dataset: bdap_entrate_stato
+
+title: Entrate dello Stato
+source: MEF — RGS · BDAP
+source_url: https://bdap.rgs.mef.gov.it/
+
+blocks:
+  - type: kpi
+    measures:
+      - mart: bdap_entrate_stato__mart_entrate_anno
+        x: anno
+        y: entrate_totali_cp
+        label: Entrate totali (competenza)
+        format: euroCompact
+        delta: true
+
+  - type: composition
+    mart: bdap_entrate_stato__mart_entrate_titolo_natura_anno
+    x: anno
+    y: totale_cp
+    by: titolo_breve
+    by_label: titolo di entrata
+    y_label: Quota sul totale
+    normalize: true
+    title: Composizione per titolo
+    note: "Quote percentuali delle entrate per titolo, per anno."
+
+  - type: series
+    mart: bdap_entrate_stato__mart_entrate_anno
+    x: anno
+    y: entrate_totali_cp
+    y_label: Entrate totali (competenza)
+    y_format: euroCompact
+    title: Entrate totali per anno
+
+notes:
+  - "Previsioni definitive di competenza: solo entrate, le spese sono in un altro dataset."

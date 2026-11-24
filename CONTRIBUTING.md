@@ -32,7 +32,8 @@ Apri http://localhost:3000
 ## Aggiungere una pagina dataset
 
 1. **Data loader**: crea `src/data/<slug>.json.py` con la logica di aggregazione
-   - usa `load_dataset()` da `src/data/_util.py` (o `safe_connect()` per query custom)
+   - **se il dataset ha un mart** (vedi `mart_refs` nel registry): usa `_views.mart_rows()` / `group_rows()` — nessuna SQL nel frontend (vedi `src/data/README.md`)
+   - **altrimenti** usa `load_dataset()` da `src/data/_util.py` (o `safe_connect()` per query custom, senza `range(YYYY, YYYY)`: gli anni vengono dal registry con `_views.available_years()`)
    - **non usare** `duckdb.connect()` diretto — preferisci `safe_connect()`
    - il nome del file usa slug URL con trattini (es. `bdap-lea-regioni.json.py`)
    - lo slug DI (con underscore) va come parametro `slug=` a `load_dataset()`
@@ -54,6 +55,24 @@ Apri http://localhost:3000
 4. **Verifica**: `npm run lint && npm test && npm run build`
 5. **Checklist pre-pub** nel template PR: verificare slug, parquet, frontmatter,
    moduli condivisi, `tableFormat` in cella separata.
+
+### Scheda dataset senza pagina (route generata)
+
+Per i dataset che non meritano una pagina narrativa c'è la **scheda** generata:
+`/schede/<url-slug>`, con metadati dal catalogo e dati dai mart. Non si scrive
+codice: si dichiarano i blocchi in `catalog/cards/<url-slug>.yml`.
+
+```bash
+npm run card:new <slug>   # crea lo stub (solo `dataset:`)
+# compila title, description, source, license e i blocchi (kpi/series/composition/map/ranking)
+npm run cards:dry         # controlla la tabella slug → blocchi/mart/punti
+npm run cards             # scrive src/data/cards.json
+npm run build             # nessuna query GCS nel build
+```
+
+Il file **non duplica** il catalogo: `period`, `rows`, `columns`, `stage`,
+`category` sono vietati e il produttore fallisce se li trova. Contratto dei
+blocchi e validazione: [`docs/dataset-card.md`](docs/dataset-card.md).
 
 ### Standard verificati automaticamente
 

@@ -8,7 +8,9 @@ on:
       - 'src/data/**'
       - 'src/dataset/**'
       - 'src/temi/**'
+      - 'src/schede/**'
       - 'src/import/**'
+      - 'catalog/cards/**'
       - 'tests/**'
       - 'scripts/**'
       - 'observablehq.config.js'
@@ -43,7 +45,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: src/.observablehq/cache
-          key: observable-cache-${{ hashFiles('src/data/*.json.py') }}
+          key: observable-cache-${{ hashFiles('src/data/*.json.py', 'src/data/_registry.py', 'src/data/_views.py') }}
           restore-keys: |
             observable-cache-
 
@@ -52,6 +54,17 @@ jobs:
 
       - name: Unit tests
         run: npm test
+
+      - name: Generate dataset cards
+        run: npm run cards
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke schede
+        run: |
+          test -f dist/observable/schede/index.html
+          test -f dist/observable/schede/anac-bandi-gara.html
 
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"

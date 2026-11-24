@@ -17,7 +17,7 @@
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -117,8 +117,16 @@ function buildSidebar(themes, catalog) {
     existsSync(resolve(ROOT, `src/dataset/${slug}.md`))
   );
 
-  // Dataset con pagina explorer non assegnati a nessun tema → "Altri dataset"
-  // Invariante: ogni pagina .md in src/dataset/ deve comparire nella sidebar.
+  // Schede dataset generate (indice + route dinamica /schede/[slug]).
+  // Una sola voce: la lista cresce senza allungare la sidebar.
+  if (existsSync(resolve(ROOT, "src/schede/index.md"))) {
+    pages.push({ name: "Schede dataset", path: "/schede/" });
+  }
+
+  // Dataset con pagina explorer non assegnati a nessun tema → "Altri dataset".
+  // Invariante: ogni pagina .md in src/dataset/ deve comparire nella sidebar,
+  // anche se non è nel catalogo ACB (es. slug divergente). Altrimenti la pagina
+  // esiste nel build ma è raggiungibile solo per URL.
   const assigned = new Set(themes.flatMap((t) => t.datasets));
   const unassigned = catalog.datasets.filter((d) => {
     if (assigned.has(d.url_slug)) return false;
@@ -126,14 +134,24 @@ function buildSidebar(themes, catalog) {
     if (!existsSync(pagePath)) return false;
     return true;
   });
-  if (unassigned.length > 0) {
+  const unassignedPages = unassigned.map((d) => ({
+    name: readPageTitle(d.url_slug),
+    path: `/dataset/${d.url_slug}`,
+  }));
+  const included = new Set([
+    ...pages.flatMap((section) => (section.pages || []).map((page) => page.path)),
+    ...unassignedPages.map((page) => page.path),
+  ]);
+  const orphans = readdirSync(resolve(ROOT, "src/dataset"))
+    .filter((file) => file.endsWith(".md"))
+    .map((file) => file.replace(/\.md$/, ""))
+    .map((slug) => ({ name: readPageTitle(slug), path: `/dataset/${slug}` }))
+    .filter((page) => !included.has(page.path));
+  if (unassignedPages.length + orphans.length > 0) {
     pages.push({
       name: "Altri dataset",
       collapsible: true,
-      pages: unassigned.map((d) => ({
-        name: readPageTitle(d.url_slug),
-        path: `/dataset/${d.url_slug}`,
-      })),
+      pages: [...unassignedPages, ...orphans],
     });
   }
 
@@ -152,13 +170,20 @@ function buildSidebar(themes, catalog) {
 
 // ── Entry point ─────────────────────────────────────────────────────────────
 
-try {
-  const catalog = readData("catalog.json");
-  const themes = readData("themes.json");
+// Guardia: il modulo è importato dai test. Senza di essa ogni `npm test`
+// riscriverebbe observablehq.config.js (file generato e tracciato in git).
+function isMainModule() {
+  return Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+}
 
-  const pages = buildSidebar(themes, catalog);
+if (isMainModule()) {
+  try {
+    const catalog = readData("catalog.json");
+    const themes = readData("themes.json");
 
-  const config = `export default {
+    const pages = buildSidebar(themes, catalog);
+
+    const config = `export default {
   root: "src",
   output: "dist/observable",
   title: "DataCivicLab Explorer",
@@ -166,14 +191,26 @@ try {
   interpreters: {
     ".py": ${JSON.stringify((process.env.PYTHON3 || "python3").split(/\s+/))}
   },
+  // Schede dataset: una route dinamica, N path calcolati dal file statico
+  // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
+  dynamicPaths: async function* () {
+    try {
+      const { readFileSync } = await import("node:fs");
+      const cards = JSON.parse(readFileSync(new URL("./src/data/cards.json", import.meta.url), "utf-8"));
+      for (const slug of Object.keys(cards)) yield \`/schede/\${slug}\`;
+    } catch {
+      // Nessuna scheda generata: il sito resta valido, solo senza /schede/*
+    }
+  },
   pages: ${JSON.stringify(pages, null, 2)},
 };
 `;
 
-  const configPath = resolve(ROOT, "observablehq.config.js");
-  writeFileSync(configPath, config, "utf-8");
-  console.log(`✓ generate-config: ${pages.length} sezioni, ${pages.flatMap(p => p.pages || []).length} dataset`);
-} catch (err) {
-  console.error("✗ generate-config fallito:", err.message);
-  process.exit(1);
+    const configPath = resolve(ROOT, "observablehq.config.js");
+    writeFileSync(configPath, config, "utf-8");
+    console.log(`✓ generate-config: ${pages.length} sezioni, ${pages.flatMap(p => p.pages || []).length} dataset`);
+  } catch (err) {
+    console.error("✗ generate-config fallito:", err.message);
+    process.exit(1);
+  }
 }

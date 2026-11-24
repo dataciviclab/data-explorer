@@ -1,88 +1,68 @@
 #!/usr/bin/env python3
-"""Data loader: ANAC Bandi di Gara (CIG) — aggregazioni per anno.
+"""Data loader: ANAC Bandi di Gara (CIG) — viste dai mart della pipeline.
 
-Legge tutti gli anni disponibili (2016-2025) e produce un JSON con:
-- trend: [{anno, n_gare, n_lotti, importo_totale}]
-- per_tipo: [{anno, tipo, n_lotti, importo}]  (tipo_scelta_contraente)
-- per_oggetto: [{anno, oggetto, n_lotti, importo}]  (oggetto_principale_contratto)
-- per_stato: [{anno, stato, n_lotti, importo}]  (stato della gara)
-- top_sa: [{anno, denominazione, importo}]  (top stazioni appaltanti)
-- anni: [2016, ...]
+Nessuna SQL locale: legge i mart dichiarati in ``appalti-pubblici``
+(``mart_annuale``, ``mart_esiti_per_procedura``, ``mart_top_stazioni``) e
+proietta le colonne attese dalla pagina.
+
+Output:
+- trend:    [{anno, n_lotti, importo_totale}]
+- per_tipo: [{anno, tipo, n_lotti, importo}]   (tipo_scelta_contraente)
+- top_sa:   [{anno, denominazione, n_lotti, importo}]
+- anni:     [2016, ...]
+
+Perimetro: dal 2016 (CIG confrontabile) all'ultimo anno completo.
+L'anno in corso è escluso perché la partizione è parziale.
 """
-import sys, json
+
+import sys
+
 sys.path.insert(0, "src/data")
-from _util import get_location, _parquet_exists, _parquet_refs
-from lab_connectors.duckdb import safe_connect
+from _views import group_rows, mart_rows, write
 
-SLUG = "anac_bandi_gara"
-YEARS = list(range(2016, 2026))
+ANNO_MIN = 2016
 
-location = get_location(SLUG)
-valid = [y for y in YEARS if _parquet_exists(SLUG, y, location)]
-if not valid:
-    json.dump({}, sys.stdout)
-    sys.exit(0)
+trend = mart_rows(
+    "anac_bandi_gara__mart_annuale",
+    select={"anno": "anno", "n_lotti": "n_lotti", "importo_totale": "importo_totale"},
+    since=ANNO_MIN,
+    until="last_complete",
+)
 
-refs = " UNION ALL ".join(
-    f"SELECT * FROM read_parquet('{url}')" for url in _parquet_refs(SLUG, valid, location))
+per_tipo = group_rows(
+    mart_rows(
+        "anac_bandi_gara__mart_esiti_per_procedura",
+        select={
+            "anno": "anno",
+            "tipo": "tipo_scelta_contraente",
+            "n_lotti": "n_lotti",
+            "importo": "importo_totale",
+        },
+        since=ANNO_MIN,
+        until="last_complete",
+    ),
+    by=["anno", "tipo"],
+    metrics={"n_lotti": "sum", "importo": "sum"},
+    sort_by="anno",
+)
 
-with safe_connect() as con:
-    trend = [
-        {"anno": r[0], "n_lotti": int(r[1]), "importo_totale": float(r[2] or 0)}
-        for r in con.sql(f"""
-            SELECT anno_pubblicazione as anno,
-                   COUNT(*) as n_lotti,
-                   SUM(COALESCE(importo_lotto, 0)) as importo_totale
-            FROM ({refs}) GROUP BY anno_pubblicazione ORDER BY anno_pubblicazione
-        """).fetchall()
-    ]
+top_sa = mart_rows(
+    "anac_bandi_gara__mart_top_stazioni",
+    select={
+        "anno": "anno",
+        "denominazione": "denominazione_amministrazione_appaltante",
+        "n_lotti": "n_lotti",
+        "importo": "importo_totale",
+    },
+    since=ANNO_MIN,
+    until="last_complete",
+)
 
-    per_tipo = [
-        {"anno": r[0], "tipo": r[1], "n_lotti": int(r[2]), "importo": float(r[3] or 0)}
-        for r in con.sql(f"""
-            SELECT anno_pubblicazione, tipo_scelta_contraente,
-                   COUNT(*) as n_lotti, SUM(COALESCE(importo_lotto, 0)) as importo
-            FROM ({refs}) WHERE tipo_scelta_contraente IS NOT NULL
-            GROUP BY anno_pubblicazione, tipo_scelta_contraente ORDER BY anno_pubblicazione, importo DESC
-        """).fetchall()
-    ]
-
-    per_oggetto = [
-        {"anno": r[0], "oggetto": r[1], "n_lotti": int(r[2]), "importo": float(r[3] or 0)}
-        for r in con.sql(f"""
-            SELECT anno_pubblicazione, oggetto_principale_contratto,
-                   COUNT(*) as n_lotti, SUM(COALESCE(importo_lotto, 0)) as importo
-            FROM ({refs}) WHERE oggetto_principale_contratto IS NOT NULL
-            GROUP BY anno_pubblicazione, oggetto_principale_contratto ORDER BY anno_pubblicazione, importo DESC
-        """).fetchall()
-    ]
-
-    per_stato = [
-        {"anno": r[0], "stato": r[1], "n_lotti": int(r[2]), "importo": float(r[3] or 0)}
-        for r in con.sql(f"""
-            SELECT anno_pubblicazione, stato,
-                   COUNT(*) as n_lotti, SUM(COALESCE(importo_lotto, 0)) as importo
-            FROM ({refs}) WHERE stato IS NOT NULL
-            GROUP BY anno_pubblicazione, stato ORDER BY anno_pubblicazione, n_lotti DESC
-        """).fetchall()
-    ]
-
-    top_sa = [
-        {"anno": r[0], "denominazione": r[1], "n_lotti": int(r[2]), "importo": float(r[3] or 0)}
-        for r in con.sql(f"""
-            SELECT anno_pubblicazione,
-                   COALESCE(denominazione_amministrazione_appaltante, 'NON CLASSIFICATA') as sa,
-                   COUNT(*) as n_lotti, SUM(COALESCE(importo_lotto, 0)) as importo
-            FROM ({refs})
-            GROUP BY anno_pubblicazione, sa ORDER BY anno_pubblicazione, importo DESC
-        """).fetchall()
-    ]
-
-json.dump({
-    "trend": trend,
-    "per_tipo": per_tipo,
-    "per_oggetto": per_oggetto,
-    "per_stato": per_stato,
-    "top_sa": top_sa,
-    "anni": valid,
-}, sys.stdout, ensure_ascii=False)
+write(
+    {
+        "trend": trend,
+        "per_tipo": per_tipo,
+        "top_sa": top_sa,
+        "anni": [row["anno"] for row in trend],
+    }
+)

@@ -6,6 +6,17 @@ export default {
   interpreters: {
     ".py": ["python3"]
   },
+  // Schede dataset: una route dinamica, N path calcolati dal file statico
+  // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
+  dynamicPaths: async function* () {
+    try {
+      const { readFileSync } = await import("node:fs");
+      const cards = JSON.parse(readFileSync(new URL("./src/data/cards.json", import.meta.url), "utf-8"));
+      for (const slug of Object.keys(cards)) yield `/schede/${slug}`;
+    } catch {
+      // Nessuna scheda generata: il sito resta valido, solo senza /schede/*
+    }
+  },
   pages: [
   {
     "name": "Territorio e ambiente",
@@ -16,24 +27,16 @@ export default {
         "path": "/dataset/ispra-emissioni-ghg"
       },
       {
-        "name": "Rifiuti urbani nei comuni",
-        "path": "/dataset/rifiuti-urbani"
-      },
-      {
         "name": "Incidenti stradali",
         "path": "/dataset/mit-incidentalita"
       },
       {
-        "name": "Infrastrutture strategiche SILOS",
-        "path": "/dataset/silos-infrastrutture"
+        "name": "Rifiuti urbani nei comuni",
+        "path": "/dataset/rifiuti-urbani"
       },
       {
         "name": "Capacità rinnovabile per regione",
         "path": "/dataset/capacita-rinnovabile"
-      },
-      {
-        "name": "Produzione elettrica per fonte",
-        "path": "/dataset/produzione-elettrica-fonti"
       }
     ]
   },
@@ -50,16 +53,8 @@ export default {
         "path": "/dataset/bdap-spese-stato"
       },
       {
-        "name": "Consumi in convenzione Consip",
-        "path": "/dataset/consip-consumi-convenzione"
-      },
-      {
         "name": "FTS EU Grants — Finanziamenti UE in Italia",
         "path": "/dataset/fts-eu-grants"
-      },
-      {
-        "name": "IRPEF — quanto reddito si dichiara in ogni territorio",
-        "path": "/dataset/irpef-comunale"
       },
       {
         "name": "Indice di Gini regionale",
@@ -70,12 +65,16 @@ export default {
         "path": "/dataset/mef-partecipazioni"
       },
       {
-        "name": "Fondo di Solidarietà Comunale",
-        "path": "/dataset/opencivitas-fsc-2025"
+        "name": "IRPEF — quanto reddito si dichiara in ogni territorio",
+        "path": "/dataset/irpef-comunale"
       },
       {
         "name": "OpenCoesione — Progetti delle politiche di coesione",
         "path": "/dataset/opencoesione-progetti"
+      },
+      {
+        "name": "Consumi in convenzione Consip",
+        "path": "/dataset/consip-consumi-convenzione"
       },
       {
         "name": "PNRR Gare — Italia Domani",
@@ -90,12 +89,20 @@ export default {
         "path": "/dataset/pnrr-progetti"
       },
       {
+        "name": "Fondo di Solidarietà Comunale",
+        "path": "/dataset/opencivitas-fsc-2025"
+      },
+      {
         "name": "Aiuti di Stato — Registro Nazionale Aiuti (RNA)",
         "path": "/dataset/rna-aiuti-stato"
       },
       {
         "name": "Bandi di gara pubblici ANAC",
         "path": "/dataset/anac-bandi-gara"
+      },
+      {
+        "name": "Infrastrutture strategiche SILOS",
+        "path": "/dataset/silos-infrastrutture"
       }
     ]
   },
@@ -104,20 +111,16 @@ export default {
     "collapsible": true,
     "pages": [
       {
-        "name": "Spesa farmaceutica convenzionata",
-        "path": "/dataset/spesa-farmaceutica"
-      },
-      {
         "name": "Spesa sanitaria regionale LEA",
         "path": "/dataset/bdap-lea"
       },
       {
-        "name": "Farmacie italiane",
-        "path": "/dataset/farmacie"
+        "name": "Spesa farmaceutica convenzionata",
+        "path": "/dataset/spesa-farmaceutica"
       },
       {
-        "name": "Posti letto ospedalieri",
-        "path": "/dataset/posti-letto-stabilimento"
+        "name": "Farmacie italiane",
+        "path": "/dataset/farmacie"
       },
       {
         "name": "Posti letto per disciplina ospedaliera",
@@ -130,6 +133,10 @@ export default {
       {
         "name": "Strutture di ricovero del SSN",
         "path": "/dataset/strutture-ricovero-asl"
+      },
+      {
+        "name": "Posti letto ospedalieri",
+        "path": "/dataset/posti-letto-stabilimento"
       }
     ]
   },
@@ -146,16 +153,16 @@ export default {
         "path": "/dataset/pensioni-inps"
       },
       {
+        "name": "Pensioni Pubblica Amministrazione — DAG",
+        "path": "/dataset/pensioni-pa-dag"
+      },
+      {
         "name": "Densità abitativa",
         "path": "/dataset/housing-crowding"
       },
       {
         "name": "Indice prezzi abitazioni (IPAB) per area",
         "path": "/dataset/istat-ipab-aree"
-      },
-      {
-        "name": "Pensioni Pubblica Amministrazione — DAG",
-        "path": "/dataset/pensioni-pa-dag"
       },
       {
         "name": "Popolazione italiana per età",
@@ -216,16 +223,30 @@ export default {
         "path": "/dataset/elezioni-europee"
       },
       {
-        "name": "Elezioni Politiche Italiane",
-        "path": "/dataset/elezioni-politiche"
-      },
-      {
         "name": "Elezioni Referendum",
         "path": "/dataset/elezioni-referendum"
       },
       {
         "name": "Elezioni Regionali",
         "path": "/dataset/elezioni-regionali"
+      },
+      {
+        "name": "Elezioni Politiche Italiane",
+        "path": "/dataset/elezioni-politiche"
+      }
+    ]
+  },
+  {
+    "name": "Schede dataset",
+    "path": "/schede/"
+  },
+  {
+    "name": "Altri dataset",
+    "collapsible": true,
+    "pages": [
+      {
+        "name": "Produzione elettrica per fonte",
+        "path": "/dataset/produzione-elettrica-fonti"
       }
     ]
   },
