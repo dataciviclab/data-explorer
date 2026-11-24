@@ -236,7 +236,7 @@ def build_card(entry: dict, spec: dict, rows: list[dict]) -> dict:
         "intro": spec.get("intro") or "",
         "notes": [str(note) for note in spec.get("notes") or []],
         "category": entry.get("category", ""),
-        "stage": entry.get("stage", ""),
+        "published": bool(entry.get("published", entry.get("stage") == "published")),
         "period": entry.get("period") or {},
         "source": spec.get("source") or entry.get("source") or "",
         "source_url": spec.get("source_url") or "",

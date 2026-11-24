@@ -209,6 +209,13 @@ def mart_location(ref: str) -> dict[str, Any]:
 
     for mart in _repo_registry(repo).marts:
         if mart.slug == ref:
+            if not mart.location.path:
+                # v2 non scrive `location` sui mart: il path si deriva da
+                # `layout` + `gcs.prefix` (lab-connectors `locations.py`).
+                raise RuntimeError(
+                    f"_views: mart {ref!r} senza location nel registry: "
+                    "serve lab-connectors con sintesi path per registry v2"
+                )
             return {
                 "type": mart.location.type,
                 "path": mart.location.path,
@@ -357,11 +364,19 @@ def available_years(slug: str, *, published: bool = False) -> list[int]:
 
     ``published=False`` (default) usa l'intervallo dichiarato (nessuna rete).
     ``published=True`` verifica le partizioni presenti su GCS (HEAD per anno).
-    Sostituisce i ``range(YYYY, YYYY)`` nei loader.
+    Con registry v2 (topic_index v8) gli anni arrivano da ``partitions`` e non
+    c'è nessuna chiamata di rete. Sostituisce i ``range(YYYY, YYYY)``.
     """
+    meta = _dataset_meta(slug)
+    partitions = meta.get("partitions")
+    if isinstance(partitions, dict) and partitions:
+        years = sorted(int(key) for key in partitions if str(key).isdigit())
+        if years:
+            return years
+
     from lab_connectors.registry.availability import published_years, year_range
 
-    repo = _dataset_meta(slug).get("registry_source") or ""
+    repo = meta.get("registry_source") or ""
     if not repo:
         raise RuntimeError(f"_views: dataset {slug!r} senza 'registry_source' nel catalogo")
     registry = _repo_registry(repo)
@@ -380,12 +395,23 @@ def available_years(slug: str, *, published: bool = False) -> list[int]:
 
 
 def latest_run(slug: str) -> dict[str, Any]:
-    """Ultima esecuzione di pipeline del dataset, dai ``signals`` del registry.
+    """Ultima esecuzione di pipeline del dataset.
 
-    Restituisce ``{}`` se il repo non pubblica segnali o il dataset non ne ha.
+    Preferisce ``last_run`` del catalogo (topic_index v8: niente più
+    ``signals`` nei registry). Con v1 ricade sui ``signals`` del repo.
     Campi: ``run_id``, ``status``, ``finished_at``, ``quality``, ``rows``.
     """
-    repo = _dataset_meta(slug).get("registry_source") or ""
+    meta = _dataset_meta(slug)
+    last = meta.get("last_run")
+    if isinstance(last, dict) and last:
+        return {
+            "run_id": last.get("run_id", ""),
+            "status": last.get("status", ""),
+            "finished_at": last.get("at") or last.get("finished_at") or "",
+            "quality": last.get("quality") or {},
+            "rows": last.get("rows") or {},
+        }
+    repo = meta.get("registry_source") or ""
     if not repo:
         return {}
     for signal in _repo_registry(repo).signals:

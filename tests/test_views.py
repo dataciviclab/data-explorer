@@ -154,3 +154,31 @@ class TestJsonable:
 
     def test_strutture_annidate(self):
         assert jsonable([{"a": [1, None]}]) == [{"a": [1, None]}]
+
+
+class TestRegistryV2:
+    """v8: `last_run` e `partitions` arrivano dal catalogo, senza repo registry."""
+
+    def test_latest_run_da_last_run(self, monkeypatch):
+        from src.data import _views
+
+        monkeypatch.setattr(
+            _views,
+            "_dataset_meta",
+            lambda slug: {
+                "last_run": {"at": "2026-11-17T17:01:24Z", "year": 2017, "status": "SUCCESS"}
+            },
+        )
+        run = _views.latest_run("x")
+        assert run["finished_at"] == "2026-11-17T17:01:24Z"
+        assert run["status"] == "SUCCESS"
+
+    def test_available_years_da_partitions(self, monkeypatch):
+        from src.data import _views
+
+        monkeypatch.setattr(
+            _views,
+            "_dataset_meta",
+            lambda slug: {"partitions": {"2024": 10, "2025": 12}},
+        )
+        assert _views.available_years("x") == [2024, 2025]

@@ -110,6 +110,7 @@ def load_registry() -> dict:
     _REGISTRY_CACHE = {
         "datasets": flat_datasets,
         "signals_by_id": signals_by_id,
+        "analyses_by_dataset": data.get("analyses_by_dataset") or {},
         "updated_at": data.get("generated_at", ""),
     }
     return _REGISTRY_CACHE
@@ -159,6 +160,7 @@ def build_catalog(registry: dict | None = None) -> dict:
         registry = load_registry()
 
     signals = registry.get("signals_by_id", {})
+    analyses = registry.get("analyses_by_dataset") or {}
 
     datasets = []
     for ds in registry.get("datasets", []):
@@ -173,6 +175,12 @@ def build_catalog(registry: dict | None = None) -> dict:
             "name": ds.get("name", ""),
             "description": ds.get("description", "")[:150],
             "stage": ds.get("stage", ""),
+            # v2 (topic_index v8): `published` arriva da ACB ed è derivato dalle
+            # pagine. Con v1 lo deriviamo qui da `analyses_by_dataset`, con
+            # fallback sullo `stage` storico.
+            "published": bool(
+                ds.get("published", (slug in analyses) or ds.get("stage") == "published")
+            ),
             "years": f"{period.get('start', '?')}–{period.get('end', '?')}" if period else "?",
             "period": {"start": period.get("start"), "end": period.get("end")},
             "source": ds.get("source", ""),
@@ -194,11 +202,12 @@ def build_catalog(registry: dict | None = None) -> dict:
                 for c in ds.get("columns", [])
             ],
         })
+    published = sum(1 for d in datasets if d["published"])
     return {
         "updated_at": registry.get("updated_at", ""),
         "total": len(datasets),
-        "published": sum(1 for d in datasets if d["stage"] == "published"),
-        "incubating": sum(1 for d in datasets if d["stage"] == "incubating"),
+        "published": published,
+        "incubating": len(datasets) - published,
         "total_clean_rows": sum(d["clean_rows"] or 0 for d in datasets),
         "datasets": datasets,
     }

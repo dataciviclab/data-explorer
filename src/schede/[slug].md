@@ -14,7 +14,7 @@ const slug = observable.params.slug;
 const card = cards[slug];
 if (!card) throw new Error(`Scheda non trovata: ${slug}`);
 
-const stageLabel = card.stage === "published" ? "Pubblicato" : "In incubazione";
+const stageLabel = card.published ? "Pubblicato" : "In incubazione";
 const fmt = (value, format) => {
   if (value == null) return "—";
   if (format === "euroCompact") return euroCompact(value);

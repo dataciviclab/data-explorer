@@ -18,7 +18,7 @@ display(
     ? html`<ul>${list.map(
         (card) => html`<li>
           <a href="/schede/${card.url_slug}">${card.name}</a>
-          ${card.stage === "published" ? "" : " · in incubazione"}
+          ${card.published ? "" : " · in incubazione"}
           ${card.series.length ? ` · ${card.series[0].x}–${card.series[card.series.length - 1].x}` : ""}
         </li>`
       )}</ul>`
