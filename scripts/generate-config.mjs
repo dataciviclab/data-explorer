@@ -173,6 +173,17 @@ if (isMainModule()) {
   interpreters: {
     ".py": ${JSON.stringify((process.env.PYTHON3 || "python3").split(/\s+/))}
   },
+  // Schede dataset: una route dinamica, N path calcolati dal file statico
+  // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
+  dynamicPaths: async function* () {
+    try {
+      const { readFileSync } = await import("node:fs");
+      const cards = JSON.parse(readFileSync(new URL("./src/data/cards.json", import.meta.url), "utf-8"));
+      for (const slug of Object.keys(cards)) yield \`/schede/\${slug}\`;
+    } catch {
+      // Nessuna scheda generata: il sito resta valido, solo senza /schede/*
+    }
+  },
   pages: ${JSON.stringify(pages, null, 2)},
 };
 `;

@@ -376,6 +376,32 @@ def available_years(slug: str, *, published: bool = False) -> list[int]:
     return years
 
 
+# ── Provenienza / ultima esecuzione ─────────────────────────────────────────
+
+
+def latest_run(slug: str) -> dict[str, Any]:
+    """Ultima esecuzione di pipeline del dataset, dai ``signals`` del registry.
+
+    Restituisce ``{}`` se il repo non pubblica segnali o il dataset non ne ha.
+    Campi: ``run_id``, ``status``, ``finished_at``, ``quality``, ``rows``.
+    """
+    repo = _dataset_meta(slug).get("registry_source") or ""
+    if not repo:
+        return {}
+    for signal in _repo_registry(repo).signals:
+        if signal.id != slug or signal.run is None:
+            continue
+        run = signal.run
+        return {
+            "run_id": run.run_id,
+            "status": run.status,
+            "finished_at": run.finished_at,
+            "quality": run.quality_score,
+            "rows": run.output_rows,
+        }
+    return {}
+
+
 # ── Output JSON ─────────────────────────────────────────────────────────────
 
 
