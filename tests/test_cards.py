@@ -278,3 +278,37 @@ class TestPoints:
     def test_scarta_righe_senza_misura(self):
         rows = [{"x": 2024, "y": None}, {"x": 2025, "y": 2}]
         assert bc._points(rows, until=2025) == [{"x": 2025, "y": 2}]
+
+
+class TestComposition:
+    def test_aggrega_per_anno_e_gruppo(self, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        monkeypatch.setattr(bc, "last_complete_year", lambda: 2025)
+        spec = {
+            "dataset": entry["slug"],
+            "blocks": [
+                {
+                    "type": "composition",
+                    "mart": "anac_bandi_gara__mart_annuale",
+                    "x": "anno",
+                    "y": "valore",
+                    "by": "gruppo",
+                }
+            ],
+        }
+        rows = {
+            "anac_bandi_gara__mart_annuale": [
+                {"x": 2024, "group": "a", "y": 1},
+                {"x": 2024, "group": "a", "y": 2},
+                {"x": 2025, "group": "b", "y": 4},
+                {"x": 2026, "group": "c", "y": 99},
+            ]
+        }
+        card = bc.build_card(entry, spec, _fetch(rows))
+        block = card["blocks"][0]
+        assert block["normalize"] is True
+        assert block["groups"] == ["a", "b"]
+        assert block["data"] == [
+            {"x": 2024, "group": "a", "y": 3},
+            {"x": 2025, "group": "b", "y": 4},
+        ]

@@ -86,6 +86,20 @@ MEASURE_KEYS = {"mart", "x", "y", "label", "format", "delta"}
 BLOCK_KEYS: dict[str, set[str]] = {
     "kpi": {"type", "title", "measures"},
     "series": {"type", "title", "note", "mart", "x", "x_label", "y", "y_label", "y_format"},
+    "composition": {
+        "type",
+        "title",
+        "note",
+        "mart",
+        "x",
+        "x_label",
+        "y",
+        "y_label",
+        "y_format",
+        "by",
+        "by_label",
+        "normalize",
+    },
     "ranking": {
         "type",
         "title",
@@ -103,6 +117,7 @@ BLOCK_KEYS: dict[str, set[str]] = {
 BLOCK_REQUIRED: dict[str, set[str]] = {
     "kpi": {"measures"},
     "series": {"mart", "x", "y"},
+    "composition": {"mart", "x", "y", "by"},
     "ranking": {"mart", "dimension", "measure"},
 }
 
@@ -271,6 +286,37 @@ def _series_block(block: dict, fetch: Fetch) -> dict:
     }
 
 
+def _composition_block(block: dict, fetch: Fetch) -> dict:
+    rows = fetch(block["mart"], {"x": block["x"], "group": block["by"], "y": block["y"]})
+    until = last_complete_year()
+    totals: dict[tuple[int, str], float] = {}
+    for row in rows:
+        x, group, value = row.get("x"), row.get("group"), row.get("y")
+        if x is None or group is None or value is None:
+            continue
+        if not isinstance(x, (int, float)) or x > until:
+            continue
+        key = (int(x), str(group))
+        totals[key] = totals.get(key, 0) + value
+    data = [
+        {"x": x, "group": group, "y": value}
+        for (x, group), value in sorted(totals.items())
+    ]
+    groups = sorted({point["group"] for point in data})
+    return {
+        "type": "composition",
+        "title": block.get("title", ""),
+        "note": block.get("note", ""),
+        "x_label": block.get("x_label") or DEFAULT_X_LABEL,
+        "y_label": block.get("y_label") or "Quota",
+        "y_format": block.get("y_format") or DEFAULT_FORMAT,
+        "by_label": block.get("by_label") or block["by"],
+        "normalize": bool(block.get("normalize", True)),
+        "groups": groups,
+        "data": data,
+    }
+
+
 def _ranking_block(block: dict, fetch: Fetch) -> dict:
     columns = {"label": block["dimension"], "value": block["measure"]}
     if block.get("x"):
@@ -363,6 +409,8 @@ def _build_blocks(spec: dict, fetch: Fetch) -> list[dict]:
             built.append(_kpi_block(block, fetch))
         elif kind == "series":
             built.append(_series_block(block, fetch))
+        elif kind == "composition":
+            built.append(_composition_block(block, fetch))
         elif kind == "ranking":
             built.append(_ranking_block(block, fetch))
     return built

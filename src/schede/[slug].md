@@ -42,8 +42,8 @@ if (card.intro) display(html`<p style="line-height:1.6">${card.intro}</p>`);
 ```
 
 ```js
-if (card.warnings.length) display(html`<div class="note" style="border-left:3px solid #d95f0e; padding:0.6rem 0.9rem; background:var(--theme-background-alt); border-radius:0 8px 8px 0;">
-  <strong>Scheda in preparazione.</strong> ${card.warnings.join(" ")}
+if ((card.warnings || []).length) display(html`<div class="note" style="border-left:3px solid #d95f0e; padding:0.6rem 0.9rem; background:var(--theme-background-alt); border-radius:0 8px 8px 0;">
+  <strong>Scheda in preparazione.</strong> ${(card.warnings || []).join(" ")}
 </div>`);
 ```
 
@@ -66,7 +66,7 @@ display(html`${renderBlocks(card.blocks, { html, plot, width, fmt })}`);
 // le dipendenze npm/Inputs. Il dizionario completo resta nel card JSON.
 display(html`<table>
   <thead><tr><th>Colonna</th><th>Tipo</th><th>Ruolo</th><th>Tipo semantico</th><th>Descrizione</th></tr></thead>
-  <tbody>${card.dictionary.slice(0, 20).map((c) => html`<tr>
+  <tbody>${(card.dictionary || []).slice(0, 20).map((c) => html`<tr>
     <td><code>${c.name}</code></td>
     <td>${c.type ?? ""}</td>
     <td>${c.role ?? ""}</td>
@@ -74,7 +74,7 @@ display(html`<table>
     <td>${c.description || "—"}</td>
   </tr>`)}</tbody>
 </table>
-<p style="opacity:0.75; font-size:0.9rem">${card.dictionary.length} colonne in totale (prime 20 mostrate).</p>`);
+<p style="opacity:0.75; font-size:0.9rem">${(card.dictionary || []).length} colonne in totale (prime 20 mostrate).</p>`);
 ```
 
 ---
@@ -91,7 +91,7 @@ display(html`<div class="grid grid-cols-3">
 
 ```js
 display(html`<ul>
-  <li><strong>Mart della scheda</strong>: ${card.marts.length ? html`${card.marts.map((mart) => html`<code>${mart}</code> `)}` : "—"}</li>
+  <li><strong>Mart della scheda</strong>: ${(card.marts || []).length ? html`${(card.marts || []).map((mart) => html`<code>${mart}</code> `)}` : "—"}</li>
   <li><strong>Fonte</strong>: ${card.source_url ? html`<a href="${card.source_url}">${card.source || card.source_id}</a>` : (card.source || card.source_id || "—")}</li>
   <li><strong>Licenza</strong>: ${card.license || "non dichiarata"}</li>
   <li><strong>Pipeline</strong>: ${card.links.pipeline ? html`<a href="${card.links.pipeline}">${card.registry_source}</a>` : "—"}</li>
@@ -101,5 +101,5 @@ display(html`<ul>
 ```
 
 ```js
-if (card.notes.length) display(html`<h2>Limiti</h2><ul>${card.notes.map((note) => html`<li>${note}</li>`)}</ul>`);
+if ((card.notes || []).length) display(html`<h2>Limiti</h2><ul>${(card.notes || []).map((note) => html`<li>${note}</li>`)}</ul>`);
 ```

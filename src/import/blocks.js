@@ -69,6 +69,35 @@ function renderSeries(block, { html, plot, width, fmt }) {
   return html`${head}<p style="opacity:0.7; font-size:0.9rem">${block.y_label}, ${first}–${last}</p>${chart}`;
 }
 
+function renderComposition(block, { html, plot, width, fmt }) {
+  const head = html`${sectionTitle(html, block.title)}${note(html, block.note)}`;
+  if (!block.data.length) {
+    return html`${head}${emptyBlock(html, block.title || "Composizione")}`;
+  }
+  const chart = plot.plot({
+    width,
+    height: 340,
+    x: { tickFormat: String, label: block.x_label },
+    y: block.normalize
+      ? { grid: true, percent: true, label: block.y_label }
+      : {
+          grid: true,
+          label: block.y_label,
+          tickFormat: (value) => fmt(value, block.y_format),
+        },
+    color: { scheme: "Tableau10", legend: true },
+    marks: [
+      plot.barY(block.data, {
+        x: "x",
+        y: "y",
+        fill: "group",
+        stack: block.normalize ? "normalize" : true,
+      }),
+    ],
+  });
+  return html`${head}<p style="opacity:0.7; font-size:0.9rem">Composizione per ${block.by_label}</p>${chart}`;
+}
+
 function renderRanking(block, { html, fmt }) {
   const head = html`${sectionTitle(html, block.title)}${note(html, block.note)}`;
   if (!block.data.length) {
@@ -91,6 +120,7 @@ function renderRanking(block, { html, fmt }) {
 const RENDERERS = {
   kpi: renderKpi,
   series: renderSeries,
+  composition: renderComposition,
   ranking: renderRanking,
 };
 
