@@ -100,6 +100,18 @@ BLOCK_KEYS: dict[str, set[str]] = {
         "by_label",
         "normalize",
     },
+    "map": {
+        "type",
+        "title",
+        "note",
+        "mart",
+        "x",
+        "dimension",
+        "dimension_label",
+        "measure",
+        "measure_label",
+        "measure_format",
+    },
     "ranking": {
         "type",
         "title",
@@ -118,6 +130,7 @@ BLOCK_REQUIRED: dict[str, set[str]] = {
     "kpi": {"measures"},
     "series": {"mart", "x", "y"},
     "composition": {"mart", "x", "y", "by"},
+    "map": {"mart", "dimension", "measure"},
     "ranking": {"mart", "dimension", "measure"},
 }
 
@@ -317,6 +330,39 @@ def _composition_block(block: dict, fetch: Fetch) -> dict:
     }
 
 
+def _map_block(block: dict, fetch: Fetch) -> dict:
+    columns = {"region": block["dimension"], "value": block["measure"]}
+    if block.get("x"):
+        columns["x"] = block["x"]
+    rows = fetch(block["mart"], columns)
+    year = None
+    if block.get("x"):
+        years = [
+            int(row["x"])
+            for row in rows
+            if isinstance(row.get("x"), (int, float)) and row["x"] <= last_complete_year()
+        ]
+        if years:
+            year = max(years)
+            rows = [row for row in rows if row.get("x") == year]
+    totals: dict[str, float] = {}
+    for row in rows:
+        region, value = row.get("region"), row.get("value")
+        if region is None or value is None:
+            continue
+        totals[str(region)] = totals.get(str(region), 0) + value
+    return {
+        "type": "map",
+        "title": block.get("title", ""),
+        "note": block.get("note", ""),
+        "year": year,
+        "dimension_label": block.get("dimension_label") or block["dimension"],
+        "measure_label": block.get("measure_label") or block["measure"],
+        "measure_format": block.get("measure_format") or DEFAULT_FORMAT,
+        "data": [{"region": region, "value": value} for region, value in sorted(totals.items())],
+    }
+
+
 def _ranking_block(block: dict, fetch: Fetch) -> dict:
     columns = {"label": block["dimension"], "value": block["measure"]}
     if block.get("x"):
@@ -411,6 +457,8 @@ def _build_blocks(spec: dict, fetch: Fetch) -> list[dict]:
             built.append(_series_block(block, fetch))
         elif kind == "composition":
             built.append(_composition_block(block, fetch))
+        elif kind == "map":
+            built.append(_map_block(block, fetch))
         elif kind == "ranking":
             built.append(_ranking_block(block, fetch))
     return built

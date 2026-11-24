@@ -5,12 +5,37 @@ description: "Come si distribuisce il fondo del 5x1000 tra gli enti beneficiari.
 source: Agenzia delle Entrate
 source_url: https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000
 
-view:
-  mart: ade_cinque_per_mille__five_per_mille_trend
-  x: anno
-  y: importo_totale
-  y_label: Importo erogato
-  y_format: euroCompact
+blocks:
+  - type: kpi
+    measures:
+      - mart: ade_cinque_per_mille__five_per_mille_trend
+        x: anno
+        y: importo_totale
+        label: Importo erogato
+        format: euroCompact
+        delta: true
+
+  - type: map
+    mart: ade_cinque_per_mille__ade_cinque_per_mille
+    x: anno
+    dimension: regione
+    dimension_label: Regione
+    measure: importo_totale_erogabile
+    measure_label: Importo erogabile
+    measure_format: euroCompact
+    title: Importo erogabile per regione
+    note: "Ultimo anno completo."
+
+  - type: ranking
+    mart: ade_cinque_per_mille__five_per_mille_top_enti
+    x: anno
+    dimension: denominazione
+    dimension_label: Ente
+    measure: importo
+    measure_label: Importo
+    measure_format: euroCompact
+    top: 10
+    title: Top 10 enti beneficiari
 
 notes:
   - "Il mart aggrega gli enti beneficiari per anno."

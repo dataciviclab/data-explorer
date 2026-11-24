@@ -70,6 +70,7 @@ notes:
 | `kpi` | `measures[{mart,x,y,label,format,delta}]` | `delta` aggiunge la variazione primo→ultimo anno |
 | `series` | `mart,x,y,x_label,y_label,y_format,title,note` | linea + punti, anno corrente escluso |
 | `composition` | `mart,x,y,by,by_label,y_label,normalize,title,note` | barre stacked per anno; `normalize: true` (default) = quote 100% |
+| `map` | `mart,x,dimension,dimension_label,measure,measure_label,measure_format,title,note` | coropletica regioni; ultimo anno completo |
 | `ranking` | `mart,x,dimension,dimension_label,measure,measure_label,measure_format,top,title,note` | ultimo anno completo, ordina per misura |
 
 `view` resta come **scorciatoia legacy**: `view: {mart,x,y,...}` equivale a un

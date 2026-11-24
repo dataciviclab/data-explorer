@@ -312,3 +312,36 @@ class TestComposition:
             {"x": 2024, "group": "a", "y": 3},
             {"x": 2025, "group": "b", "y": 4},
         ]
+
+
+class TestMap:
+    def test_ultimo_anno_e_somma_per_regione(self, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        monkeypatch.setattr(bc, "last_complete_year", lambda: 2025)
+        spec = {
+            "dataset": entry["slug"],
+            "blocks": [
+                {
+                    "type": "map",
+                    "mart": "anac_bandi_gara__mart_annuale",
+                    "x": "anno",
+                    "dimension": "regione",
+                    "measure": "valore",
+                }
+            ],
+        }
+        rows = {
+            "anac_bandi_gara__mart_annuale": [
+                {"x": 2024, "region": "Lazio", "value": 99},
+                {"x": 2025, "region": "Lazio", "value": 1},
+                {"x": 2025, "region": "Lazio", "value": 2},
+                {"x": 2025, "region": "Lombardia", "value": 3},
+                {"x": 2026, "region": "Sicilia", "value": 100},
+            ]
+        }
+        block = bc.build_card(entry, spec, _fetch(rows))["blocks"][0]
+        assert block["year"] == 2025
+        assert block["data"] == [
+            {"region": "Lazio", "value": 3},
+            {"region": "Lombardia", "value": 3},
+        ]

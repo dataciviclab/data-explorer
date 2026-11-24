@@ -11,6 +11,8 @@
  *                     measure_format, data: [{label, value}]}
  */
 
+import { normalizzaReg, buildMapLookup } from "./geo-utils.js";
+
 const PALETTE = { line: "#2c7fb8", bar: "#4e79a7", accent: "#d95f0e" };
 
 function sectionTitle(html, title) {
@@ -98,6 +100,44 @@ function renderComposition(block, { html, plot, width, fmt }) {
   return html`${head}<p style="opacity:0.7; font-size:0.9rem">Composizione per ${block.by_label}</p>${chart}`;
 }
 
+function renderMap(block, { html, plot, width, fmt, geo }) {
+  const head = html`${sectionTitle(html, block.title)}${note(html, block.note)}`;
+  if (!geo || !block.data.length) {
+    return html`${head}${emptyBlock(html, block.title || "Mappa")}`;
+  }
+  const lookup = buildMapLookup(block.data, geo.regioniGeo, "region", "value");
+  const valueOf = (feature) => lookup.get(normalizzaReg(feature.properties.DEN_REG)) ?? null;
+  const values = block.data.map((row) => row.value).filter((value) => typeof value === "number");
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const domain = min === max ? [0, max || 1] : [min, max];
+  const chart = plot.plot({
+    width,
+    height: 460,
+    projection: { type: "mercator", domain: geo.regioniGeo },
+    color: {
+      type: "quantile",
+      n: 5,
+      scheme: "Blues",
+      domain,
+      label: block.measure_label,
+      legend: true,
+      tickFormat: (value) => fmt(value, block.measure_format),
+    },
+    marks: [
+      plot.geo(geo.regioniGeo, {
+        fill: valueOf,
+        stroke: "#fff",
+        strokeWidth: 0.5,
+        tip: true,
+        title: (feature) => `${feature.properties.DEN_REG}: ${fmt(valueOf(feature), block.measure_format)}`,
+      }),
+      plot.geo(geo.confiniReg, { stroke: "#555", strokeWidth: 0.5 }),
+    ],
+  });
+  return html`${head}<p style="opacity:0.7; font-size:0.9rem">${block.dimension_label} · ultimo anno disponibile</p>${chart}`;
+}
+
 function renderRanking(block, { html, fmt }) {
   const head = html`${sectionTitle(html, block.title)}${note(html, block.note)}`;
   if (!block.data.length) {
@@ -121,6 +161,7 @@ const RENDERERS = {
   kpi: renderKpi,
   series: renderSeries,
   composition: renderComposition,
+  map: renderMap,
   ranking: renderRanking,
 };
 

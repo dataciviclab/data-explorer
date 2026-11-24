@@ -5,6 +5,7 @@ toc: false
 
 ```js
 import { num, euroCompact, pct, numFix } from "../import/format-utils.js";
+import { loadItalianRegions } from "../import/geo-utils.js";
 import { renderBlocks } from "../import/blocks.js";
 ```
 
@@ -52,7 +53,17 @@ const plot = await import("npm:@observablehq/plot");
 ```
 
 ```js
-display(html`${renderBlocks(card.blocks, { html, plot, width, fmt })}`);
+// Il TopoJSON si carica solo se la scheda ha una mappa.
+const hasMap = (card.blocks || []).some((block) => block.type === "map");
+let geo = null;
+if (hasMap) {
+  const topo = await FileAttachment("../data/regioni.topojson").json();
+  geo = await loadItalianRegions(topo);
+}
+```
+
+```js
+display(html`${renderBlocks(card.blocks, { html, plot, width, fmt, geo })}`);
 ```
 
 ---
