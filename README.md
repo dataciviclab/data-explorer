@@ -43,6 +43,7 @@ Apri http://localhost:3000
 ## Come funziona
 
 - **Data loader**: script Python in `src/data/` leggono i parquet da GCS via DuckDB a build time e producono JSON aggregato
+- **Schede dataset** (`/schede/<slug>`): un produttore fuori build (`npm run cards`) legge i mart e scrive un JSON statico; il build non interroga GCS. L'editoriale vive in `catalog/cards/*.yml`
 - **Deploy**: GitHub Pages via CI (`npm run build` → `observable build` → `explorer.dataciviclab.org`)
 
 ## Stack
