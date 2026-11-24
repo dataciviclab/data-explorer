@@ -9,6 +9,7 @@ Closes #
 ## Cosa cambia
 
 - [ ] Nuovo dataset — pagina explorer
+- [ ] Nuova scheda dataset (`/schede/`, `catalog/cards/`)
 - [ ] Bug fix frontend (data loader / layout / performance)
 - [ ] Aggiornamento config / catalogo
 - [ ] Modifica struttura dati upstream
@@ -25,6 +26,18 @@ Se la PR aggiunge un nuovo dataset in explorer:
 - [ ] **Frontmatter**: `title`, `description`, `source`, `source_url`, `period`, `last_modified`, `dataset_slug`
 - [ ] **Sezione Limiti** obbligatoria (copertura, note metodologiche)
 - [ ] **Verifica**: `npm run lint` e `npm test` passano
+
+## Checklist scheda dataset (`catalog/cards/`)
+
+Se la PR aggiunge o modifica una scheda:
+
+- [ ] `npm run cards:dry` — nessun errore di validazione, tabella sensata
+- [ ] `npm run cards` — `src/data/cards.json` generato
+- [ ] `npm run build` — le pagine `/schede/*` esistono, nessuna query GCS nel build
+- [ ] il file **non duplica** campi del catalogo (`period`, `rows`, `columns`, `stage`, …)
+- [ ] ogni `mart` usato è tra i `mart_refs` del dataset
+
+Contratto e blocchi disponibili: [`docs/dataset-card.md`](docs/dataset-card.md).
 
 ## Standard check
 

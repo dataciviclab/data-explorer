@@ -56,6 +56,24 @@ Apri http://localhost:3000
 5. **Checklist pre-pub** nel template PR: verificare slug, parquet, frontmatter,
    moduli condivisi, `tableFormat` in cella separata.
 
+### Scheda dataset senza pagina (route generata)
+
+Per i dataset che non meritano una pagina narrativa c'è la **scheda** generata:
+`/schede/<url-slug>`, con metadati dal catalogo e dati dai mart. Non si scrive
+codice: si dichiarano i blocchi in `catalog/cards/<url-slug>.yml`.
+
+```bash
+npm run card:new <slug>   # crea lo stub (solo `dataset:`)
+# compila title, description, source, license e i blocchi (kpi/series/composition/map/ranking)
+npm run cards:dry         # controlla la tabella slug → blocchi/mart/punti
+npm run cards             # scrive src/data/cards.json
+npm run build             # nessuna query GCS nel build
+```
+
+Il file **non duplica** il catalogo: `period`, `rows`, `columns`, `stage`,
+`category` sono vietati e il produttore fallisce se li trova. Contratto dei
+blocchi e validazione: [`docs/dataset-card.md`](docs/dataset-card.md).
+
 ### Standard verificati automaticamente
 
 `npm run lint` include `node scripts/lint-standards.mjs` che controlla:

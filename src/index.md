@@ -104,6 +104,7 @@ description: "I dati pubblici italiani, puliti e pronti all'uso — dal IRPEF ai
     pronto per analisi e visualizzazioni.
   </p>
   <button class="hero-cta" onclick="document.querySelector('[id*=tutti-i-dataset]')?.scrollIntoView({behavior:'smooth'})" style="display:inline-block;margin-top:1rem;padding:0.55rem 1.4rem;color:var(--theme-foreground);background:transparent;border:2px solid var(--theme-foreground-focus);border-radius:8px;font-weight:600;font-size:0.92rem;cursor:pointer">Esplora il catalogo →</button>
+  <a class="hero-cta" href="/schede/" style="margin-left:0.5rem">Schede dataset →</a>
 </div>
 
 ```js

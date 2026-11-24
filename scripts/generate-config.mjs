@@ -117,6 +117,12 @@ function buildSidebar(themes, catalog) {
     existsSync(resolve(ROOT, `src/dataset/${slug}.md`))
   );
 
+  // Schede dataset generate (indice + route dinamica /schede/[slug]).
+  // Una sola voce: la lista cresce senza allungare la sidebar.
+  if (existsSync(resolve(ROOT, "src/schede/index.md"))) {
+    pages.push({ name: "Schede dataset", path: "/schede/" });
+  }
+
   // Dataset con pagina explorer non assegnati a nessun tema → "Altri dataset"
   // Invariante: ogni pagina .md in src/dataset/ deve comparire nella sidebar.
   const assigned = new Set(themes.flatMap((t) => t.datasets));

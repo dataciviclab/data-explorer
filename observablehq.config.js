@@ -237,6 +237,10 @@ export default {
     ]
   },
   {
+    "name": "Schede dataset",
+    "path": "/schede/"
+  },
+  {
     "name": "Visioni incrociate",
     "collapsible": true,
     "pages": [
