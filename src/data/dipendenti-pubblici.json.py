@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """Data loader: Dipendenti pubblici — aggregazione per comparto e anno."""
-import json, sys
+import sys
 sys.path.insert(0, "src/data")
 from _util import get_location, _parquet_exists, _parquet_refs
+from _views import available_years, write
 from lab_connectors.duckdb import safe_connect
 
 slug = "dipendenti_pubblici"
-years = list(range(2010, 2025))  # 2010-2024
+# Anni dichiarati nel registry del repo: niente range hardcoded.
+years = available_years(slug)
 
 location = get_location(slug)
 valid_years = [y for y in years if _parquet_exists(slug, y, location)]
 if not valid_years:
-    json.dump([], sys.stdout)
+    write([])
     sys.exit(0)
 
 parquet_refs = " UNION ALL ".join(
@@ -28,4 +30,4 @@ with safe_connect() as con:
     """).fetchall()
 
 data = [{"anno": r[0], "comparto": r[1], "donne": int(r[2]), "uomini": int(r[3]), "totale": int(r[2] + r[3])} for r in rows]
-json.dump(data, sys.stdout, ensure_ascii=False)
+write(data)

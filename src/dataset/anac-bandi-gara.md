@@ -11,7 +11,7 @@ data_driven: true
 
 # Bandi di gara pubblici — cosa ci dice l'ANAC
 
-**In ${last} la PA italiana ha pubblicato ${num(lastTrend.n_lotti)} bandi di gara per un totale di ${numFix(lastTrend.importo_totale / 1e9, 0)} miliardi di euro di importo stimato. In 10 anni i lotti sono quadruplicati, ma l'importo medio si è dimezzato: è semplificazione del Codice Appalti o frammentazione della spesa?**
+**In ${last} la PA italiana ha pubblicato ${num(lastTrend.n_lotti)} bandi di gara per un totale di ${numFix(lastTrend.importo_totale / 1e9, 0)} miliardi di euro di importo stimato. Dal ${first} i lotti sono cresciuti del ${numFix(deltaLottiPct, 0)}%, mentre l'importo medio per lotto è calato del ${numFix(-mediaDeltaPct, 0)}%: è semplificazione del Codice Appalti o frammentazione della spesa?**
 
 Bandi di gara registrati dall'ANAC attraverso il sistema CIG (Codice Identificativo Gara), 2016-2025. I dati mostrano quanti bandi vengono pubblicati, a quanto ammontano, come si distribuiscono per procedura e categoria, e dove finisce la spesa. I numeri sono calcolati dal dato a build-time: se si ripubblica il parquet, KPI e grafici si aggiornano da soli.
 
@@ -21,7 +21,7 @@ import { num, numFix, pct, euroCompact, tableFormat } from "../import/format-uti
 
 ```js
 const data = await FileAttachment("../data/anac-bandi-gara.json").json();
-const { trend, per_tipo: perTipo, per_oggetto: perOggetto, per_stato: perStato, top_sa: topSa } = data;
+const { trend, per_tipo: perTipo, top_sa: topSa } = data;
 ```
 
 ```js
@@ -33,10 +33,8 @@ const first = firstTrend.anno;
 
 ```js
 const trendN = trend.map(d => ({ anno: d.anno, lotti: d.n_lotti, importo: d.importo_totale }));
-const tipoPerAnno = Array.from(
-  d3.rollup(perTipo, v => ({ lotti: d3.sum(v, d => d.n_lotti), importo: d3.sum(v, d => d.importo) }), d => d.anno, d => d.tipo),
-  ([anno, m]) => Array.from(m, ([tipo, v]) => ({ anno, tipo, ...v }))
-).flat().sort((a, b) => a.anno - b.anno);
+// per_tipo è già aggregato per anno×tipo nel data loader: qui solo rinomina.
+const tipoPerAnno = perTipo.map(d => ({ anno: d.anno, tipo: d.tipo, lotti: d.n_lotti, importo: d.importo }));
 const tipoNorm = Array.from(
   d3.rollup(tipoPerAnno, v => {
     const tot = d3.sum(v, d => d.lotti);
@@ -44,9 +42,10 @@ const tipoNorm = Array.from(
   }, d => d.anno, d => d.tipo),
   ([anno, m]) => Array.from(m, ([tipo, pct]) => ({anno, tipo, pct}))
 ).flat().sort((a, b) => a.anno - b.anno);
-const statoLast = perStato.filter(d => d.anno == last).sort((a, b) => b.n_lotti - a.n_lotti);
 const saLast = topSa.filter(d => d.anno == last).sort((a, b) => b.importo - a.importo).slice(0, 20);
 const mediaLotto = lastTrend.n_lotti > 0 ? lastTrend.importo_totale / lastTrend.n_lotti : null;
+const mediaFirst = firstTrend.n_lotti > 0 ? firstTrend.importo_totale / firstTrend.n_lotti : null;
+const mediaDeltaPct = mediaFirst ? ((mediaLotto - mediaFirst) / mediaFirst) * 100 : null;
 const deltaLottiPct = firstTrend.n_lotti ? ((lastTrend.n_lotti - firstTrend.n_lotti) / firstTrend.n_lotti * 100) : null;
 ```
 
@@ -135,7 +134,7 @@ Il Codice Appalti 2023 ha semplificato le procedure, ma ha prodotto un effetto c
 ## Limiti
 
 - **Copertura**: 2016-2025; i dati sono i bandi pubblicati, non i contratti effettivamente stipulati
-- **Importi**: valori stimati a pubblicazione; 65% dei lotti non ha `importo_lotto` — le somme escludono queste righe
+- **Importi**: valori stimati a pubblicazione; 65% dei lotti non ha `importo_lotto` e i lotti con importo sospetto (`flag_importo_sospetto`: valore fuori scala o rapporto anomalo con la gara) sono esclusi dalle somme — restano nel conteggio dei lotti. È la definizione del mart `mart_annuale`
 - **Urgenza**: il flag urgenza è spesso compilato come "NON APPLICABILE"; vanno lette con cautela
 - **Stato**: la Sezione Centrale ANAC corrisponde alla sede ANAC competente, non alla localizzazione della stazione appaltante
 

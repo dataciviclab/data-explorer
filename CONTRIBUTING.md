@@ -32,7 +32,8 @@ Apri http://localhost:3000
 ## Aggiungere una pagina dataset
 
 1. **Data loader**: crea `src/data/<slug>.json.py` con la logica di aggregazione
-   - usa `load_dataset()` da `src/data/_util.py` (o `safe_connect()` per query custom)
+   - **se il dataset ha un mart** (vedi `mart_refs` nel registry): usa `_views.mart_rows()` / `group_rows()` — nessuna SQL nel frontend (vedi `src/data/README.md`)
+   - **altrimenti** usa `load_dataset()` da `src/data/_util.py` (o `safe_connect()` per query custom, senza `range(YYYY, YYYY)`: gli anni vengono dal registry con `_views.available_years()`)
    - **non usare** `duckdb.connect()` diretto — preferisci `safe_connect()`
    - il nome del file usa slug URL con trattini (es. `bdap-lea-regioni.json.py`)
    - lo slug DI (con underscore) va come parametro `slug=` a `load_dataset()`

@@ -17,7 +17,7 @@
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -152,13 +152,20 @@ function buildSidebar(themes, catalog) {
 
 // ── Entry point ─────────────────────────────────────────────────────────────
 
-try {
-  const catalog = readData("catalog.json");
-  const themes = readData("themes.json");
+// Guardia: il modulo è importato dai test. Senza di essa ogni `npm test`
+// riscriverebbe observablehq.config.js (file generato e tracciato in git).
+function isMainModule() {
+  return Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+}
 
-  const pages = buildSidebar(themes, catalog);
+if (isMainModule()) {
+  try {
+    const catalog = readData("catalog.json");
+    const themes = readData("themes.json");
 
-  const config = `export default {
+    const pages = buildSidebar(themes, catalog);
+
+    const config = `export default {
   root: "src",
   output: "dist/observable",
   title: "DataCivicLab Explorer",
@@ -170,10 +177,11 @@ try {
 };
 `;
 
-  const configPath = resolve(ROOT, "observablehq.config.js");
-  writeFileSync(configPath, config, "utf-8");
-  console.log(`✓ generate-config: ${pages.length} sezioni, ${pages.flatMap(p => p.pages || []).length} dataset`);
-} catch (err) {
-  console.error("✗ generate-config fallito:", err.message);
-  process.exit(1);
+    const configPath = resolve(ROOT, "observablehq.config.js");
+    writeFileSync(configPath, config, "utf-8");
+    console.log(`✓ generate-config: ${pages.length} sezioni, ${pages.flatMap(p => p.pages || []).length} dataset`);
+  } catch (err) {
+    console.error("✗ generate-config fallito:", err.message);
+    process.exit(1);
+  }
 }
