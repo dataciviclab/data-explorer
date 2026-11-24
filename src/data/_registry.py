@@ -181,6 +181,7 @@ def build_catalog(registry: dict | None = None) -> dict:
             "tags": ds.get("tags", []),
             "registry_source": ds.get("registry_source", ""),
             "clean_rows": clean_rows,
+            "mart_refs": ds.get("mart_refs", []),
             "location": ds.get("location", {}),
             "columns": [
                 {

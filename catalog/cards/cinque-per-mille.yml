@@ -1,0 +1,16 @@
+dataset: ade_cinque_per_mille
+
+title: "5x1000 — beneficiari e importi"
+description: "Come si distribuisce il fondo del 5x1000 tra gli enti beneficiari."
+source: Agenzia delle Entrate
+source_url: https://www.agenziaentrate.gov.it/portale/area-tematica-5x1000
+
+view:
+  mart: ade_cinque_per_mille__five_per_mille_trend
+  x: anno
+  y: importo_totale
+  y_label: Importo erogato
+  y_format: euroCompact
+
+notes:
+  - "Il mart aggrega gli enti beneficiari per anno."

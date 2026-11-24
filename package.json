@@ -8,7 +8,7 @@
     "dev": "node scripts/generate-config.mjs && observable preview",
     "preview": "node scripts/generate-config.mjs && observable preview",
     "generate:config": "node scripts/generate-config.mjs",
-    "cards": "${PYTHON3:-python3} scripts/build-cards.py",
+    "cards": "${PYTHON3:-python3} scripts/build_cards.py",
     "test": "node --test tests/*.test.mjs && python3 -m pytest tests/ -q --tb=short",
     "test:js": "node --test tests/*.test.mjs",
     "test:py": "python3 -m pytest tests/ -q --tb=short",
@@ -18,7 +18,9 @@
     "verify": "node scripts/verifica/verify-page.mjs",
     "lint": "eslint scripts/ tests/ eslint.config.js && node scripts/lint-standards.mjs",
     "lint:fix": "eslint scripts/ tests/ eslint.config.js --fix",
-    "lint:standards": "node scripts/lint-standards.mjs"
+    "lint:standards": "node scripts/lint-standards.mjs",
+    "cards:dry": "${PYTHON3:-python3} scripts/build_cards.py --dry-run",
+    "card:new": "${PYTHON3:-python3} scripts/build_cards.py --new"
   },
   "engines": {
     "npm": ">=7.0.0",

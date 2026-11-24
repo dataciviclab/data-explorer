@@ -38,13 +38,17 @@ if (card.description) display(html`<p style="font-size:1.05rem; line-height:1.6"
 ```
 
 ```js
+if (card.intro) display(html`<p style="line-height:1.6">${card.intro}</p>`);
+```
+
+```js
 if (card.warnings.length) display(html`<div class="note" style="border-left:3px solid #d95f0e; padding:0.6rem 0.9rem; background:var(--theme-background-alt); border-radius:0 8px 8px 0;">
   <strong>Scheda in preparazione.</strong> ${card.warnings.join(" ")}
 </div>`);
 ```
 
 ```js
-display(html`<div class="grid grid-cols-3">
+if (card.kpis.length) display(html`<div class="grid grid-cols-3">
   ${card.kpis.map((kpi) => html`<div class="card"><h3>${kpi.label}</h3><span class="big">${fmt(kpi.value, kpi.format)}</span></div>`)}
 </div>`);
 ```
@@ -119,10 +123,16 @@ display(html`<div class="grid grid-cols-3">
 ```js
 display(html`<ul>
   <li><strong>Mart della scheda</strong>: <code>${card.mart.ref}</code></li>
+  <li><strong>Fonte</strong>: ${card.source_url ? html`<a href="${card.source_url}">${card.source || card.source_id}</a>` : (card.source || card.source_id || "—")}</li>
+  <li><strong>Licenza</strong>: ${card.license || "non dichiarata"}</li>
   <li><strong>Pipeline</strong>: ${card.links.pipeline ? html`<a href="${card.links.pipeline}">${card.registry_source}</a>` : "—"}</li>
   <li><strong>Parquet clean</strong>: ${card.links.parquet ? html`<a href="${card.links.parquet}">dato pubblico</a>` : "—"}</li>
   <li><strong>Query SQL</strong>: <a href="${card.links.query}">interroga i dati</a></li>
 </ul>`);
+```
+
+```js
+if (card.notes.length) display(html`<h2>Limiti</h2><ul>${card.notes.map((note) => html`<li>${note}</li>`)}</ul>`);
 ```
 
 ```js

@@ -1,0 +1,21 @@
+dataset: anac_bandi_gara
+
+title: Bandi di gara pubblici ANAC
+description: "Lotti, importi e procedure dei bandi pubblicati dalle stazioni appaltanti."
+source: ANAC — Autorità Nazionale Anticorruzione
+source_url: https://dati.anticorruzione.it/
+license: CC-BY-SA 4.0
+
+view:
+  mart: anac_bandi_gara__mart_annuale
+  x: anno
+  y: n_lotti
+  y_label: Lotti pubblicati
+  y_format: num
+  y2: importo_totale
+  y2_label: Importo stimato
+  y2_format: euroCompact
+
+notes:
+  - "Gli importi escludono i lotti con importo sospetto (flag_importo_sospetto); i lotti restano nel conteggio."
+  - "Il mart copre 2007–2025: il periodo dichiarato nel registry può essere più stretto dei file pubblicati."
