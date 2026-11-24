@@ -2,11 +2,11 @@
 """Genera le schede dataset statiche consumate da `/schede/[slug]`.
 
 La cura editoriale vive in `catalog/cards/<url_slug>.yml` (opzionale): il file
-referenzia lo slug del dataset e dichiara **solo** ciò che il catalogo non ha
-(titolo, intro, eventuale vista, note). Tutto il resto viene dal catalogo ACB.
+referenzia lo slug del dataset e dichiara **solo** ciò che il catalogo non ha.
 
-Il produttore gira **fuori** dal build del sito e scrive un artefatto piccolo
-(`src/data/cards.json`): il build non interroga GCS.
+La pagina è una composizione di **blocchi** dichiarati nel file (v0: `kpi`,
+`series`, `ranking`). Il produttore risolve i dati dai mart e li scrive nel
+card JSON: il build del sito non interroga GCS.
 
 Uso:
     python3 scripts/build_cards.py                 # genera tutte le schede
@@ -21,6 +21,7 @@ import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Callable
 
 import yaml
 
@@ -34,8 +35,8 @@ CARDS_DIR = ROOT / "catalog" / "cards"
 OUTPUT = ROOT / "src" / "data" / "cards.json"
 QUERY_SQL_URL = "https://dataciviclab-dashboard.streamlit.app/Query_SQL"
 
-# Campi ammessi nel file editoriale. Tutto il resto è un errore (typo o
-# duplicazione di un campo che appartiene al catalogo).
+Fetch = Callable[[str, dict], list[dict]]
+
 ALLOWED_KEYS = {
     "dataset",
     "title",
@@ -44,6 +45,7 @@ ALLOWED_KEYS = {
     "source_url",
     "license",
     "view",
+    "blocks",
     "intro",
     "notes",
 }
@@ -79,11 +81,37 @@ VIEW_KEYS = {
 }
 VIEW_REQUIRED = {"mart", "x", "y"}
 
+MEASURE_KEYS = {"mart", "x", "y", "label", "format", "delta"}
+
+BLOCK_KEYS: dict[str, set[str]] = {
+    "kpi": {"type", "title", "measures"},
+    "series": {"type", "title", "note", "mart", "x", "x_label", "y", "y_label", "y_format"},
+    "ranking": {
+        "type",
+        "title",
+        "note",
+        "mart",
+        "x",
+        "dimension",
+        "dimension_label",
+        "measure",
+        "measure_label",
+        "measure_format",
+        "top",
+    },
+}
+BLOCK_REQUIRED: dict[str, set[str]] = {
+    "kpi": {"measures"},
+    "series": {"mart", "x", "y"},
+    "ranking": {"mart", "dimension", "measure"},
+}
+
 DEFAULT_X_LABEL = "Anno"
 DEFAULT_FORMAT = "num"
+DEFAULT_TOP = 20
 
 
-# ── File editoriali ─────────────────────────────────────────────────────────
+# ── Validazione dei file editoriali ─────────────────────────────────────────
 
 
 def _validate_view(path: Path, view: dict, entry: dict, errors: list[str]) -> None:
@@ -96,11 +124,43 @@ def _validate_view(path: Path, view: dict, entry: dict, errors: list[str]) -> No
     unknown = set(view) - VIEW_KEYS
     if unknown:
         errors.append(f"{path.name}: view ha campi non ammessi {sorted(unknown)}")
-    mart = view.get("mart")
+    _validate_mart(path, view.get("mart"), entry, errors)
+
+
+def _validate_mart(path: Path, mart: str | None, entry: dict, errors: list[str]) -> None:
     if mart and mart not in (entry.get("mart_refs") or []):
-        errors.append(
-            f"{path.name}: mart {mart!r} non tra i mart_refs di {entry['slug']!r}"
-        )
+        errors.append(f"{path.name}: mart {mart!r} non tra i mart_refs di {entry['slug']!r}")
+
+
+def _validate_block(path: Path, block: dict, entry: dict, errors: list[str]) -> None:
+    if not isinstance(block, dict):
+        errors.append(f"{path.name}: ogni blocco deve essere una mappa")
+        return
+    kind = block.get("type")
+    if kind not in BLOCK_KEYS:
+        errors.append(f"{path.name}: tipo blocco non supportato {kind!r} (kpi|series|ranking)")
+        return
+    missing = BLOCK_REQUIRED[kind] - set(block)
+    if missing:
+        errors.append(f"{path.name}: blocco {kind} manca {sorted(missing)}")
+    unknown = set(block) - BLOCK_KEYS[kind]
+    if unknown:
+        errors.append(f"{path.name}: blocco {kind} ha campi non ammessi {sorted(unknown)}")
+    if kind == "kpi":
+        measures = block.get("measures")
+        if not isinstance(measures, list) or not measures:
+            errors.append(f"{path.name}: blocco kpi richiede 'measures' non vuoto")
+            return
+        for measure in measures:
+            if not isinstance(measure, dict) or {"mart", "x", "y"} - set(measure):
+                errors.append(f"{path.name}: misura kpi incompleta (mart/x/y)")
+                continue
+            unknown = set(measure) - MEASURE_KEYS
+            if unknown:
+                errors.append(f"{path.name}: misura kpi ha campi non ammessi {sorted(unknown)}")
+            _validate_mart(path, measure.get("mart"), entry, errors)
+        return
+    _validate_mart(path, block.get("mart"), entry, errors)
 
 
 def load_specs(catalog_by_slug: dict[str, dict]) -> tuple[dict[str, dict], list[str]]:
@@ -138,61 +198,177 @@ def load_specs(catalog_by_slug: dict[str, dict]) -> tuple[dict[str, dict], list[
         if entry["slug"] in specs:
             errors.append(f"{path.name}: dataset {slug!r} già dichiarato in un altro file")
 
-        view = raw.get("view")
-        if view is not None:
-            _validate_view(path, view, entry, errors)
+        if raw.get("view") and raw.get("blocks"):
+            errors.append(f"{path.name}: usa 'blocks' oppure 'view', non entrambi")
+
+        if raw.get("view") is not None:
+            _validate_view(path, raw["view"], entry, errors)
+
+        blocks = raw.get("blocks")
+        if blocks is not None:
+            if not isinstance(blocks, list) or not blocks:
+                errors.append(f"{path.name}: 'blocks' deve essere una lista non vuota")
+            else:
+                for block in blocks:
+                    _validate_block(path, block, entry, errors)
 
         specs[entry["slug"]] = raw
 
     return specs, errors
 
 
-# ── Costruzione della scheda ────────────────────────────────────────────────
+# ── Blocchi: dati dal mart ──────────────────────────────────────────────────
 
 
-def _points(rows: list[dict], until: int, has_y2: bool) -> list[dict]:
+def _points(rows: list[dict], until: int) -> list[dict]:
     """Serie ordinata, dedup per x, al più fino all'ultimo anno completo."""
     by_x: dict = {}
     for row in rows:
         x, y = row.get("x"), row.get("y")
         if x is None or y is None or not isinstance(x, (int, float)) or x > until:
             continue
-        point = {"x": int(x), "y": y}
-        if has_y2 and row.get("y2") is not None:
-            point["y2"] = row["y2"]
-        by_x[int(x)] = point
+        by_x[int(x)] = {"x": int(x), "y": y}
     return [by_x[x] for x in sorted(by_x)]
 
 
-def _kpis(points: list[dict], view: dict) -> list[dict]:
-    if not points:
+def _kpi_block(block: dict, fetch: Fetch) -> dict:
+    items = []
+    until = last_complete_year()
+    for measure in block["measures"]:
+        points = _points(fetch(measure["mart"], {"x": measure["x"], "y": measure["y"]}), until)
+        if not points:
+            continue
+        last = points[-1]
+        items.append(
+            {
+                "label": measure.get("label") or measure["y"],
+                "value": last["y"],
+                "format": measure.get("format") or DEFAULT_FORMAT,
+            }
+        )
+        if measure.get("delta") and points[0]["y"]:
+            delta = (last["y"] - points[0]["y"]) / points[0]["y"] * 100
+            items.append(
+                {
+                    "label": f"Δ {points[0]['x']}→{last['x']}",
+                    "value": round(delta, 1),
+                    "format": "deltaPct",
+                }
+            )
+    return {"type": "kpi", "title": block.get("title", ""), "items": items}
+
+
+def _series_block(block: dict, fetch: Fetch) -> dict:
+    points = _points(fetch(block["mart"], {"x": block["x"], "y": block["y"]}), last_complete_year())
+    return {
+        "type": "series",
+        "title": block.get("title", ""),
+        "note": block.get("note", ""),
+        "x_label": block.get("x_label") or DEFAULT_X_LABEL,
+        "y_label": block.get("y_label") or block["y"],
+        "y_format": block.get("y_format") or DEFAULT_FORMAT,
+        "data": points,
+    }
+
+
+def _ranking_block(block: dict, fetch: Fetch) -> dict:
+    columns = {"label": block["dimension"], "value": block["measure"]}
+    if block.get("x"):
+        columns["x"] = block["x"]
+    rows = fetch(block["mart"], columns)
+    year = None
+    if block.get("x"):
+        years = [row["x"] for row in rows if isinstance(row.get("x"), (int, float))]
+        years = [int(y) for y in years if y <= last_complete_year()]
+        if years:
+            year = max(years)
+            rows = [row for row in rows if row.get("x") == year]
+    data = [
+        {"label": row["label"], "value": row["value"]}
+        for row in rows
+        if row.get("label") is not None and row.get("value") is not None
+    ]
+    data.sort(key=lambda row: row["value"], reverse=True)
+    top = int(block.get("top") or DEFAULT_TOP)
+    return {
+        "type": "ranking",
+        "title": block.get("title", ""),
+        "note": block.get("note", ""),
+        "year": year,
+        "dimension_label": block.get("dimension_label") or block["dimension"],
+        "measure_label": block.get("measure_label") or block["measure"],
+        "measure_format": block.get("measure_format") or DEFAULT_FORMAT,
+        "data": data[:top],
+    }
+
+
+def _legacy_blocks(spec: dict) -> list[dict]:
+    """`view` (formato singolo) → kpi + series. Compatibilità con i file v0."""
+    view = spec.get("view")
+    if not view:
         return []
-    first, last = points[0], points[-1]
-    kpis = [
+    measures = [
         {
-            "label": view.get("y_label") or view["y"],
-            "value": last["y"],
-            "format": view.get("y_format") or DEFAULT_FORMAT,
+            "mart": view["mart"],
+            "x": view["x"],
+            "y": view["y"],
+            "label": view.get("y_label"),
+            "format": view.get("y_format"),
+            "delta": True,
         }
     ]
-    if first["y"]:
-        delta = (last["y"] - first["y"]) / first["y"] * 100
-        kpis.append(
+    if view.get("y2"):
+        measures.append(
             {
-                "label": f"Δ {first['x']}→{last['x']}",
-                "value": round(delta, 1),
-                "format": "deltaPct",
+                "mart": view["mart"],
+                "x": view["x"],
+                "y": view["y2"],
+                "label": view.get("y2_label"),
+                "format": view.get("y2_format"),
             }
         )
-    if view.get("y2") and last.get("y2") is not None:
-        kpis.append(
-            {
-                "label": view.get("y2_label") or view["y2"],
-                "value": last["y2"],
-                "format": view.get("y2_format") or DEFAULT_FORMAT,
-            }
-        )
-    return kpis
+    return [
+        {"type": "kpi", "measures": measures},
+        {
+            "type": "series",
+            "mart": view["mart"],
+            "x": view["x"],
+            "y": view["y"],
+            "x_label": view.get("x_label"),
+            "y_label": view.get("y_label"),
+            "y_format": view.get("y_format"),
+        },
+    ]
+
+
+def _spec_blocks(spec: dict) -> list[dict]:
+    return spec["blocks"] if spec.get("blocks") is not None else _legacy_blocks(spec)
+
+
+def _marts_used(spec: dict) -> list[str]:
+    marts: set[str] = set()
+    for block in _spec_blocks(spec):
+        if block.get("type") == "kpi":
+            marts.update(measure["mart"] for measure in block["measures"])
+        elif block.get("mart"):
+            marts.add(block["mart"])
+    return sorted(marts)
+
+
+def _build_blocks(spec: dict, fetch: Fetch) -> list[dict]:
+    built = []
+    for block in _spec_blocks(spec):
+        kind = block["type"]
+        if kind == "kpi":
+            built.append(_kpi_block(block, fetch))
+        elif kind == "series":
+            built.append(_series_block(block, fetch))
+        elif kind == "ranking":
+            built.append(_ranking_block(block, fetch))
+    return built
+
+
+# ── Costruzione della scheda ────────────────────────────────────────────────
 
 
 def _links(entry: dict) -> dict:
@@ -205,7 +381,7 @@ def _links(entry: dict) -> dict:
     }
 
 
-def _warnings(card: dict, spec: dict, has_view: bool) -> list[str]:
+def _warnings(card: dict, spec: dict) -> list[str]:
     warnings = []
     if not card["description"]:
         warnings.append("Descrizione del dataset non disponibile.")
@@ -215,19 +391,15 @@ def _warnings(card: dict, spec: dict, has_view: bool) -> list[str]:
         warnings.append("Licenza non dichiarata.")
     if not spec.get("title"):
         warnings.append("Titolo editoriale non dichiarato: uso il nome del catalogo.")
-    if not has_view:
-        warnings.append("Vista base non dichiarata: scheda senza grafico.")
+    if not card["blocks"]:
+        warnings.append("Nessun blocco dichiarato: scheda senza grafici.")
     if not card["links"]["parquet"]:
         warnings.append("Percorso del parquet clean non disponibile.")
     return warnings
 
 
-def build_card(entry: dict, spec: dict, rows: list[dict]) -> dict:
-    """Compone la scheda: catalogo + override editoriali + fatti dal mart."""
-    view = spec.get("view") or {}
-    has_view = bool(view)
-    points = _points(rows, last_complete_year(), bool(view.get("y2"))) if has_view else []
-
+def build_card(entry: dict, spec: dict, fetch: Fetch) -> dict:
+    """Compone la scheda: catalogo + override editoriali + blocchi dai mart."""
     card = {
         "slug": entry["slug"],
         "url_slug": entry["url_slug"],
@@ -245,16 +417,13 @@ def build_card(entry: dict, spec: dict, rows: list[dict]) -> dict:
         "registry_source": entry.get("registry_source", ""),
         "rows_clean": entry.get("clean_rows"),
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "mart": {"ref": view.get("mart", ""), "table": view.get("mart", "").split("__", 1)[-1]},
-        "x": {"field": view.get("x", ""), "label": view.get("x_label") or DEFAULT_X_LABEL},
-        "y": {"label": view.get("y_label") or view.get("y", ""), "format": view.get("y_format") or DEFAULT_FORMAT},
-        "series": points,
-        "kpis": _kpis(points, view) if has_view else [],
+        "marts": _marts_used(spec),
+        "blocks": _build_blocks(spec, fetch),
         "dictionary": entry.get("columns") or [],
         "links": _links(entry),
         "run": latest_run(entry["slug"]) or None,
     }
-    card["warnings"] = _warnings(card, spec, has_view)
+    card["warnings"] = _warnings(card, spec)
     return card
 
 
@@ -273,6 +442,18 @@ def _find_entry(datasets: list[dict], key: str) -> dict | None:
     return None
 
 
+def _mart_fetch() -> Fetch:
+    cache: dict[tuple, list[dict]] = {}
+
+    def fetch(mart: str, columns: dict) -> list[dict]:
+        key = (mart, tuple(sorted(columns.items())))
+        if key not in cache:
+            cache[key] = mart_rows(mart, select=columns)
+        return cache[key]
+
+    return fetch
+
+
 def new_stub(datasets: list[dict], key: str) -> int:
     entry = _find_entry(datasets, key)
     if entry is None:
@@ -287,18 +468,16 @@ def new_stub(datasets: list[dict], key: str) -> int:
     lines = [
         f"# Scheda editoriale — {entry['url_slug']}",
         "# Compila solo ciò che il catalogo non ha: titolo, intro, note,",
-        "# e (se serve) la vista. Metadati e colonne vengono dal catalogo.",
+        "# e i blocchi (kpi/series/ranking). Metadati e colonne dal catalogo.",
         f"dataset: {entry['slug']}",
         '# title: "..."',
         '# intro: "..."',
+        "# blocks:",
+        "#   - type: series",
+        f"#     mart: {marts[0] if marts else '<mart>'}" ,
+        "#     x: anno",
+        "#     y: <misura>",
     ]
-    if marts:
-        lines += [
-            "# view:",
-            f"#   mart: {marts[0]}",
-            "#   x: anno",
-            "#   y: <misura>",
-        ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"✓ creato {path.relative_to(ROOT)}")
     return 0
@@ -326,44 +505,30 @@ def main(argv: list[str]) -> int:
         return 1
 
     dry_run = "--dry-run" in argv
+    fetch = _mart_fetch()
     cards: dict[str, dict] = {}
-    rows_out: list[tuple[str, str, str, str, int, str]] = []
+    rows_out: list[tuple[str, int, int, int, str]] = []
 
     for slug, spec in sorted(specs.items()):
         entry = by_slug[slug]
         if only and entry["url_slug"] not in only and slug not in only:
             continue
-        view = spec.get("view")
-        rows: list[dict] = []
-        if view:
-            columns = {"x": view["x"], "y": view["y"]}
-            if view.get("y2"):
-                columns["y2"] = view["y2"]
-            rows = mart_rows(view["mart"], select=columns)
-        card = build_card(entry, spec, rows)
+        card = build_card(entry, spec, fetch)
         cards[entry["url_slug"]] = card
-        rows_out.append(
-            (
-                entry["url_slug"],
-                (view or {}).get("mart", "—"),
-                (view or {}).get("x", "—"),
-                (view or {}).get("y", "—"),
-                len(card["series"]),
-                card["name"],
-            )
-        )
+        points = sum(len(block.get("data", [])) for block in card["blocks"] if block["type"] == "series")
+        rows_out.append((entry["url_slug"], len(card["blocks"]), len(card["marts"]), points, card["name"]))
 
     if dry_run:
-        print(f"{'scheda':26s} {'mart':40s} {'x':10s} {'y':22s} {'punti':>5s}  titolo")
+        print(f"{'scheda':26s} {'blocchi':>7s} {'mart':>4s} {'punti':>5s}  titolo")
         for row in rows_out:
-            print(f"{row[0]:26s} {row[1]:40s} {row[2]:10s} {row[3]:22s} {row[4]:5d}  {row[5]}")
-        print(f"\n{len(rows_out)} schede; {sum(len(c['series']) > 0 for c in cards.values())} con grafico")
+            print(f"{row[0]:26s} {row[1]:7d} {row[2]:4d} {row[3]:5d}  {row[4]}")
+        print(f"\n{len(rows_out)} schede; {sum(1 for c in cards.values() if c['blocks'])} con blocchi")
         return 0
 
     OUTPUT.write_text(json.dumps(jsonable(cards), ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"✓ scrivete {len(cards)} schede in {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size} byte)")
     for row in rows_out:
-        print(f"  · {row[0]}: {row[4]} punti da {row[1]}")
+        print(f"  · {row[0]}: {row[1]} blocchi, {row[2]} mart, {row[3]} punti")
     return 0
 
 

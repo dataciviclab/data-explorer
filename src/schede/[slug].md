@@ -5,6 +5,7 @@ toc: false
 
 ```js
 import { num, euroCompact, pct, numFix } from "../import/format-utils.js";
+import { renderBlocks } from "../import/blocks.js";
 ```
 
 ```js
@@ -22,7 +23,6 @@ const fmt = (value, format) => {
   if (format === "deltaPct") return `${value >= 0 ? "+" : ""}${numFix(value, 1)}%`;
   return num(value);
 };
-const lastPoint = card.series.length ? card.series[card.series.length - 1] : null;
 ```
 
 # ${card.name}
@@ -48,49 +48,18 @@ if (card.warnings.length) display(html`<div class="note" style="border-left:3px 
 ```
 
 ```js
-if (card.kpis.length) display(html`<div class="grid grid-cols-3">
-  ${card.kpis.map((kpi) => html`<div class="card"><h3>${kpi.label}</h3><span class="big">${fmt(kpi.value, kpi.format)}</span></div>`)}
-</div>`);
-```
-
-## Serie storica
-
-```js
-display(html`<p>${card.series.length > 1
-  ? `${card.y.label}, dal ${card.series[0].x} al ${lastPoint.x}. Fonte: mart ${card.mart.ref}.`
-  : "Serie non disponibile per questo dataset."}</p>`);
-```
-
-```js
 const plot = await import("npm:@observablehq/plot");
 ```
 
 ```js
-display(
-  card.series.length > 1
-    ? plot.plot({
-        width,
-        height: 300,
-        marginLeft: 76,
-        x: { tickFormat: String, label: card.x.label },
-        y: { grid: true, label: card.y.label, tickFormat: (v) => fmt(v, card.y.format) },
-        marks: [
-          plot.lineY(card.series, { x: "x", y: "y", stroke: "#2c7fb8", strokeWidth: 2, tip: true }),
-          plot.dot(card.series, { x: "x", y: "y", fill: "#2c7fb8", tip: true }),
-          plot.ruleY([0]),
-        ],
-      })
-    : html`<em>Nessuna serie da mostrare.</em>`
-);
+display(html`${renderBlocks(card.blocks, { html, plot, width, fmt })}`);
 ```
 
 ---
 
 ## Colonne del dataset clean
 
-```js
-display(html`<p style="opacity:0.75; font-size:0.92rem">Le descrizioni sono quelle dichiarate nel registry: se mancano, la scheda non le inventa.</p>`);
-```
+<p style="opacity:0.75; font-size:0.92rem">Le descrizioni sono quelle dichiarate nel registry: se mancano, la scheda non le inventa.</p>
 
 ```js
 // Tabella statica (niente Inputs): le pagine dinamiche OF non iniettano
@@ -122,7 +91,7 @@ display(html`<div class="grid grid-cols-3">
 
 ```js
 display(html`<ul>
-  <li><strong>Mart della scheda</strong>: <code>${card.mart.ref}</code></li>
+  <li><strong>Mart della scheda</strong>: ${card.marts.length ? html`${card.marts.map((mart) => html`<code>${mart}</code> `)}` : "—"}</li>
   <li><strong>Fonte</strong>: ${card.source_url ? html`<a href="${card.source_url}">${card.source || card.source_id}</a>` : (card.source || card.source_id || "—")}</li>
   <li><strong>Licenza</strong>: ${card.license || "non dichiarata"}</li>
   <li><strong>Pipeline</strong>: ${card.links.pipeline ? html`<a href="${card.links.pipeline}">${card.registry_source}</a>` : "—"}</li>
@@ -133,8 +102,4 @@ display(html`<ul>
 
 ```js
 if (card.notes.length) display(html`<h2>Limiti</h2><ul>${card.notes.map((note) => html`<li>${note}</li>`)}</ul>`);
-```
-
-```js
-if (card.run) display(html`<p style="opacity:0.75; font-size:0.9rem">Run ${card.run.run_id} · stato ${card.run.status} · qualità ${card.run.quality?.mart ?? "—"}</p>`);
 ```

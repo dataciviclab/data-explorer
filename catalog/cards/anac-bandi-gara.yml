@@ -6,15 +6,41 @@ source: ANAC — Autorità Nazionale Anticorruzione
 source_url: https://dati.anticorruzione.it/
 license: CC-BY-SA 4.0
 
-view:
-  mart: anac_bandi_gara__mart_annuale
-  x: anno
-  y: n_lotti
-  y_label: Lotti pubblicati
-  y_format: num
-  y2: importo_totale
-  y2_label: Importo stimato
-  y2_format: euroCompact
+blocks:
+  - type: kpi
+    measures:
+      - mart: anac_bandi_gara__mart_annuale
+        x: anno
+        y: n_lotti
+        label: Lotti pubblicati
+        format: num
+        delta: true
+      - mart: anac_bandi_gara__mart_annuale
+        x: anno
+        y: importo_totale
+        label: Importo stimato
+        format: euroCompact
+
+  - type: series
+    mart: anac_bandi_gara__mart_annuale
+    x: anno
+    y: n_lotti
+    y_label: Lotti pubblicati
+    y_format: num
+    title: Lotti pubblicati per anno
+    note: "Serie dal 2007 all'ultimo anno completo."
+
+  - type: ranking
+    mart: anac_bandi_gara__mart_top_stazioni
+    x: anno
+    dimension: denominazione_amministrazione_appaltante
+    dimension_label: Stazione appaltante
+    measure: importo_totale
+    measure_label: Importo dei lotti
+    measure_format: euroCompact
+    top: 20
+    title: Top 20 stazioni appaltanti
+    note: "Per importo dei lotti pubblicati nell'ultimo anno completo."
 
 notes:
   - "Gli importi escludono i lotti con importo sospetto (flag_importo_sospetto); i lotti restano nel conteggio."

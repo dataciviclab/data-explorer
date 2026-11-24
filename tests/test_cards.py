@@ -1,7 +1,7 @@
 """Test per scripts/build_cards.py — contratto delle schede editoriali.
 
 Copre senza rete: validazione dei file `catalog/cards/*.yml`, merge
-catalogo/override, scelta dei punti e dei KPI. Le query ai mart sono
+catalogo/override, blocchi (kpi/series/ranking). Le query ai mart sono
 verificate dal dry-run/CI, non qui.
 """
 
@@ -25,7 +25,7 @@ def entry():
         "period": {"start": 2016, "end": 2025},
         "registry_source": "appalti-pubblici",
         "clean_rows": 123,
-        "mart_refs": ["anac_bandi_gara__mart_annuale"],
+        "mart_refs": ["anac_bandi_gara__mart_annuale", "anac_bandi_gara__mart_top_stazioni"],
         "location": {"path": "gs://bucket/anac/x.parquet"},
         "columns": [{"name": "anno", "type": "INTEGER"}],
     }
@@ -44,6 +44,13 @@ def cards_dir(tmp_path, monkeypatch):
 
 def _write(cards_dir, name, text):
     (cards_dir / f"{name}.yml").write_text(textwrap.dedent(text), encoding="utf-8")
+
+
+def _fetch(data):
+    def fetch(mart, columns):
+        return data.get(mart, [])
+
+    return fetch
 
 
 class TestLoadSpecs:
@@ -103,6 +110,68 @@ class TestLoadSpecs:
         _, errors = bc.load_specs(catalog)
         assert any("view manca" in e for e in errors)
 
+    def test_view_e_blocks_insieme(self, cards_dir, catalog):
+        _write(
+            cards_dir,
+            "anac-bandi-gara",
+            """
+            dataset: anac_bandi_gara
+            view:
+              mart: anac_bandi_gara__mart_annuale
+              x: anno
+              y: n_lotti
+            blocks:
+              - type: series
+                mart: anac_bandi_gara__mart_annuale
+                x: anno
+                y: n_lotti
+            """,
+        )
+        _, errors = bc.load_specs(catalog)
+        assert any("usa 'blocks' oppure 'view'" in e for e in errors)
+
+    def test_blocco_sconosciuto(self, cards_dir, catalog):
+        _write(
+            cards_dir,
+            "anac-bandi-gara",
+            """
+            dataset: anac_bandi_gara
+            blocks:
+              - type: mappa
+                mart: anac_bandi_gara__mart_annuale
+            """,
+        )
+        _, errors = bc.load_specs(catalog)
+        assert any("tipo blocco non supportato" in e for e in errors)
+
+    def test_blocco_incompleto(self, cards_dir, catalog):
+        _write(
+            cards_dir,
+            "anac-bandi-gara",
+            """
+            dataset: anac_bandi_gara
+            blocks:
+              - type: ranking
+                mart: anac_bandi_gara__mart_top_stazioni
+            """,
+        )
+        _, errors = bc.load_specs(catalog)
+        assert any("blocco ranking manca" in e for e in errors)
+
+    def test_kpi_senza_measures(self, cards_dir, catalog):
+        _write(
+            cards_dir,
+            "anac-bandi-gara",
+            """
+            dataset: anac_bandi_gara
+            blocks:
+              - type: kpi
+                measures: []
+            """,
+        )
+        _, errors = bc.load_specs(catalog)
+        assert any("richiede 'measures'" in e for e in errors)
+
 
 class TestBuildCard:
     def test_override_editoriali_vincono(self, entry, monkeypatch):
@@ -114,7 +183,7 @@ class TestBuildCard:
             "source": "Fonte leggibile",
             "license": "CC-BY",
         }
-        card = bc.build_card(entry, spec, [])
+        card = bc.build_card(entry, spec, _fetch({}))
         assert card["name"] == "Titolo editoriale"
         assert card["description"] == "descrizione editoriale"
         assert card["source"] == "Fonte leggibile"
@@ -123,18 +192,17 @@ class TestBuildCard:
 
     def test_default_dal_catalogo(self, entry, monkeypatch):
         monkeypatch.setattr(bc, "latest_run", lambda slug: {})
-        card = bc.build_card(entry, {"dataset": entry["slug"]}, [])
+        card = bc.build_card(entry, {"dataset": entry["slug"]}, _fetch({}))
         assert card["name"] == "Anac Bandi Gara"
         assert card["description"] == "descrizione dal catalogo"
 
-    def test_senza_vista_niente_serie(self, entry, monkeypatch):
+    def test_senza_blocchi(self, entry, monkeypatch):
         monkeypatch.setattr(bc, "latest_run", lambda slug: {})
-        card = bc.build_card(entry, {"dataset": entry["slug"]}, [])
-        assert card["series"] == []
-        assert card["kpis"] == []
-        assert any("Vista base non dichiarata" in w for w in card["warnings"])
+        card = bc.build_card(entry, {"dataset": entry["slug"]}, _fetch({}))
+        assert card["blocks"] == []
+        assert any("Nessun blocco dichiarato" in w for w in card["warnings"])
 
-    def test_vista_completa(self, entry, monkeypatch):
+    def test_vista_legacy_diventa_kpi_e_series(self, entry, monkeypatch):
         monkeypatch.setattr(bc, "latest_run", lambda slug: {})
         monkeypatch.setattr(bc, "last_complete_year", lambda: 2025)
         spec = {
@@ -145,31 +213,68 @@ class TestBuildCard:
                 "y": "n_lotti",
                 "y_label": "Lotti",
                 "y_format": "num",
+                "y2": "importo_totale",
             },
         }
-        rows = [
-            {"x": 2024, "y": 10},
-            {"x": 2025, "y": 20},
-            {"x": 2026, "y": 999},  # anno in corso: escluso
+        rows = {"anac_bandi_gara__mart_annuale": [{"x": 2024, "y": 10}, {"x": 2025, "y": 20}]}
+        card = bc.build_card(entry, spec, _fetch(rows))
+        assert [block["type"] for block in card["blocks"]] == ["kpi", "series"]
+        kpi = card["blocks"][0]
+        assert kpi["items"][0] == {"label": "Lotti", "value": 20, "format": "num"}
+        assert kpi["items"][1]["value"] == 100.0
+        assert [p["x"] for p in card["blocks"][1]["data"]] == [2024, 2025]
+
+    def test_blocchi_espliciti(self, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        monkeypatch.setattr(bc, "last_complete_year", lambda: 2025)
+        spec = {
+            "dataset": entry["slug"],
+            "blocks": [
+                {
+                    "type": "series",
+                    "mart": "anac_bandi_gara__mart_annuale",
+                    "x": "anno",
+                    "y": "n_lotti",
+                    "title": "Serie",
+                },
+                {
+                    "type": "ranking",
+                    "mart": "anac_bandi_gara__mart_top_stazioni",
+                    "x": "anno",
+                    "dimension": "denominazione",
+                    "measure": "importo",
+                    "top": 2,
+                    "title": "Top",
+                },
+            ],
+        }
+        rows = {
+            "anac_bandi_gara__mart_annuale": [{"x": 2024, "y": 1}, {"x": 2025, "y": 2}],
+            "anac_bandi_gara__mart_top_stazioni": [
+                {"x": 2024, "label": "vecchia", "value": 99},
+                {"x": 2025, "label": "a", "value": 10},
+                {"x": 2025, "label": "b", "value": 30},
+                {"x": 2025, "label": "c", "value": 20},
+            ],
+        }
+        card = bc.build_card(entry, spec, _fetch(rows))
+        ranking = card["blocks"][1]
+        assert ranking["year"] == 2025
+        assert [row["label"] for row in ranking["data"]] == ["b", "c"]
+        assert card["marts"] == [
+            "anac_bandi_gara__mart_annuale",
+            "anac_bandi_gara__mart_top_stazioni",
         ]
-        card = bc.build_card(entry, spec, rows)
-        assert [p["x"] for p in card["series"]] == [2024, 2025]
-        assert card["kpis"][0] == {"label": "Lotti", "value": 20, "format": "num"}
-        assert card["kpis"][1]["value"] == 100.0
 
 
 class TestPoints:
     def test_filtra_anno_corrente_e_dedup(self):
         rows = [{"x": 2024, "y": 1}, {"x": 2025, "y": 2}, {"x": 2025, "y": 3}]
-        assert bc._points(rows, until=2025, has_y2=False) == [
+        assert bc._points(rows, until=2025) == [
             {"x": 2024, "y": 1},
             {"x": 2025, "y": 3},
         ]
 
     def test_scarta_righe_senza_misura(self):
         rows = [{"x": 2024, "y": None}, {"x": 2025, "y": 2}]
-        assert bc._points(rows, until=2025, has_y2=False) == [{"x": 2025, "y": 2}]
-
-    def test_y2_inclusa_solo_se_presente(self):
-        rows = [{"x": 2025, "y": 2, "y2": 9}]
-        assert bc._points(rows, until=2025, has_y2=True) == [{"x": 2025, "y": 2, "y2": 9}]
+        assert bc._points(rows, until=2025) == [{"x": 2025, "y": 2}]
