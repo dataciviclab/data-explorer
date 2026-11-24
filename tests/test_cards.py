@@ -345,3 +345,64 @@ class TestMap:
             {"region": "Lazio", "value": 3},
             {"region": "Lombardia", "value": 3},
         ]
+
+
+class TestWhere:
+    def test_filtra_le_righe(self, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        monkeypatch.setattr(bc, "last_complete_year", lambda: 2025)
+        spec = {
+            "dataset": entry["slug"],
+            "blocks": [
+                {
+                    "type": "series",
+                    "mart": "anac_bandi_gara__mart_annuale",
+                    "x": "anno",
+                    "y": "valore",
+                    "where": {"livello": "nazionale"},
+                }
+            ],
+        }
+        rows = {
+            "anac_bandi_gara__mart_annuale": [
+                {"x": 2024, "y": 10, "livello": "nazionale"},
+                {"x": 2025, "y": 20, "livello": "nazionale"},
+                {"x": 2025, "y": 999, "livello": "provincia"},
+            ]
+        }
+        block = bc.build_card(entry, spec, _fetch(rows))["blocks"][0]
+        assert block["data"] == [{"x": 2024, "y": 10}, {"x": 2025, "y": 20}]
+
+    def test_where_non_mappa(self, cards_dir, catalog):
+        _write(
+            cards_dir,
+            "anac-bandi-gara",
+            """
+            dataset: anac_bandi_gara
+            blocks:
+              - type: series
+                mart: anac_bandi_gara__mart_annuale
+                x: anno
+                y: n_lotti
+                where: [livello, nazionale]
+            """,
+        )
+        _, errors = bc.load_specs(catalog)
+        assert any("'where' deve essere una mappa" in e for e in errors)
+
+    def test_where_valore_non_scalare(self, cards_dir, catalog):
+        _write(
+            cards_dir,
+            "anac-bandi-gara",
+            """
+            dataset: anac_bandi_gara
+            blocks:
+              - type: series
+                mart: anac_bandi_gara__mart_annuale
+                x: anno
+                y: n_lotti
+                where: {livello: [nazionale]}
+            """,
+        )
+        _, errors = bc.load_specs(catalog)
+        assert any("deve essere uno scalare" in e for e in errors)

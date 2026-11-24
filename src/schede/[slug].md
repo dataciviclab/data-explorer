@@ -20,6 +20,7 @@ const stageLabel = card.published ? "Pubblicato" : "In incubazione";
 const fmt = (value, format) => {
   if (value == null) return "—";
   if (format === "euroCompact") return euroCompact(value);
+  if (format === "mlnEur") return `${num(value)} mln €`;
   if (format === "pct") return pct(value);
   if (format === "deltaPct") return `${value >= 0 ? "+" : ""}${numFix(value, 1)}%`;
   return num(value);

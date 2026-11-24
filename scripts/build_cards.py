@@ -81,11 +81,11 @@ VIEW_KEYS = {
 }
 VIEW_REQUIRED = {"mart", "x", "y"}
 
-MEASURE_KEYS = {"mart", "x", "y", "label", "format", "delta"}
+MEASURE_KEYS = {"mart", "x", "y", "label", "format", "delta", "where"}
 
 BLOCK_KEYS: dict[str, set[str]] = {
     "kpi": {"type", "title", "measures"},
-    "series": {"type", "title", "note", "mart", "x", "x_label", "y", "y_label", "y_format"},
+    "series": {"type", "title", "note", "mart", "x", "x_label", "y", "y_label", "y_format", "where"},
     "composition": {
         "type",
         "title",
@@ -99,6 +99,7 @@ BLOCK_KEYS: dict[str, set[str]] = {
         "by",
         "by_label",
         "normalize",
+        "where",
     },
     "map": {
         "type",
@@ -111,6 +112,7 @@ BLOCK_KEYS: dict[str, set[str]] = {
         "measure",
         "measure_label",
         "measure_format",
+        "where",
     },
     "ranking": {
         "type",
@@ -124,6 +126,7 @@ BLOCK_KEYS: dict[str, set[str]] = {
         "measure_label",
         "measure_format",
         "top",
+        "where",
     },
 }
 BLOCK_REQUIRED: dict[str, set[str]] = {
@@ -160,6 +163,18 @@ def _validate_mart(path: Path, mart: str | None, entry: dict, errors: list[str])
         errors.append(f"{path.name}: mart {mart!r} non tra i mart_refs di {entry['slug']!r}")
 
 
+def _validate_where(path: Path, where: object, errors: list[str]) -> None:
+    """`where` è uguaglianza colonna → scalare. Niente operatori, niente SQL."""
+    if where is None:
+        return
+    if not isinstance(where, dict):
+        errors.append(f"{path.name}: 'where' deve essere una mappa colonna: valore")
+        return
+    for key, value in where.items():
+        if not isinstance(value, (str, int, float, bool)):
+            errors.append(f"{path.name}: where[{key!r}] deve essere uno scalare")
+
+
 def _validate_block(path: Path, block: dict, entry: dict, errors: list[str]) -> None:
     if not isinstance(block, dict):
         errors.append(f"{path.name}: ogni blocco deve essere una mappa")
@@ -174,6 +189,7 @@ def _validate_block(path: Path, block: dict, entry: dict, errors: list[str]) -> 
     unknown = set(block) - BLOCK_KEYS[kind]
     if unknown:
         errors.append(f"{path.name}: blocco {kind} ha campi non ammessi {sorted(unknown)}")
+    _validate_where(path, block.get("where"), errors)
     if kind == "kpi":
         measures = block.get("measures")
         if not isinstance(measures, list) or not measures:
@@ -186,6 +202,7 @@ def _validate_block(path: Path, block: dict, entry: dict, errors: list[str]) -> 
             unknown = set(measure) - MEASURE_KEYS
             if unknown:
                 errors.append(f"{path.name}: misura kpi ha campi non ammessi {sorted(unknown)}")
+            _validate_where(path, measure.get("where"), errors)
             _validate_mart(path, measure.get("mart"), entry, errors)
         return
     _validate_mart(path, block.get("mart"), entry, errors)
@@ -248,6 +265,20 @@ def load_specs(catalog_by_slug: dict[str, dict]) -> tuple[dict[str, dict], list[
 # ── Blocchi: dati dal mart ──────────────────────────────────────────────────
 
 
+def _where(block: dict) -> dict:
+    return block.get("where") or {}
+
+
+def _apply_where(rows: list[dict], where: dict) -> list[dict]:
+    if not where:
+        return rows
+    return [row for row in rows if all(row.get(key) == value for key, value in where.items())]
+
+
+def _columns(where: dict, **aliases: str) -> dict:
+    return {**aliases, **{key: key for key in where}}
+
+
 def _points(rows: list[dict], until: int) -> list[dict]:
     """Serie ordinata, dedup per x, al più fino all'ultimo anno completo."""
     by_x: dict = {}
@@ -263,7 +294,11 @@ def _kpi_block(block: dict, fetch: Fetch) -> dict:
     items = []
     until = last_complete_year()
     for measure in block["measures"]:
-        points = _points(fetch(measure["mart"], {"x": measure["x"], "y": measure["y"]}), until)
+        where = _where(measure)
+        rows = _apply_where(
+            fetch(measure["mart"], _columns(where, x=measure["x"], y=measure["y"])), where
+        )
+        points = _points(rows, until)
         if not points:
             continue
         last = points[-1]
@@ -287,7 +322,11 @@ def _kpi_block(block: dict, fetch: Fetch) -> dict:
 
 
 def _series_block(block: dict, fetch: Fetch) -> dict:
-    points = _points(fetch(block["mart"], {"x": block["x"], "y": block["y"]}), last_complete_year())
+    where = _where(block)
+    rows = _apply_where(
+        fetch(block["mart"], _columns(where, x=block["x"], y=block["y"])), where
+    )
+    points = _points(rows, last_complete_year())
     return {
         "type": "series",
         "title": block.get("title", ""),
@@ -300,7 +339,14 @@ def _series_block(block: dict, fetch: Fetch) -> dict:
 
 
 def _composition_block(block: dict, fetch: Fetch) -> dict:
-    rows = fetch(block["mart"], {"x": block["x"], "group": block["by"], "y": block["y"]})
+    where = _where(block)
+    rows = _apply_where(
+        fetch(
+            block["mart"],
+            _columns(where, x=block["x"], group=block["by"], y=block["y"]),
+        ),
+        where,
+    )
     until = last_complete_year()
     totals: dict[tuple[int, str], float] = {}
     for row in rows:
@@ -331,10 +377,11 @@ def _composition_block(block: dict, fetch: Fetch) -> dict:
 
 
 def _map_block(block: dict, fetch: Fetch) -> dict:
-    columns = {"region": block["dimension"], "value": block["measure"]}
+    where = _where(block)
+    columns = _columns(where, region=block["dimension"], value=block["measure"])
     if block.get("x"):
         columns["x"] = block["x"]
-    rows = fetch(block["mart"], columns)
+    rows = _apply_where(fetch(block["mart"], columns), where)
     year = None
     if block.get("x"):
         years = [
@@ -364,10 +411,11 @@ def _map_block(block: dict, fetch: Fetch) -> dict:
 
 
 def _ranking_block(block: dict, fetch: Fetch) -> dict:
-    columns = {"label": block["dimension"], "value": block["measure"]}
+    where = _where(block)
+    columns = _columns(where, label=block["dimension"], value=block["measure"])
     if block.get("x"):
         columns["x"] = block["x"]
-    rows = fetch(block["mart"], columns)
+    rows = _apply_where(fetch(block["mart"], columns), where)
     year = None
     if block.get("x"):
         years = [row["x"] for row in rows if isinstance(row.get("x"), (int, float))]

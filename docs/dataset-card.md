@@ -73,6 +73,13 @@ notes:
 | `map` | `mart,x,dimension,dimension_label,measure,measure_label,measure_format,title,note` | coropletica regioni; ultimo anno completo |
 | `ranking` | `mart,x,dimension,dimension_label,measure,measure_label,measure_format,top,title,note` | ultimo anno completo, ordina per misura |
 
+Tutti i blocchi dati accettano:
+
+- `where: {colonna: valore}` — uguaglianza, niente operatori né SQL (es.
+  `{livello: regione}` per un mart che mescola nazione, regioni e province);
+- `y_format` / `measure_format`: `num`, `euroCompact`, `pct`, `mlnEur`
+  (valore già in milioni di euro).
+
 `view` resta come **scorciatoia legacy**: `view: {mart,x,y,...}` equivale a un
 blocco `kpi` (y e y2) + un blocco `series`. Non si possono usare `view` e
 `blocks` nello stesso file.

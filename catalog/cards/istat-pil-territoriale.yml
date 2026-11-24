@@ -1,0 +1,54 @@
+dataset: istat_pil_territoriale
+
+title: PIL territoriale
+description: "PIL, valore aggiunto e imposte nette per regione e provincia (ISTAT, prezzi correnti)."
+source: ISTAT — Conti economici territoriali
+
+blocks:
+  - type: kpi
+    measures:
+      - mart: istat_pil_territoriale__pil_territoriale
+        x: anno
+        y: pil_mln_eu
+        label: PIL Italia (mln €)
+        format: mlnEur
+        delta: true
+        where: {livello: nazionale, territorio_codice: IT}
+
+  - type: map
+    mart: istat_pil_territoriale__pil_territoriale
+    x: anno
+    dimension: territorio_nome
+    dimension_label: Regione
+    measure: pil_mln_eu
+    measure_label: PIL (mln €)
+    measure_format: mlnEur
+    where: {livello: regione}
+    title: PIL per regione
+    note: "Prezzi correnti, ultimo anno disponibile."
+
+  - type: ranking
+    mart: istat_pil_territoriale__pil_territoriale
+    x: anno
+    dimension: territorio_nome
+    dimension_label: Provincia
+    measure: pil_mln_eu
+    measure_label: PIL (mln €)
+    measure_format: mlnEur
+    where: {livello: provincia}
+    top: 10
+    title: Top 10 province per PIL
+    note: "Le province sono disponibili fino al 2023."
+
+  - type: series
+    mart: istat_pil_territoriale__pil_territoriale
+    x: anno
+    y: pil_mln_eu
+    y_label: PIL Italia (mln €)
+    y_format: mlnEur
+    where: {livello: nazionale, territorio_codice: IT}
+    title: PIL Italia per anno
+
+notes:
+  - "Valori in milioni di euro, prezzi correnti."
+  - "Nazione e regioni arrivano al 2024; le province al 2023."
