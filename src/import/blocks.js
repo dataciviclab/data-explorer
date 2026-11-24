@@ -100,14 +100,35 @@ function renderComposition(block, { html, plot, width, fmt }) {
   return html`${head}<p style="opacity:0.7; font-size:0.9rem">Composizione per ${block.by_label}</p>${chart}`;
 }
 
+// Le fonti dividono spesso le due P.A. (Bolzano/Trento): il TopoJSON ha una
+// sola regione, e il lookup generico scarta i nomi ambigui. Si aggregano qui.
+const PA_PATTERN = /(?:BOLZANO|TRENTO|TRENTINO)/;
+
+export function aggregateMapRows(rows) {
+  const totals = new Map();
+  for (const row of rows || []) {
+    if (!row || row.region == null || row.value == null) continue;
+    const key = normalizzaReg(String(row.region));
+    const target = PA_PATTERN.test(key) ? "Trentino-Alto Adige" : String(row.region);
+    const targetKey = normalizzaReg(target);
+    const current = totals.get(targetKey);
+    totals.set(targetKey, {
+      region: target,
+      value: (current ? current.value : 0) + row.value,
+    });
+  }
+  return [...totals.values()];
+}
+
 function renderMap(block, { html, plot, width, fmt, geo }) {
   const head = html`${sectionTitle(html, block.title)}${note(html, block.note)}`;
   if (!geo || !block.data.length) {
     return html`${head}${emptyBlock(html, block.title || "Mappa")}`;
   }
-  const lookup = buildMapLookup(block.data, geo.regioniGeo, "region", "value");
+  const rows = aggregateMapRows(block.data);
+  const lookup = buildMapLookup(rows, geo.regioniGeo, "region", "value");
   const valueOf = (feature) => lookup.get(normalizzaReg(feature.properties.DEN_REG)) ?? null;
-  const values = block.data.map((row) => row.value).filter((value) => typeof value === "number");
+  const values = rows.map((row) => row.value).filter((value) => typeof value === "number");
   const min = Math.min(...values);
   const max = Math.max(...values);
   const domain = min === max ? [0, max || 1] : [min, max];

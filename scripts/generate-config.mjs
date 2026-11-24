@@ -123,8 +123,10 @@ function buildSidebar(themes, catalog) {
     pages.push({ name: "Schede dataset", path: "/schede/" });
   }
 
-  // Dataset con pagina explorer non assegnati a nessun tema → "Altri dataset"
-  // Invariante: ogni pagina .md in src/dataset/ deve comparire nella sidebar.
+  // Dataset con pagina explorer non assegnati a nessun tema → "Altri dataset".
+  // Invariante: ogni pagina .md in src/dataset/ deve comparire nella sidebar,
+  // anche se non è nel catalogo ACB (es. slug divergente). Altrimenti la pagina
+  // esiste nel build ma è raggiungibile solo per URL.
   const assigned = new Set(themes.flatMap((t) => t.datasets));
   const unassigned = catalog.datasets.filter((d) => {
     if (assigned.has(d.url_slug)) return false;
@@ -132,14 +134,24 @@ function buildSidebar(themes, catalog) {
     if (!existsSync(pagePath)) return false;
     return true;
   });
-  if (unassigned.length > 0) {
+  const unassignedPages = unassigned.map((d) => ({
+    name: readPageTitle(d.url_slug),
+    path: `/dataset/${d.url_slug}`,
+  }));
+  const included = new Set([
+    ...pages.flatMap((section) => (section.pages || []).map((page) => page.path)),
+    ...unassignedPages.map((page) => page.path),
+  ]);
+  const orphans = readdirSync(resolve(ROOT, "src/dataset"))
+    .filter((file) => file.endsWith(".md"))
+    .map((file) => file.replace(/\.md$/, ""))
+    .map((slug) => ({ name: readPageTitle(slug), path: `/dataset/${slug}` }))
+    .filter((page) => !included.has(page.path));
+  if (unassignedPages.length + orphans.length > 0) {
     pages.push({
       name: "Altri dataset",
       collapsible: true,
-      pages: unassigned.map((d) => ({
-        name: readPageTitle(d.url_slug),
-        path: `/dataset/${d.url_slug}`,
-      })),
+      pages: [...unassignedPages, ...orphans],
     });
   }
 

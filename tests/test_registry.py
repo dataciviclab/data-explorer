@@ -193,3 +193,26 @@ class TestPublishedV2:
         cat = build_catalog(registry)
         assert cat["published"] == 0
         assert cat["datasets"][0]["published"] is False
+
+
+class TestSchedaPubblicata:
+    """Una scheda in catalog/cards/*.yml è una superficie pubblica esplicita."""
+
+    def test_scheda_locale_marca_published(self, monkeypatch):
+        import src.data._registry as mod
+
+        monkeypatch.setattr(mod, "local_card_slugs", lambda: {"x"})
+        registry = {"datasets": [_registry_entry("x", "appalti", stage="incubating")]}
+        cat = mod.build_catalog(registry)
+        assert cat["datasets"][0]["published"] is True
+        assert cat["published"] == 1
+
+    def test_campo_v8_false_senza_scheda(self, monkeypatch):
+        import src.data._registry as mod
+
+        monkeypatch.setattr(mod, "local_card_slugs", lambda: set())
+        registry = {
+            "datasets": [{**_registry_entry("x", "appalti", stage="published"), "published": False}]
+        }
+        cat = mod.build_catalog(registry)
+        assert cat["datasets"][0]["published"] is False

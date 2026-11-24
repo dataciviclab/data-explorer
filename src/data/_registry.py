@@ -22,6 +22,7 @@ ACB (context branch)
 """
 import json
 import os
+import re
 import time
 
 import requests
@@ -32,6 +33,9 @@ from lab_connectors.registry import to_url_slug
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 THEMES_CONFIG_PATH = os.path.join(ROOT, "catalog", "themes.json")
 PAGES_DIR = os.path.join(ROOT, "src", "dataset")
+CARDS_DIR = os.path.join(ROOT, "catalog", "cards")
+
+_CARD_SLUG = re.compile(r"^dataset:\s*([A-Za-z0-9_\-]+)", re.MULTILINE)
 
 # Local cache for topic_index.json — avoids N HTTP requests (one per loader).
 _CACHE_DIR = os.path.join(ROOT, ".observable", "cache")
@@ -147,6 +151,30 @@ def has_explorer_page(url_slug: str) -> bool:
     return os.path.exists(os.path.join(PAGES_DIR, f"{url_slug}.md"))
 
 
+def local_card_slugs() -> set[str]:
+    """Slug DI dei dataset con una scheda editoriale in ``catalog/cards/*.yml``.
+
+    Una scheda è una superficie pubblica esplicita: il dataset va contato come
+    pubblicato anche se ACB (v7/v8) non lo sa. ACB legge solo ``src/dataset/``,
+    quindi senza questo le schede risulterebbero "in incubazione".
+    """
+    slugs: set[str] = set()
+    if not os.path.isdir(CARDS_DIR):
+        return slugs
+    for name in sorted(os.listdir(CARDS_DIR)):
+        if not name.endswith((".yml", ".yaml")):
+            continue
+        try:
+            with open(os.path.join(CARDS_DIR, name), encoding="utf-8") as handle:
+                text = handle.read()
+        except OSError:
+            continue
+        match = _CARD_SLUG.search(text)
+        if match:
+            slugs.add(match.group(1))
+    return slugs
+
+
 def build_catalog(registry: dict | None = None) -> dict:
     """Costruisce il catalogo explorer (output di catalog.json.py).
 
@@ -161,6 +189,7 @@ def build_catalog(registry: dict | None = None) -> dict:
 
     signals = registry.get("signals_by_id", {})
     analyses = registry.get("analyses_by_dataset") or {}
+    cards = local_card_slugs()
 
     datasets = []
     for ds in registry.get("datasets", []):
@@ -169,18 +198,22 @@ def build_catalog(registry: dict | None = None) -> dict:
         url_slug = resolve_url_slug(slug)
         run = signals.get(slug, {})
         clean_rows = run.get("output_rows", {}).get("clean")
+        # Pubblicato se: c'è una scheda editoriale in DE (superficie esplicita),
+        # oppure ACB v8 lo dice, oppure c'è una pagina (v7), oppure lo stage
+        # storico (v1).
+        if slug in cards:
+            published = True
+        elif "published" in ds:
+            published = bool(ds["published"])
+        else:
+            published = (slug in analyses) or ds.get("stage") == "published"
         datasets.append({
             "slug": slug,
             "url_slug": url_slug,
             "name": ds.get("name", ""),
             "description": ds.get("description", "")[:150],
             "stage": ds.get("stage", ""),
-            # v2 (topic_index v8): `published` arriva da ACB ed è derivato dalle
-            # pagine. Con v1 lo deriviamo qui da `analyses_by_dataset`, con
-            # fallback sullo `stage` storico.
-            "published": bool(
-                ds.get("published", (slug in analyses) or ds.get("stage") == "published")
-            ),
+            "published": published,
             "years": f"{period.get('start', '?')}–{period.get('end', '?')}" if period else "?",
             "period": {"start": period.get("start"), "end": period.get("end")},
             "source": ds.get("source", ""),

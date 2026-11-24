@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/ensure-cards.mjs",
     "build": "node scripts/generate-config.mjs && observable build",
+    "predev": "node scripts/ensure-cards.mjs",
     "dev": "node scripts/generate-config.mjs && observable preview",
+    "prepreview": "node scripts/ensure-cards.mjs",
     "preview": "node scripts/generate-config.mjs && observable preview",
     "generate:config": "node scripts/generate-config.mjs",
     "cards": "${PYTHON3:-python3} scripts/build_cards.py",

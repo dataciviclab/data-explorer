@@ -55,5 +55,16 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Generate dataset cards
+        run: npm run cards
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke schede
+        run: |
+          test -f dist/observable/schede/index.html
+          test -f dist/observable/schede/anac-bandi-gara.html
+
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"

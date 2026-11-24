@@ -241,6 +241,16 @@ export default {
     "path": "/schede/"
   },
   {
+    "name": "Altri dataset",
+    "collapsible": true,
+    "pages": [
+      {
+        "name": "Produzione elettrica per fonte",
+        "path": "/dataset/produzione-elettrica-fonti"
+      }
+    ]
+  },
+  {
     "name": "Visioni incrociate",
     "collapsible": true,
     "pages": [
