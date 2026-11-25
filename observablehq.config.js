@@ -4,7 +4,7 @@ export default {
   title: "DataCivicLab Explorer",
   theme: ["air", "ocean-floor"],
   interpreters: {
-    ".py": ["/home/gabry/dev/dataciviclab-workspace/.venv/bin/python"]
+    ".py": ["python3"]
   },
   // Schede dataset: una route dinamica, N path calcolati dal file statico
   // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
