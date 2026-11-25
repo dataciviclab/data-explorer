@@ -267,6 +267,106 @@ class TestBuildCard:
         ]
 
 
+class TestIncremental:
+    """Il contratto delle schede incrementali: niente query se nulla è cambiato."""
+
+    SERIES = """
+    dataset: anac_bandi_gara
+    blocks:
+      - type: series
+        mart: anac_bandi_gara__mart_annuale
+        x: anno
+        y: n_lotti
+    """
+
+    def test_build_card_registra_il_fingerprint(self, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        card = bc.build_card(entry, {"dataset": entry["slug"]}, _fetch({}), fingerprint="abc")
+        assert card["fingerprint"] == "abc"
+
+    def test_fingerprint_cambia_con_editoriale_e_pipeline(self, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {"run_id": "a"})
+        base = bc.card_fingerprint(entry, "dataset: anac_bandi_gara\n")
+        assert base == bc.card_fingerprint(entry, "dataset: anac_bandi_gara\n")
+        assert base != bc.card_fingerprint(entry, "dataset: anac_bandi_gara\ntitle: X\n")
+
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {"run_id": "b"})
+        assert base != bc.card_fingerprint(entry, "dataset: anac_bandi_gara\n")
+
+    def test_fingerprint_cambia_col_catalogo(self, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        base = bc.card_fingerprint(entry, "")
+        assert base != bc.card_fingerprint({**entry, "clean_rows": 999}, "")
+
+    def test_riusa_senza_interrogare_i_mart(self, cards_dir, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        _write(cards_dir, "anac-bandi-gara", self.SERIES)
+        by_slug = {entry["slug"]: entry}
+        specs, errors = bc.load_specs(by_slug)
+        assert errors == []
+        calls = []
+
+        def fetch(mart, columns):
+            calls.append(mart)
+            return []
+
+        first, report = bc.build_all(specs, by_slug, {}, fetch)
+        assert report[0]["state"] == "query"
+        assert calls == ["anac_bandi_gara__mart_annuale"]
+
+        second, report = bc.build_all(specs, by_slug, first, fetch)
+        assert report[0]["state"] == "riuso"
+        assert second == first
+        assert calls == ["anac_bandi_gara__mart_annuale"]  # nessuna nuova query
+
+    def test_force_e_only_forzano_il_rebuild(self, cards_dir, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        _write(cards_dir, "anac-bandi-gara", self.SERIES)
+        by_slug = {entry["slug"]: entry}
+        specs, _ = bc.load_specs(by_slug)
+        first, _ = bc.build_all(specs, by_slug, {}, _fetch({}))
+
+        _, forced = bc.build_all(specs, by_slug, first, _fetch({}), force=True)
+        assert forced[0]["state"] == "query"
+
+        # `only` accetta sia lo slug DI sia lo url_slug.
+        _, only_slug = bc.build_all(
+            specs, by_slug, first, _fetch({}), only=frozenset({"anac-bandi-gara"})
+        )
+        assert only_slug[0]["state"] == "query"
+
+    def test_only_non_pota_le_altre_schede(self, cards_dir, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        _write(cards_dir, "anac-bandi-gara", self.SERIES)
+        _write(cards_dir, "altro-ds", "dataset: altro_ds\n")
+        by_slug = {
+            entry["slug"]: entry,
+            "altro_ds": {**entry, "slug": "altro_ds", "url_slug": "altro-ds"},
+        }
+        specs, errors = bc.load_specs(by_slug)
+        assert errors == []
+        first, _ = bc.build_all(specs, by_slug, {}, _fetch({}))
+
+        cards, report = bc.build_all(
+            specs, by_slug, first, _fetch({}), only=frozenset({"anac-bandi-gara"})
+        )
+        states = {row["url_slug"]: row["state"] for row in report}
+        assert states == {"anac-bandi-gara": "query", "altro-ds": "riuso"}
+        assert set(cards) == {"anac-bandi-gara", "altro-ds"}
+
+    def test_le_schede_rimosse_spariscono(self, cards_dir, entry, monkeypatch):
+        monkeypatch.setattr(bc, "latest_run", lambda slug: {})
+        _write(cards_dir, "anac-bandi-gara", self.SERIES)
+        by_slug = {entry["slug"]: entry}
+        specs, _ = bc.load_specs(by_slug)
+        first, _ = bc.build_all(specs, by_slug, {}, _fetch({}))
+
+        cards, report = bc.build_all({}, by_slug, first, _fetch({}))
+
+        assert cards == {}
+        assert report == []
+
+
 class TestPoints:
     def test_filtra_anno_corrente_e_dedup(self):
         rows = [{"x": 2024, "y": 1}, {"x": 2025, "y": 2}, {"x": 2025, "y": 3}]

@@ -8,18 +8,31 @@ La pagina è una composizione di **blocchi** dichiarati nel file (v0: `kpi`,
 `series`, `ranking`). Il produttore risolve i dati dai mart e li scrive nel
 card JSON: il build del sito non interroga GCS.
 
+Le schede sono **incrementali**: ognuna porta un `fingerprint` degli input
+(file editoriale, campi del catalogo usati, `last_run` della pipeline, hash del
+produttore). Se il fingerprint non cambia, la scheda precedente viene riusata
+così com'è: zero query ai mart. A 100–200 schede un deploy che non le tocca non
+costa nulla.
+
 Uso:
-    python3 scripts/build_cards.py                 # genera tutte le schede
+    python3 scripts/build_cards.py                 # aggiorna solo ciò che è cambiato
     python3 scripts/build_cards.py --dry-run       # mostra le scelte, non scrive
     python3 scripts/build_cards.py --only anac-bandi-gara,entrate-stato
+    python3 scripts/build_cards.py --force         # ignora le schede in cache
     python3 scripts/build_cards.py --new anac_bandi_gara   # stub editoriale
+
+`--only` non filtra l'output: **forza** il rebuild di quei dataset e riusa gli
+altri (serve a un `data_updated` mirato). Le schede non più dichiarate in
+`catalog/cards/` spariscono dall'artefatto.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Callable
 
@@ -140,6 +153,29 @@ BLOCK_REQUIRED: dict[str, set[str]] = {
 DEFAULT_X_LABEL = "Anno"
 DEFAULT_FORMAT = "num"
 DEFAULT_TOP = 20
+
+# Cambia quando cambia la forma della scheda: invalida tutte le schede.
+SCHEMA_VERSION = 2
+
+# Campi del catalogo che finiscono nella scheda: se cambiano, la scheda va rifatta.
+FINGERPRINT_ENTRY_KEYS = (
+    "slug",
+    "url_slug",
+    "name",
+    "description",
+    "category",
+    "theme",
+    "theme_name",
+    "published",
+    "period",
+    "source",
+    "source_id",
+    "registry_source",
+    "clean_rows",
+    "mart_refs",
+    "location",
+    "columns",
+)
 
 
 # ── Validazione dei file editoriali ─────────────────────────────────────────
@@ -542,7 +578,7 @@ def _warnings(card: dict, spec: dict) -> list[str]:
     return warnings
 
 
-def build_card(entry: dict, spec: dict, fetch: Fetch) -> dict:
+def build_card(entry: dict, spec: dict, fetch: Fetch, *, fingerprint: str = "") -> dict:
     """Compone la scheda: catalogo + override editoriali + blocchi dai mart."""
     card = {
         "slug": entry["slug"],
@@ -563,6 +599,7 @@ def build_card(entry: dict, spec: dict, fetch: Fetch) -> dict:
         "registry_source": entry.get("registry_source", ""),
         "rows_clean": entry.get("clean_rows"),
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "fingerprint": fingerprint,
         "marts": _marts_used(spec),
         "blocks": _build_blocks(spec, fetch),
         "dictionary": entry.get("columns") or [],
@@ -571,6 +608,107 @@ def build_card(entry: dict, spec: dict, fetch: Fetch) -> dict:
     }
     card["warnings"] = _warnings(card, spec)
     return card
+
+
+# ── Fingerprint e riuso (schede incrementali) ───────────────────────────────
+
+
+def _spec_text(entry: dict) -> str:
+    """File editoriale grezzo: ogni modifica deve invalidare la scheda."""
+    try:
+        return (CARDS_DIR / f"{entry['url_slug']}.yml").read_text(encoding="utf-8")
+    except OSError:
+        return ""
+
+
+@lru_cache(maxsize=1)
+def producer_version() -> str:
+    """Hash del produttore + contratti dati: cambia il codice, cambiano le schede."""
+    digest = hashlib.sha256()
+    for path in (
+        Path(__file__).resolve(),
+        ROOT / "src" / "data" / "_views.py",
+        ROOT / "src" / "data" / "_registry.py",
+    ):
+        digest.update(path.read_bytes())
+    return digest.hexdigest()[:16]
+
+
+def card_fingerprint(entry: dict, spec_text: str, *, producer: str = "") -> str:
+    """Identità della scheda: stessi input ⇒ stesso fingerprint ⇒ si riusa.
+
+    Input: contratto del produttore, file editoriale, campi del catalogo usati
+    dalla scheda, ultima esecuzione della pipeline (``last_run``) e ultimo anno
+    completo (a gennaio le serie cambiano perimetro).
+    """
+    payload = {
+        "schema": SCHEMA_VERSION,
+        "producer": producer or producer_version(),
+        "spec": spec_text,
+        "dataset": {key: entry.get(key) for key in FINGERPRINT_ENTRY_KEYS},
+        "run": latest_run(entry["slug"]),
+        "last_complete_year": last_complete_year(),
+    }
+    serialized = json.dumps(jsonable(payload), sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:32]
+
+
+def load_cards(path: Path | None = None) -> dict[str, dict]:
+    """Schede già generate (artefatto): base per il riuso incrementale."""
+    try:
+        data = json.loads((path or OUTPUT).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def build_all(
+    specs: dict[str, dict],
+    by_slug: dict[str, dict],
+    previous: dict[str, dict],
+    fetch: Fetch,
+    *,
+    force: bool = False,
+    only: frozenset[str] = frozenset(),
+    producer: str = "",
+) -> tuple[dict[str, dict], list[dict]]:
+    """Costruisce le schede riusando quelle il cui fingerprint non è cambiato.
+
+    ``only`` non filtra l'output: forza il rebuild di quei dataset e riusa gli
+    altri. Le schede non più dichiarate in ``catalog/cards/`` non entrano
+    nell'artefatto (niente code morte).
+    """
+    cards: dict[str, dict] = {}
+    report: list[dict] = []
+    producer = producer or producer_version()
+
+    for slug, spec in sorted(specs.items()):
+        entry = by_slug[slug]
+        url_slug = entry["url_slug"]
+        fingerprint = card_fingerprint(entry, _spec_text(entry), producer=producer)
+        forced = force or slug in only or url_slug in only
+        cached = previous.get(url_slug)
+        if not forced and isinstance(cached, dict) and cached.get("fingerprint") == fingerprint:
+            card, state = cached, "riuso"
+        else:
+            card, state = build_card(entry, spec, fetch, fingerprint=fingerprint), "query"
+        cards[url_slug] = card
+        blocks = card.get("blocks") or []
+        report.append(
+            {
+                "url_slug": url_slug,
+                "name": card.get("name", ""),
+                "blocks": len(blocks),
+                "marts": len(card.get("marts") or []),
+                "points": sum(
+                    len(block.get("data") or [])
+                    for block in blocks
+                    if block.get("type") == "series"
+                ),
+                "state": state,
+            }
+        )
+    return cards, report
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
@@ -642,6 +780,9 @@ def main(argv: list[str]) -> int:
     only: set[str] = set()
     if "--only" in argv:
         index = argv.index("--only")
+        if index + 1 >= len(argv):
+            print("! --only richiede una lista di slug", file=sys.stderr)
+            return 1
         only = {part.strip() for part in argv[index + 1].split(",") if part.strip()}
 
     specs, errors = load_specs(by_slug)
@@ -651,30 +792,40 @@ def main(argv: list[str]) -> int:
         return 1
 
     dry_run = "--dry-run" in argv
+    force = "--force" in argv or "--refresh" in argv
     fetch = _mart_fetch()
-    cards: dict[str, dict] = {}
-    rows_out: list[tuple[str, int, int, int, str]] = []
-
-    for slug, spec in sorted(specs.items()):
-        entry = by_slug[slug]
-        if only and entry["url_slug"] not in only and slug not in only:
-            continue
-        card = build_card(entry, spec, fetch)
-        cards[entry["url_slug"]] = card
-        points = sum(len(block.get("data", [])) for block in card["blocks"] if block["type"] == "series")
-        rows_out.append((entry["url_slug"], len(card["blocks"]), len(card["marts"]), points, card["name"]))
+    cards, report = build_all(
+        specs,
+        by_slug,
+        load_cards(),
+        fetch,
+        force=force,
+        only=frozenset(only),
+        producer=producer_version(),
+    )
+    reused = sum(1 for row in report if row["state"] == "riuso")
 
     if dry_run:
-        print(f"{'scheda':26s} {'blocchi':>7s} {'mart':>4s} {'punti':>5s}  titolo")
-        for row in rows_out:
-            print(f"{row[0]:26s} {row[1]:7d} {row[2]:4d} {row[3]:5d}  {row[4]}")
-        print(f"\n{len(rows_out)} schede; {sum(1 for c in cards.values() if c['blocks'])} con blocchi")
+        print(f"{'scheda':26s} {'blocchi':>7s} {'mart':>4s} {'punti':>5s}  {'stato':6s} titolo")
+        for row in report:
+            print(
+                f"{row['url_slug']:26s} {row['blocks']:7d} {row['marts']:4d} "
+                f"{row['points']:5d}  {row['state']:6s} {row['name']}"
+            )
+        with_blocks = sum(1 for card in cards.values() if card.get("blocks"))
+        print(f"\n{len(report)} schede; {reused} da cache; {with_blocks} con blocchi")
         return 0
 
     OUTPUT.write_text(json.dumps(jsonable(cards), ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"✓ scrivete {len(cards)} schede in {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size} byte)")
-    for row in rows_out:
-        print(f"  · {row[0]}: {row[1]} blocchi, {row[2]} mart, {row[3]} punti")
+    print(
+        f"✓ {len(cards) - reused} aggiornate, {reused} riusate "
+        f"in {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size} byte)"
+    )
+    for row in report:
+        print(
+            f"  · {row['url_slug']}: {row['blocks']} blocchi, {row['marts']} mart, "
+            f"{row['points']} punti [{row['state']}]"
+        )
     return 0
 
 
