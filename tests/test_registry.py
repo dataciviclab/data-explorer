@@ -201,7 +201,7 @@ class TestSchedaPubblicata:
     def test_scheda_locale_marca_published(self, monkeypatch):
         import src.data._registry as mod
 
-        monkeypatch.setattr(mod, "local_cards", lambda: {"x": "Titolo editoriale"})
+        monkeypatch.setattr(mod, "local_cards", lambda: {"x": {"title": "Titolo editoriale", "description": ""}})
         registry = {"datasets": [_registry_entry("x", "appalti", stage="incubating")]}
         cat = mod.build_catalog(registry)
         assert cat["datasets"][0]["published"] is True
@@ -225,7 +225,7 @@ class TestSuperficiPubbliche:
         import src.data._registry as mod
 
         monkeypatch.setattr(mod, "has_explorer_page", lambda url: url == "pagina")
-        monkeypatch.setattr(mod, "local_cards", lambda: {"scheda": "Scheda editoriale"})
+        monkeypatch.setattr(mod, "local_cards", lambda: {"scheda": {"title": "Scheda editoriale", "description": "Descrizione scheda"}})
         registry = {
             "datasets": [
                 _registry_entry("pagina", "appalti"),
@@ -240,11 +240,12 @@ class TestSuperficiPubbliche:
         assert by_slug["nessuna"]["page_url"] is None
         assert by_slug["scheda"]["published"] is True
         assert by_slug["scheda"]["name"] == "Scheda editoriale"
+        assert by_slug["scheda"]["description"] == "Descrizione scheda"
 
     def test_tema_include_dataset_con_scheda(self, monkeypatch):
         import src.data._registry as mod
 
-        monkeypatch.setattr(mod, "local_cards", lambda: {"senza_pagina": ""})
+        monkeypatch.setattr(mod, "local_cards", lambda: {"senza_pagina": {"title": "", "description": ""}})
         registry = {"datasets": [_registry_entry("senza_pagina", "ambiente")]}
         themes = mod.build_themes(registry, page_exists=lambda url: False)
         ta = next(t for t in themes if t["slug"] == "territorio-ambiente")

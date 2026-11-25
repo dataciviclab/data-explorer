@@ -37,6 +37,7 @@ CARDS_DIR = os.path.join(ROOT, "catalog", "cards")
 
 _CARD_SLUG = re.compile(r"^dataset:\s*([A-Za-z0-9_\-]+)", re.MULTILINE)
 _CARD_TITLE = re.compile(r"^title:\s*(.+)$", re.MULTILINE)
+_CARD_DESCRIPTION = re.compile(r"^description:\s*(.+)$", re.MULTILINE)
 
 # Local cache for topic_index.json — avoids N HTTP requests (one per loader).
 _CACHE_DIR = os.path.join(ROOT, ".observable", "cache")
@@ -152,14 +153,14 @@ def has_explorer_page(url_slug: str) -> bool:
     return os.path.exists(os.path.join(PAGES_DIR, f"{url_slug}.md"))
 
 
-def local_cards() -> dict[str, str]:
-    """Schede editoriali in ``catalog/cards/*.yml``: slug DI → titolo.
+def local_cards() -> dict[str, dict[str, str]]:
+    """Schede editoriali in ``catalog/cards/*.yml``: slug DI → {title, description}.
 
     Una scheda è una superficie pubblica esplicita: il dataset va contato come
     pubblicato anche se ACB (v7/v8) non lo sa, e il ``title`` editoriale è il
     nome pubblico (catalogo, temi, home), non lo slug del registry.
     """
-    cards: dict[str, str] = {}
+    cards: dict[str, dict[str, str]] = {}
     if not os.path.isdir(CARDS_DIR):
         return cards
     for name in sorted(os.listdir(CARDS_DIR)):
@@ -177,7 +178,11 @@ def local_cards() -> dict[str, str]:
         title = title_match.group(1).strip() if title_match else ""
         if len(title) >= 2 and title[0] == title[-1] and title[0] in ("'", '"'):
             title = title[1:-1]
-        cards[slug_match.group(1)] = title
+        description_match = _CARD_DESCRIPTION.search(text)
+        description = description_match.group(1).strip() if description_match else ""
+        if len(description) >= 2 and description[0] == description[-1] and description[0] in ("'", '"'):
+            description = description[1:-1]
+        cards[slug_match.group(1)] = {"title": title, "description": description}
     return cards
 
 
@@ -226,11 +231,12 @@ def build_catalog(registry: dict | None = None) -> dict:
         else:
             published = (slug in analyses) or ds.get("stage") == "published"
         theme_slug, theme_name = theme_by_category.get(ds.get("category", ""), ("", ""))
+        card = cards.get(slug) or {}
         datasets.append({
             "slug": slug,
             "url_slug": url_slug,
-            "name": cards.get(slug) or ds.get("name", ""),
-            "description": ds.get("description", "")[:150],
+            "name": card.get("title") or ds.get("name", ""),
+            "description": (card.get("description") or ds.get("description", ""))[:150],
             "stage": ds.get("stage", ""),
             "published": published,
             "has_page": has_page,
