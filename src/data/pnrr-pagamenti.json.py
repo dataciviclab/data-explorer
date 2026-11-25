@@ -21,7 +21,7 @@ url = _parquet_refs(slug, [year], location)[0]
 
 with safe_connect() as con:
     # KPI totali
-    kpi_row = con.sql(f"""
+    kpi_row = con.execute(f"""
         SELECT COUNT(*) AS n_record,
                COUNT(DISTINCT cup) AS n_progetti,
                ROUND(COALESCE(SUM(finanziamento_totale), 0) / 1e9, 2) AS fin_mld,
@@ -60,7 +60,7 @@ with safe_connect() as con:
     ]
 
     # Composizione pagamenti per fonte
-    fonti_rows = con.sql(f"""
+    fonti_rows = con.execute(f"""
         SELECT
             ROUND(COALESCE(SUM(pagamento_stato), 0) / 1e9, 2) AS stato,
             ROUND(COALESCE(SUM(pagamento_ue), 0) / 1e9, 2) AS ue,

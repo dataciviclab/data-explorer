@@ -20,7 +20,7 @@ url = _parquet_refs(slug, [year], location)[0]
 
 with safe_connect() as con:
     # KPI totali
-    kpi_row = con.sql(f"""
+    kpi_row = con.execute(f"""
         SELECT COUNT(*) AS n_progetti,
                COUNT(DISTINCT cup) AS n_cup,
                ROUND(COALESCE(SUM(fin_totale), 0) / 1e9, 2) AS fin_mld,
