@@ -162,3 +162,30 @@ Prima di considerare una pagina pronta, chiedersi:
 - `section-note` e `method-note` sono davvero minime?
 - la pagina resta leggibile con poco testo?
 - il dettaglio finale riporta l'utente al dataset?
+
+## Audit automatico
+
+`npm run audit` gira in CI dopo il build e legge i dati realmente prodotti dai
+loader. **Errori** (bloccano il deploy):
+
+- un loader produce un output vuoto (la pagina andrebbe in errore nel browser);
+- un dataset `published` non ha né pagina né scheda (voce morta nel catalogo).
+
+**Avvisi** (non bloccano, vanno letti):
+
+- `period` del frontmatter e anni presenti nei dati non coincidono: la pagina
+  può filtrare (es. `attivita-aula` parte dal 2022), ma il frontmatter va
+  verificato;
+- una mappa non copre tutte le regioni del TopoJSON;
+- un loader contiene un path GCS hardcoded.
+
+Se una mappa esclude regioni **per scelta editoriale**, dichiaralo nel
+frontmatter: l'audit le sottrae dal controllo.
+
+```yaml
+mappe_escluse: [Friuli-Venezia Giulia, Sardegna, Sicilia, Trentino-Alto Adige/Südtirol, Valle d'Aosta/Vallée d'Aoste]
+```
+
+Le pagine che unificano le province autonome nel Trentino-Alto Adige
+(`buildRegLookupWithTrentino`, `isTrentinoPA`, `extraFallbacks`) vengono
+saltate dal controllo mappe: l'aggregato non è deducibile staticamente.
