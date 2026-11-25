@@ -1,7 +1,7 @@
 # Scheda dataset — modello e flusso
 
-Stato: **pilota** (3 schede, route `/schede/[slug]`). Non sostituisce ancora
-`/dataset/*`.
+Stato: **pilota**, route `/schede/[slug]`. Non sostituisce ancora
+`/dataset/*`: le pagine curate restano, le schede sono additive.
 
 ## Perché esiste
 
@@ -106,13 +106,60 @@ lo `url_slug`, lo stesso dataset è in due file, un `mart` non è tra i
 ## Comandi
 
 ```bash
-npm run cards:dry        # tabella slug → blocchi/mart/punti, non scrive
-npm run cards            # scrive src/data/cards.json
+npm run cards:dry        # tabella slug → blocchi/mart/punti/stato, non scrive
+npm run cards            # aggiorna solo ciò che è cambiato
+npm run cards -- --only anac-bandi-gara   # forza quel dataset, riusa gli altri
+npm run cards -- --force                  # ignora la cache (tutte le schede)
 npm run card:new <slug>  # crea lo stub editoriale
 npm run build            # legge cards.json, nessuna query GCS
 ```
 
 In CI `npm run cards` è uno step prima del build (`deploy.yml`).
+
+## Freschezza, cache e riuso
+
+La scheda è **incrementale**. Ogni card porta un `fingerprint` calcolato da:
+
+- hash del produttore (`build_cards.py`, `_views.py`, `_registry.py`);
+- contenuto del file editoriale (ogni modifica invalida);
+- campi del catalogo usati dalla scheda;
+- `latest_run` della pipeline (la pipeline ha rigenerato i mart?);
+- ultimo anno completo (a gennaio le serie cambiano perimetro).
+
+Stesso fingerprint ⇒ la card precedente viene riusata **così com'è** (stesso
+`generated_at`), senza interrogare i mart. `src/data/cards.json` è in cache tra
+un run e l'altro: un deploy che non tocca le schede costa ~1 s, non N query.
+
+| Evento | Loader eseguiti | Schede interrogate |
+|---|---|---|
+| 1 dataset (dispatch `data_updated`) | quelli che ne leggono i mart | 1 (forzata dallo slug) |
+| push di codice su 1 loader | 1 | 0 (fingerprint invariato) |
+| modifica di un `.yml` editoriale | 0 | 1 |
+| `_util`/`_registry`/`_views`/requirements | tutti (deploy) | tutte (cambia il produttore) |
+| `catalog_updated` (solo metadati) | 0 | 0 |
+
+Il PR check **non** fa il full: usa la cache, esegue i loader toccati dal diff e
+lascia la validazione della dipendenza/contratto al deploy.
+
+### Refresh mirato di un dataset
+
+```bash
+# da un repo dati, dopo aver ripubblicato i mart di X
+gh api repos/dataciviclab/data-explorer/dispatches \
+  -f event_type=data_updated \
+  -f client_payload[datasets]=<slug_di_X>
+```
+
+Il deploy invalida i loader che leggono i mart di X (`scripts/invalidate_cache.py`
+li trova dal sorgente: `bdap_entrate_stato` → `bdap-entrate` +
+`entrate-vs-spese`), rigenera la card di X e lascia tutto il resto in cache.
+`workflow_dispatch` ha gli stessi input (`datasets`, `full_refresh`).
+
+Dopo il build, lo step *Smoke — i loader invalidati sono girati* verifica che
+ogni output invalidato esista davvero in cache: se un loader è fallito e il
+build ha servito lo stale, il deploy si ferma invece di pubblicare numeri
+vecchi. Con la cache svuotata non c'è fallback: un loader rotto fa fallire il
+build (verificato).
 
 ## Migrare le pagine curate
 
