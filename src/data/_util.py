@@ -116,6 +116,20 @@ def _parquet_refs(slug: str, years: list[int], location: dict | None = None) -> 
     return [https_url("clean", "clean_parquet", slug=slug, year=year) for year in years]
 
 
+def _no_parquet(slug: str, years: list[int], location: dict | None = None) -> None:
+    """Errore esplicito quando nessun anno richiesto ha un parquet.
+
+    Un loader che scrive ``[]`` produce una pagina vuota senza errore di build:
+    il guasto resta invisibile finché qualcuno non apre la pagina. Meglio
+    rompere il build e leggere il messaggio.
+    """
+    path = _location_path(location) or "<path canonico>"
+    raise RuntimeError(
+        f"_util: nessun parquet per {slug!r} negli anni {years} "
+        f"(location: {path}). Aggiorna 'years' nel loader o la location nel "
+        "registry: un loader non deve emettere un output vuoto."
+    )
+
 def load_dataset(
     slug: str,
     years: list[int],
@@ -136,8 +150,7 @@ def load_dataset(
     """
     valid_years = [y for y in years if _parquet_exists(slug, y, location)]
     if not valid_years:
-        json.dump([], sys.stdout)
-        return
+        _no_parquet(slug, years, location)
 
     refs = _parquet_refs(slug, valid_years, location)
     parquet_refs = " UNION ALL ".join(
@@ -185,8 +198,7 @@ def raw_sample(
     """
     valid_years = [y for y in years if _parquet_exists(slug, y, location)]
     if not valid_years:
-        json.dump([], sys.stdout)
-        return
+        _no_parquet(slug, years, location)
 
     refs = _parquet_refs(slug, valid_years, location)
     # Campiona casualmente distribuito tra i file per-anno: con LIMIT su un

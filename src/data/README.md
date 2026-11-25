@@ -52,6 +52,21 @@ I loader che restano su `clean` (perché non hanno un mart equivalente) usano
 ancora `_util.load_dataset()` / `safe_connect()`: migrano quando il mart
 corrispondente esiste.
 
+### Due regole non negoziabili
+
+1. **Niente anni hardcoded.** `years=[2023]` con un commento «il file contiene
+   1990-2023» è il modo in cui `ispra-emissioni-ghg` si è rotto quando la
+   pipeline ha pubblicato il 2024: `_parquet_exists` confrontava l'anno del
+   path, non trovava il 2023 e il loader scriveva `[]`. Gli anni vengono dal
+   mart (`mart_rows`) o dal registry (`available_years`).
+2. **Niente output vuoto.** `load_dataset`/`raw_sample` ora **falliscono** se
+   nessun anno richiesto ha un parquet: un `[]` produce una pagina che va in
+   errore nel browser senza che il build se ne accorga. Se un dataset è
+   davvero senza dati, l'errore deve dirlo nel job.
+
+`npm run audit` (step CI dopo il build) verifica output vuoti, path GCS
+hardcoded, `published` senza superficie e copertura regioni delle mappe.
+
 ## Utility condivisa (`_util.py`)
 
 `_util.py` fornisce `load_dataset()`, `_parquet_exists()` e `_parquet_refs()`

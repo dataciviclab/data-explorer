@@ -158,13 +158,12 @@ class TestRawSample:
 
     @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=False)
-    def test_empty_when_no_years(self, mock_exists, mock_safe_connect):
+    def test_errore_quando_nessun_anno_esiste(self, mock_exists, mock_safe_connect):
+        """Nessun anno valido → errore, non un output vuoto."""
         from src.data._util import raw_sample
 
-        buf = io.StringIO()
-        sys.stdout = buf
-        raw_sample("test-slug", [2020, 2021])
-        assert json.loads(buf.getvalue()) == []
+        with pytest.raises(RuntimeError, match="nessun parquet"):
+            raw_sample("test-slug", [2020, 2021])
         mock_safe_connect.assert_not_called()
 
 
@@ -249,23 +248,18 @@ class TestLoadDataset:
 
     @patch("src.data._util.safe_connect")
     @patch("src.data._util._parquet_exists", return_value=False)
-    def test_empty_when_no_valid_years(self, mock_exists, mock_safe_connect, mock_con):
-        """Nessun anno valido → array JSON vuoto."""
+    def test_errore_quando_nessun_anno_valido(self, mock_exists, mock_safe_connect, mock_con):
+        """Nessun anno valido → errore: una pagina vuota non deve passare."""
         mock_safe_connect.return_value.__enter__.return_value = mock_con
         from src.data._util import load_dataset
 
-        buf = io.StringIO()
-        sys.stdout = buf
-
-        load_dataset(
-            slug="test-slug",
-            years=[2020, 2021],
-            group_cols=["anno"],
-            metric_cols=["valore"],
-        )
-
-        output = json.loads(buf.getvalue())
-        assert output == []
+        with pytest.raises(RuntimeError, match="nessun parquet"):
+            load_dataset(
+                slug="test-slug",
+                years=[2020, 2021],
+                group_cols=["anno"],
+                metric_cols=["valore"],
+            )
         # DuckDB non deve essere chiamata
         mock_con.sql.assert_not_called()
 
