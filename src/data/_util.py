@@ -132,27 +132,46 @@ def _no_parquet(slug: str, years: list[int], location: dict | None = None) -> No
 
 def load_dataset(
     slug: str,
-    years: list[int],
+    years: list[int] | None,
     group_cols: list[str],
     metric_cols: list[str],
     where: str = "",
     location: dict | None = None,
+    ints: list[str] | None = None,
 ) -> None:
     """
     Legge parquet GCS per un dataset, raggruppa per group_cols,
     somma metric_cols, output JSON su stdout.
     Salta gli anni in cui il parquet non esiste.
 
+    ``years=None`` usa tutti i file dichiarati nella ``location``: è la forma
+    corretta per un file multi-anno, dove un anno scritto a mano è una
+    duplicazione del dato (e invecchia: vedi il caso emissioni).
+
     ``location``: dict opzionale dal registry ({type, path, multi_file}).
-    Se assente, usa il pattern canonico (dataset-incubator).
+    Se assente, usa il pattern canonico (dataset-incubator) e ``years`` è
+    obbligatorio.
+
+    ``ints``: colonne da emettere come interi. Le fonti a volte le pubblicano
+    come stringhe ('1'), e una pagina che confronta ``=== 1`` filtra zero
+    righe senza errori di build.
 
     Output: array JSON di righe aggregate (v1 contract).
     """
-    valid_years = [y for y in years if _parquet_exists(slug, y, location)]
-    if not valid_years:
-        _no_parquet(slug, years, location)
-
-    refs = _parquet_refs(slug, valid_years, location)
+    if years is None:
+        if not location:
+            raise ValueError(
+                "_util: years=None richiede 'location' (senza anni non si "
+                "deriva il path canonico)"
+            )
+        refs = _parquet_refs(slug, [], location)
+        if not refs:
+            _no_parquet(slug, [], location)
+    else:
+        valid_years = [y for y in years if _parquet_exists(slug, y, location)]
+        if not valid_years:
+            _no_parquet(slug, years, location)
+        refs = _parquet_refs(slug, valid_years, location)
     parquet_refs = " UNION ALL ".join(
         f"SELECT * FROM read_parquet('{ref}')" for ref in refs
     )
@@ -173,10 +192,17 @@ def load_dataset(
         rows = con.sql(query).fetchall()
 
     columns = group_cols + metric_cols
-    data = [
-        dict(zip(columns, [int(v) if isinstance(v, float) and v == v and v == int(v) else v for v in row]))
-        for row in rows
-    ]
+    int_cols = set(ints or ())
+    data = []
+    for row in rows:
+        record = {}
+        for column, value in zip(columns, row):
+            if isinstance(value, float) and value == value and value == int(value):
+                value = int(value)
+            if column in int_cols and value is not None:
+                value = int(float(value)) if isinstance(value, str) else int(value)
+            record[column] = value
+        data.append(record)
 
     json.dump(data, sys.stdout, ensure_ascii=False)
 

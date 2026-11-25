@@ -6,6 +6,9 @@ source_url: https://esploradati.istat.it/
 period: "2003–2024"
 last_modified: 2026-05-27
 dataset_slug: istat_gini_regionale
+# Il Trentino-Alto Adige è pubblicato solo come due province autonome: un
+# indice di Gini regionale non si può ricavare dalle due province.
+mappe_escluse: [Trentino-Alto Adige/Südtirol]
 data_driven: true
 ---
 
@@ -42,8 +45,11 @@ const annoData = filtered
   .filter(d => d.anno === annoSel)
   .sort((a, b) => b.gini - a.gini);
 
-// Dati per la mappa: esclude province autonome (20 regioni reali)
-const annoDataRegioni = annoData.filter(d => !d.regione.startsWith('Provincia Autonoma'));
+// Dati per la mappa e per le statistiche regionali: fuori le province
+// autonome (il Trentino non è aggregabile) e gli aggregati ISTAT ("Sud"),
+// che altrimenti entrano nella media come se fossero una regione.
+const isAggregato = (r) => /Provincia Autonoma|aggregato/i.test(r.regione);
+const annoDataRegioni = annoData.filter(d => !isAggregato(d));
 const mediaRegionale = d3.mean(annoDataRegioni, d => d.gini);
 const minGini = d3.min(annoDataRegioni, d => d.gini);
 const maxGini = d3.max(annoDataRegioni, d => d.gini);
@@ -54,7 +60,7 @@ const giniLookup = buildMapLookup(annoDataRegioni, regioniGeo, "regione", "gini"
 
 ```js
 const trendNazionale = Array.from(
-  d3.rollup(filtered.filter(d => !d.regione.startsWith('Provincia Autonoma')), v => d3.mean(v, d => d.gini), d => d.anno),
+  d3.rollup(filtered.filter(d => !isAggregato(d)), v => d3.mean(v, d => d.gini), d => d.anno),
   ([anno, gini]) => ({anno, gini})
 ).sort((a, b) => a.anno - b.anno);
 ```
@@ -109,7 +115,7 @@ Plot.plot({
 })
 ```
 
-> **Nota di lettura**: la legenda usa la scala `quantile` — ogni colore contiene lo stesso numero di regioni. Trentino-Alto Adige e le province autonome sono aggregate nel valore regionale. I valori precisi sono nella tabella in fondo.
+> **Nota di lettura**: la legenda usa la scala `quantile` — ogni colore contiene lo stesso numero di regioni. Il Trentino-Alto Adige non è in mappa: ISTAT pubblica l'indice solo per le due province autonome e un Gini regionale non si ricava dalla loro media. Le statistiche regionali escludono anche l'aggregato "Sud". I valori precisi sono nella tabella in fondo.
 
 ---
 

@@ -6,6 +6,9 @@ source_url: https://dati.istruzione.it/opendata/
 period: "2015–2025"
 last_modified: 2026-05-31
 dataset_slug: mim_alunni_corso_eta
+# La fonte non pubblica Trentino-Alto Adige e Valle d'Aosta: la mappa copre
+# 18 regioni su 20 (vedi Limiti).
+mappe_escluse: [Trentino-Alto Adige/Südtirol, Valle d'Aosta/Vallée d'Aoste]
 data_driven: true
 ---
 
@@ -187,6 +190,7 @@ La secondaria di II grado è l'ordine con più iscritti, ma la demografia è in 
 ## Limiti
 
 - **Copertura**: la serie copre gli anni scolastici dal 2015/16 al 2024/25. Dati precedenti non sono disponibili in questo dataset.
+- **Regioni mancanti**: la fonte non pubblica i dati di Trentino-Alto Adige e Valle d'Aosta. La mappa e le statistiche coprono 18 regioni su 20.
 - **Scuole statali**: i dati si riferiscono alle sole scuole statali. Non includono scuole paritarie, private o regionali.
 - **Anno scolastico**: l'anno mostrato è l'anno di inizio del ciclo scolastico (es. 2023 = anno scolastico 2023/24).
 - **Granularità**: i dati sono aggregati per regione e ordine scolastico. La disaggregazione per singola scuola è disponibile nel dataset originale.

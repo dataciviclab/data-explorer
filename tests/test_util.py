@@ -400,6 +400,57 @@ class TestLoadDataset:
         assert "ORDER BY regione" in sql_call
 
 
+    @patch("src.data._util.safe_connect")
+    @patch("src.data._util._parquet_refs")
+    def test_years_none_usa_tutti_i_file_della_location(self, mock_refs, mock_safe_connect, mock_con):
+        """years=None: nessun anno hardcoded, i refs vengono dalla location."""
+        mock_refs.return_value = ["https://example.test/2024/x.parquet"]
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
+        mock_con.sql.return_value.fetchall.return_value = [("2024", 1.0)]
+        from src.data._util import load_dataset
+
+        buf = io.StringIO()
+        sys.stdout = buf
+
+        load_dataset(
+            slug="test-slug",
+            years=None,
+            group_cols=["anno"],
+            metric_cols=["valore"],
+            location={"type": "gcs", "path": "gs://bucket/x.parquet"},
+        )
+
+        sql_call = mock_con.sql.call_args[0][0]
+        assert "https://example.test/2024/x.parquet" in sql_call
+        assert json.loads(buf.getvalue())[0]["anno"] == "2024"
+
+    @patch("src.data._util.safe_connect")
+    @patch("src.data._util._parquet_exists", return_value=True)
+    def test_ints_converte_le_stringhe_in_interi(self, mock_exists, mock_safe_connect, mock_con):
+        """Una colonna numerica pubblicata come stringa ('1') va emessa come intero."""
+        mock_con.sql.return_value.fetchall.return_value = [("2024", "Lombardia", "1", 0.31)]
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
+        from src.data._util import load_dataset
+
+        buf = io.StringIO()
+        sys.stdout = buf
+
+        load_dataset(
+            slug="test-slug",
+            years=[2024],
+            group_cols=["anno", "regione", "pres_aff_imp"],
+            metric_cols=["gini"],
+            location={
+                "type": "gcs",
+                "path": "gs://bucket/test-slug/2024/test-slug_2024_clean.parquet",
+            },
+            ints=["pres_aff_imp"],
+        )
+
+        row = json.loads(buf.getvalue())[0]
+        assert row["pres_aff_imp"] == 1
+        assert isinstance(row["pres_aff_imp"], int)
+
 class TestLoaderCompat:
     """I loader non devono importare simboli privati rimossi dal refactor."""
 
