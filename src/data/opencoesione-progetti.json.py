@@ -8,7 +8,7 @@ from _util import load_dataset, get_location
 load_dataset(
     slug="opencoesione_progetti",
     years=[2026],  # unico snapshot multi-ciclo
-    group_cols=["OC_DESCR_CICLO", "OC_MACROAREA", "OC_TEMA_SINTETICO", "OC_STATO_PROGETTO"],
+    group_cols=["OC_DESCR_CICLO", "OC_MACROAREA_PROGETTO", "OC_TEMA_SINTETICO", "OC_STATO_PROGETTO"],
     metric_cols=["FINANZ_TOTALE_PUBBLICO", "TOT_PAGAMENTI", "OC_COSTO_COESIONE"],
     location=get_location("opencoesione_progetti"),
 )

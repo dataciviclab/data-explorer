@@ -75,7 +75,7 @@ const perMacroarea = d3.rollups(
     finanziato: d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO),
     pagato: d3.sum(v, d => d.TOT_PAGAMENTI),
   }),
-  d => d.OC_MACROAREA
+  d => d.OC_MACROAREA_PROGETTO
 ).map(([key, val]) => ({macroarea: key, ...val}))
  .sort((a, b) => b.finanziato - a.finanziato);
 ```
@@ -160,7 +160,7 @@ const perMacroareaCiclo = d3.rollups(
       : 0)
   }),
   d => d.OC_DESCR_CICLO,
-  d => d.OC_MACROAREA
+  d => d.OC_MACROAREA_PROGETTO
 ).flatMap(([ciclo, macroMap]) =>
   Array.from(macroMap, ([macroarea, val]) => ({
     ciclo,
