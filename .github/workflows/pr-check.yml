@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - 'package.json'
+      - 'package-lock.json'
       - 'src/data/**'
       - 'src/dataset/**'
       - 'src/temi/**'
