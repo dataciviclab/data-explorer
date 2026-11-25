@@ -199,6 +199,8 @@ def load_dataset(
         for column, value in zip(columns, row):
             if isinstance(value, float) and value == value and value == int(value):
                 value = int(value)
+            if isinstance(value, str) and not value.strip():
+                value = None
             if column in int_cols and value is not None:
                 value = int(float(value)) if isinstance(value, str) else int(value)
             record[column] = value

@@ -451,6 +451,31 @@ class TestLoadDataset:
         assert row["pres_aff_imp"] == 1
         assert isinstance(row["pres_aff_imp"], int)
 
+    @patch("src.data._util.safe_connect")
+    @patch("src.data._util._parquet_exists", return_value=True)
+    def test_ints_stringa_vuota_diventa_null(self, mock_exists, mock_safe_connect, mock_con):
+        """Una stringa vuota non deve esplodere in int(float(''))."""
+        mock_con.sql.return_value.fetchall.return_value = [("2024", "Lombardia", "", 0.31)]
+        mock_safe_connect.return_value.__enter__.return_value = mock_con
+        from src.data._util import load_dataset
+
+        buf = io.StringIO()
+        sys.stdout = buf
+
+        load_dataset(
+            slug="test-slug",
+            years=[2024],
+            group_cols=["anno", "regione", "pres_aff_imp"],
+            metric_cols=["gini"],
+            location={
+                "type": "gcs",
+                "path": "gs://bucket/test-slug/2024/test-slug_2024_clean.parquet",
+            },
+            ints=["pres_aff_imp"],
+        )
+
+        assert json.loads(buf.getvalue())[0]["pres_aff_imp"] is None
+
 class TestLoaderCompat:
     """I loader non devono importare simboli privati rimossi dal refactor."""
 
