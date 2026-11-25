@@ -5,7 +5,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="strutture_asl",
-    years=[2022],
+    years=None,
     group_cols=["regione", "denominazione_asl", "comune_asl", "sigla_provincia_asl"],
     metric_cols=[
         "totale_residenti",

@@ -5,7 +5,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="popolazione_istat_comunale_2019_2025",
-    years=list(range(2019, 2026)),
+    years=None,
     group_cols=["anno", "fascia_eta"],
     metric_cols=["popolazione_residente", "totale_maschi", "totale_femmine"],
     location=get_location("popolazione_istat_comunale_2019_2025"),

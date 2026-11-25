@@ -5,7 +5,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="reparti_ricovero",
-    years=[2022],
+    years=None,
     group_cols=["regione", "disciplina", "tipo_struttura"],
     metric_cols=[
         "posti_letto_degenza_ordinaria",

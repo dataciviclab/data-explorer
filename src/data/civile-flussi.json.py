@@ -8,7 +8,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="civile_flussi",
-    years=[2025],  # unico file multi-anno
+    years=None,
     group_cols=["anno", "distretto"],
     metric_cols=["sopravvenuti", "definiti_totale", "pendenti_finali"],
     location=get_location("civile_flussi"),

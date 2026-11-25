@@ -5,7 +5,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="posti_letto_stabilimento",
-    years=[2020, 2021, 2022, 2023],
+    years=None,
     group_cols=[
         "anno", "descrizione_regione", "descrizione_tipo_struttura",
         "descrizione_disciplina",

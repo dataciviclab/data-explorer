@@ -5,7 +5,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="mim_alunni_corso_eta",
-    years=list(range(2016, 2026)),
+    years=None,
     group_cols=["anno_scolastico", "regione", "ordine_scuola", "area_geografica"],
     metric_cols=["alunni"],
     location=get_location("mim_alunni_corso_eta"),

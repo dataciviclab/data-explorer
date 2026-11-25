@@ -5,7 +5,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="istat_ipab_aree",
-    years=list(range(2010, 2026)),
+    years=None,
     group_cols=["area", "trimestre"],
     metric_cols=["indice_prezzi"],
     where="tipo_abitazione = 'EXST_DW'",
