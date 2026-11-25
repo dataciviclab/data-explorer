@@ -36,6 +36,7 @@ PAGES_DIR = os.path.join(ROOT, "src", "dataset")
 CARDS_DIR = os.path.join(ROOT, "catalog", "cards")
 
 _CARD_SLUG = re.compile(r"^dataset:\s*([A-Za-z0-9_\-]+)", re.MULTILINE)
+_CARD_TITLE = re.compile(r"^title:\s*(.+)$", re.MULTILINE)
 
 # Local cache for topic_index.json — avoids N HTTP requests (one per loader).
 _CACHE_DIR = os.path.join(ROOT, ".observable", "cache")
@@ -151,16 +152,16 @@ def has_explorer_page(url_slug: str) -> bool:
     return os.path.exists(os.path.join(PAGES_DIR, f"{url_slug}.md"))
 
 
-def local_card_slugs() -> set[str]:
-    """Slug DI dei dataset con una scheda editoriale in ``catalog/cards/*.yml``.
+def local_cards() -> dict[str, str]:
+    """Schede editoriali in ``catalog/cards/*.yml``: slug DI → titolo.
 
     Una scheda è una superficie pubblica esplicita: il dataset va contato come
-    pubblicato anche se ACB (v7/v8) non lo sa. ACB legge solo ``src/dataset/``,
-    quindi senza questo le schede risulterebbero "in incubazione".
+    pubblicato anche se ACB (v7/v8) non lo sa, e il ``title`` editoriale è il
+    nome pubblico (catalogo, temi, home), non lo slug del registry.
     """
-    slugs: set[str] = set()
+    cards: dict[str, str] = {}
     if not os.path.isdir(CARDS_DIR):
-        return slugs
+        return cards
     for name in sorted(os.listdir(CARDS_DIR)):
         if not name.endswith((".yml", ".yaml")):
             continue
@@ -169,10 +170,20 @@ def local_card_slugs() -> set[str]:
                 text = handle.read()
         except OSError:
             continue
-        match = _CARD_SLUG.search(text)
-        if match:
-            slugs.add(match.group(1))
-    return slugs
+        slug_match = _CARD_SLUG.search(text)
+        if not slug_match:
+            continue
+        title_match = _CARD_TITLE.search(text)
+        title = title_match.group(1).strip() if title_match else ""
+        if len(title) >= 2 and title[0] == title[-1] and title[0] in ("'", '"'):
+            title = title[1:-1]
+        cards[slug_match.group(1)] = title
+    return cards
+
+
+def local_card_slugs() -> set[str]:
+    """Slug DI con una scheda (compat: usa ``local_cards``)."""
+    return set(local_cards())
 
 
 def build_catalog(registry: dict | None = None) -> dict:
@@ -189,7 +200,12 @@ def build_catalog(registry: dict | None = None) -> dict:
 
     signals = registry.get("signals_by_id", {})
     analyses = registry.get("analyses_by_dataset") or {}
-    cards = local_card_slugs()
+    cards = local_cards()
+    theme_by_category = {
+        category: (theme.get("slug", ""), theme.get("name", ""))
+        for theme in load_themes_config()
+        for category in theme.get("categories", [])
+    }
 
     datasets = []
     for ds in registry.get("datasets", []):
@@ -198,22 +214,33 @@ def build_catalog(registry: dict | None = None) -> dict:
         url_slug = resolve_url_slug(slug)
         run = signals.get(slug, {})
         clean_rows = run.get("output_rows", {}).get("clean")
+        has_page = has_explorer_page(url_slug)
+        has_card = slug in cards
         # Pubblicato se: c'è una scheda editoriale in DE (superficie esplicita),
         # oppure ACB v8 lo dice, oppure c'è una pagina (v7), oppure lo stage
         # storico (v1).
-        if slug in cards:
+        if has_card:
             published = True
         elif "published" in ds:
             published = bool(ds["published"])
         else:
             published = (slug in analyses) or ds.get("stage") == "published"
+        theme_slug, theme_name = theme_by_category.get(ds.get("category", ""), ("", ""))
         datasets.append({
             "slug": slug,
             "url_slug": url_slug,
-            "name": ds.get("name", ""),
+            "name": cards.get(slug) or ds.get("name", ""),
             "description": ds.get("description", "")[:150],
             "stage": ds.get("stage", ""),
             "published": published,
+            "has_page": has_page,
+            "has_card": has_card,
+            # Supersficie pubblica del dataset: pagina curata o scheda.
+            "page_url": (
+                f"/dataset/{url_slug}" if has_page else f"/schede/{url_slug}" if has_card else None
+            ),
+            "theme": theme_slug,
+            "theme_name": theme_name,
             "years": f"{period.get('start', '?')}–{period.get('end', '?')}" if period else "?",
             "period": {"start": period.get("start"), "end": period.get("end")},
             "source": ds.get("source", ""),
@@ -249,10 +276,10 @@ def build_catalog(registry: dict | None = None) -> dict:
 def build_themes(registry: dict | None = None, page_exists=None) -> list[dict]:
     """Deriva i temi dal registry usando la config editoriale.
 
-    Un dataset entra in un tema se ha una pagina explorer (url_slug) E la
-    sua `category` è mappata in catalog/themes.json. Lo stage registry è
-    irrilevante: la presenza di una pagina è l'intento editoriale di
-    esposizione (alcune pagine esistono per dataset ancora incubating).
+    Un dataset entra in un tema se ha una **superficie pubblica** (pagina
+    explorer o scheda `catalog/cards/`) E la sua `category` è mappata in
+    catalog/themes.json. Lo stage registry è irrilevante: la superficie è
+    l'intento editoriale di esposizione.
 
     I dataset senza pagina non entrano nei temi: finiscono in "Altri dataset"
     (sidebar) o semplicemente non vengono linkati dalle pagine tema.
@@ -264,15 +291,16 @@ def build_themes(registry: dict | None = None, page_exists=None) -> list[dict]:
         registry = load_registry()
     if page_exists is None:
         page_exists = has_explorer_page
+    cards = local_cards()
 
-    # category → url_slug (solo dataset con pagina explorer)
+    # category → url_slug (dataset con pagina o scheda)
     by_category: dict[str, list[str]] = {}
     for ds in registry.get("datasets", []):
         category = ds.get("category")
         if not category:
             continue
         url_slug = resolve_url_slug(ds["slug"])
-        if not page_exists(url_slug):
+        if not (page_exists(url_slug) or ds["slug"] in cards):
             continue
         by_category.setdefault(category, []).append(url_slug)
 

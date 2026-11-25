@@ -31,7 +31,7 @@ const fmt = (value, format) => {
 
 ```js
 display(html`<p style="margin-top:-0.4rem; opacity:0.8">
-  ${stageLabel}${card.category ? ` · ${card.category}` : ""}${card.registry_source ? ` · ${card.registry_source}` : ""}${card.source_id ? ` · fonte ${card.source_id}` : ""}
+  ${stageLabel}${card.theme ? html` · <a href="/temi/${card.theme}">${card.theme_name || card.theme}</a>` : card.category ? ` · ${card.category}` : ""}${card.registry_source ? ` · ${card.registry_source}` : ""}${card.source_id ? ` · fonte ${card.source_id}` : ""}
 </p>`);
 ```
 
