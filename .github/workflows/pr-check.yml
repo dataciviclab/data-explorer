@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # serve a git diff per invalidare solo i loader cambiati
 
       - uses: actions/setup-node@v7
         with:
@@ -47,9 +49,33 @@ jobs:
         uses: actions/cache@v6
         with:
           path: src/.observablehq/cache
-          key: observable-cache-${{ hashFiles('src/data/*.json.py', 'src/data/_registry.py', 'src/data/_views.py') }}
+          key: observable-cache-${{ github.run_id }}
           restore-keys: |
             observable-cache-
+
+      # La cache OF usa `useStale`: va invalidato solo cio' che e' cambiato.
+      # - loader modificati/aggiunti -> si cancella il loro output
+      # - contratto condiviso (util/registry/views/requirements) -> tutto
+      - name: Invalidate changed loaders
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          BASE="${BASE_SHA:-HEAD^}"
+          if [ "$BASE" = "0000000000000000000000000000000000000000" ]; then BASE=HEAD^; fi
+          echo "base: $BASE"
+          if git diff --name-only "$BASE" HEAD -- src/data/_util.py src/data/_registry.py src/data/_views.py requirements.txt | grep -q .; then
+            echo "contratto condiviso cambiato: invalido tutta la cache"
+            rm -rf src/.observablehq/cache
+          else
+            for loader in $(git diff --name-only "$BASE" HEAD -- 'src/data/*.json.py'); do
+              name=$(basename "$loader" .json.py)
+              echo "invalido loader: $name"
+              rm -f "src/.observablehq/cache/data/${name}.json"
+            done
+          fi
+
+      - name: Refresh metadata cache (catalog/themes)
+        run: rm -f src/.observablehq/cache/data/catalog.json src/.observablehq/cache/data/themes.json
 
       - name: Lint
         run: npm run lint

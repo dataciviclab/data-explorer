@@ -21,14 +21,14 @@ url = _parquet_refs(slug, [year], location)[0]
 
 with safe_connect() as con:
     # KPI totali
-    kpi_row = con.sql(f"""
+    kpi_row = con.execute(f"""
         SELECT COUNT(*) AS n_record,
                COUNT(DISTINCT cup) AS n_progetti,
                ROUND(COALESCE(SUM(finanziamento_totale), 0) / 1e9, 2) AS fin_mld,
                ROUND(COALESCE(SUM(pagamento_totale), 0) / 1e9, 2) AS pag_mld,
                ROUND(COALESCE(SUM(pagamento_pnrr), 0) / 1e9, 2) AS pag_pnrr_mld
         FROM read_parquet('{url}')
-    """).fetchone()
+    """).fetchall()[0]
 
     fin_totale = float(kpi_row[2])
     pag_totale = float(kpi_row[3])
@@ -60,7 +60,7 @@ with safe_connect() as con:
     ]
 
     # Composizione pagamenti per fonte
-    fonti_rows = con.sql(f"""
+    fonti_rows = con.execute(f"""
         SELECT
             ROUND(COALESCE(SUM(pagamento_stato), 0) / 1e9, 2) AS stato,
             ROUND(COALESCE(SUM(pagamento_ue), 0) / 1e9, 2) AS ue,
@@ -69,7 +69,7 @@ with safe_connect() as con:
             ROUND(COALESCE(SUM(pagamento_privato), 0) / 1e9, 2) AS privato,
             ROUND(COALESCE(SUM(pagamento_comune + pagamento_provincia + pagamento_altro_pubblico + pagamento_pnc + pagamento_altri_fondi + pagamento_da_reperire), 0) / 1e9, 2) AS altro
         FROM read_parquet('{url}')
-    """).fetchone()
+    """).fetchall()[0]
 
     fonti = [
         {"fonte": "Stato", "mld": float(fonti_rows[0])},
