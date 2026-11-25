@@ -5,13 +5,20 @@ on:
     branches:
       - main
   repository_dispatch:
-    types: [catalog_updated]
+    # `catalog_updated`: solo metadati (ACB ha rigenerato l'indice).
+    # `data_updated`: rinfresca i dataset indicati in `client_payload.datasets`
+    # (slug DI o url_slug separati da virgola).
+    types: [catalog_updated, data_updated]
   workflow_dispatch:
     inputs:
       full_refresh:
         description: "Rilegge tutti i parquet (egress GCS). Default: solo metadati."
         type: boolean
         default: false
+      datasets:
+        description: "Dataset da rinfrescare (slug o url_slug, separati da virgola). Vuoto = solo metadati."
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -52,46 +59,94 @@ jobs:
           restore-keys: |
             observable-cache-
 
-      # La cache OF è pensata per la velocità, ma `observable build` chiama i
-      # loader con `useStale: true`: senza invalidazione serve dati vecchi.
-      # I metadati (ACB cambia ogni 6h) si rigenerano sempre; i 58 loader delle
-      # pagine restano in cache per non pagare 10-15 min a ogni push.
-      # La cache OF usa `useStale`: va invalidato solo cio' che e' cambiato.
-      # - loader modificati/aggiunti -> si cancella il loro output
-      # - contratto condiviso (util/registry/views/requirements) -> tutto
-      - name: Invalidate changed loaders
+      # Le schede sono incrementali: il file precedente è la base del riuso.
+      - name: Restore dataset cards cache
+        uses: actions/cache@v6
+        with:
+          path: src/data/cards.json
+          key: cards-${{ github.run_id }}
+          restore-keys: |
+            cards-
+
+      - name: Resolve refresh scope
+        id: scope
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          INPUT_DATASETS: ${{ inputs.datasets }}
+          PAYLOAD_DATASETS: ${{ github.event.client_payload.datasets }}
+          FULL_REFRESH: ${{ inputs.full_refresh }}
         run: |
-          BASE="${BASE_SHA:-HEAD^}"
-          if [ "$BASE" = "0000000000000000000000000000000000000000" ]; then BASE=HEAD^; fi
-          echo "base: $BASE"
-          if git diff --name-only "$BASE" HEAD -- src/data/_util.py src/data/_registry.py src/data/_views.py requirements.txt | grep -q .; then
-            echo "contratto condiviso cambiato: invalido tutta la cache"
-            rm -rf src/.observablehq/cache
+          datasets="${INPUT_DATASETS:-$PAYLOAD_DATASETS}"
+          datasets="$(printf '%s' "$datasets" | tr -d '[:space:]')"
+          echo "datasets=$datasets" >> "$GITHUB_OUTPUT"
+          if [ "$FULL_REFRESH" = "true" ]; then
+            echo "full=1" >> "$GITHUB_OUTPUT"
           else
-            for loader in $(git diff --name-only "$BASE" HEAD -- 'src/data/*.json.py'); do
-              name=$(basename "$loader" .json.py)
-              echo "invalido loader: $name"
-              rm -f "src/.observablehq/cache/data/${name}.json"
-            done
+            echo "full=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "scope: datasets='$datasets' full='$FULL_REFRESH'"
+
+      # `observable build` usa `useStale: true`: senza invalidazione servirebbe
+      # dati vecchi. Qui si toglie dalla cache solo ciò che è cambiato.
+      # - diff base..HEAD: loader modificati (contratto condiviso → full)
+      # - `datasets` da dispatch: i loader che leggono quei mart
+      - name: Invalidate stale loader cache
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          DATASETS: ${{ steps.scope.outputs.datasets }}
+          FULL: ${{ steps.scope.outputs.full }}
+          REPORT: ${{ runner.temp }}/invalidated-loaders.txt
+        run: |
+          if [ "$FULL" = "1" ]; then
+            python3 scripts/invalidate_cache.py --full --report "$REPORT"
+          else
+            python3 scripts/invalidate_cache.py \
+              --base "${BASE_SHA:-}" \
+              --datasets "$DATASETS" \
+              --on-shared full \
+              --report "$REPORT"
           fi
 
       - name: Refresh metadata cache (catalog/themes)
         run: rm -f src/.observablehq/cache/data/catalog.json src/.observablehq/cache/data/themes.json
 
-      - name: Full data refresh (on demand)
-        if: github.event_name == 'workflow_dispatch' && inputs.full_refresh
-        run: rm -rf src/.observablehq/cache
-
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
 
-      - name: Generate dataset cards (static, keeps the build off GCS)
-        run: npm run cards
+      # `full_refresh` riguarda anche le schede: se i mart sono cambiati senza
+      # un nuovo `last_run`, i fingerprint non si muovono e le schede restano
+      # vecchie mentre le pagine sono fresche. Qui si forza tutto.
+      - name: Generate dataset cards (incremental)
+        env:
+          DATASETS: ${{ steps.scope.outputs.datasets }}
+          FULL: ${{ steps.scope.outputs.full }}
+        run: |
+          if [ "$FULL" = "1" ]; then
+            npm run cards -- --force
+          elif [ -n "$DATASETS" ]; then
+            npm run cards -- --only "$DATASETS"
+          else
+            npm run cards
+          fi
 
       - name: Build Observable Framework
         run: npm run build
+
+      # Se un loader invalidi non ha riscritto il suo output, il build ha
+      # servito lo stale (o è fallito): meglio rompere qui che pubblicare
+      # numeri vecchi. Vale anche per `full_refresh`.
+      - name: Smoke — i loader invalidati sono girati
+        run: |
+          report="${{ runner.temp }}/invalidated-loaders.txt"
+          [ -f "$report" ] || exit 0
+          failed=0
+          while read -r name; do
+            [ -z "$name" ] && continue
+            if [ ! -f "src/.observablehq/cache/data/${name}.json" ]; then
+              echo "✗ ${name}: output non riscritto dopo l'invalidazione"
+              failed=1
+            fi
+          done < "$report"
+          exit $failed
 
       - name: Smoke — catalogo fresco
         run: |
