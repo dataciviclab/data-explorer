@@ -61,28 +61,46 @@ function readPageTitle(slug) {
 }
 
 /**
- * Costruisce le sezioni tema della sidebar. I temi sono dinamici (category
- * registry): vengono inclusi solo i dataset con una pagina explorer reale,
- * evitando link rotti. I temi senza dataset con pagina vengono omessi.
+ * Costruisce le sezioni tema della sidebar.
+ *
+ * Una sezione è cliccabile quando esiste la pagina del tema: il framework
+ * rende il `<summary>` come link se la sezione ha `path`. Così il tema è sia
+ * destinazione sia contenitore dei suoi dataset, senza voci "Panoramica".
+ *
+ * Un dataset senza pagina ma con una scheda (`/schede/<slug>`) resta in
+ * sidebar: prima veniva scartato e l'unico modo per raggiungerlo era la home.
  *
  * hasPage: callable slug → bool, iniettabile nei test (default: fs).
+ * options.hasCard: slug → bool (scheda generata)
+ * options.readName: slug → titolo pubblico (pagina o scheda)
+ * options.hasThemePage: slug → bool (pagina /temi/<slug>)
  */
-export function resolveThemePages(themes, hasPage) {
+export function resolveThemePages(themes, hasPage, options = {}) {
+  const {
+    hasCard = () => false,
+    readName = readPageTitle,
+    hasThemePage = () => false,
+  } = options;
+
   return themes
     .map((t) => {
       const themePages = [];
       for (const slug of t.datasets || []) {
-        if (!hasPage(slug)) {
-          console.warn(`  ⚠  tema ${t.name}: ${slug} senza pagina explorer (salta)`);
-          continue;
+        if (hasPage(slug)) {
+          themePages.push({ name: readName(slug), path: `/dataset/${slug}` });
+        } else if (hasCard(slug)) {
+          themePages.push({ name: readName(slug), path: `/schede/${slug}` });
+        } else {
+          console.warn(`  ⚠  tema ${t.name}: ${slug} senza pagina né scheda (salta)`);
         }
-        themePages.push({
-          name: readPageTitle(slug),
-          path: `/dataset/${slug}`,
-        });
       }
       if (themePages.length === 0) return null;
-      return { name: t.name, collapsible: true, pages: themePages };
+      return {
+        name: t.name,
+        collapsible: true,
+        ...(hasThemePage(t.slug) ? { path: `/temi/${t.slug}` } : null),
+        pages: themePages,
+      };
     })
     .filter(Boolean);
 }
@@ -116,8 +134,16 @@ function resolveCrossViewPagesSync() {
 }
 
 function buildSidebar(themes, catalog) {
-  const pages = resolveThemePages(themes, (slug) =>
-    existsSync(resolve(ROOT, `src/dataset/${slug}.md`))
+  const byUrl = new Map(catalog.datasets.map((d) => [d.url_slug, d]));
+  const pages = resolveThemePages(
+    themes,
+    (slug) => existsSync(resolve(ROOT, `src/dataset/${slug}.md`)),
+    {
+      hasCard: (slug) => Boolean(byUrl.get(slug)?.has_card),
+      readName: (slug) =>
+        byUrl.get(slug)?.has_card ? byUrl.get(slug).name : readPageTitle(slug),
+      hasThemePage: (slug) => existsSync(resolve(ROOT, `src/temi/${slug}.md`)),
+    }
   );
 
   // Schede dataset generate (indice + route dinamica /schede/[slug]).
@@ -134,12 +160,11 @@ function buildSidebar(themes, catalog) {
   const unassigned = catalog.datasets.filter((d) => {
     if (assigned.has(d.url_slug)) return false;
     const pagePath = resolve(ROOT, `src/dataset/${d.url_slug}.md`);
-    if (!existsSync(pagePath)) return false;
-    return true;
+    return existsSync(pagePath) || Boolean(d.has_card);
   });
   const unassignedPages = unassigned.map((d) => ({
-    name: readPageTitle(d.url_slug),
-    path: `/dataset/${d.url_slug}`,
+    name: d.has_card ? d.name : readPageTitle(d.url_slug),
+    path: d.page_url,
   }));
   const included = new Set([
     ...pages.flatMap((section) => (section.pages || []).map((page) => page.path)),

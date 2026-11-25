@@ -21,6 +21,7 @@ export default {
   {
     "name": "Territorio e ambiente",
     "collapsible": true,
+    "path": "/temi/territorio-ambiente",
     "pages": [
       {
         "name": "Emissioni GHG da processi energetici",
@@ -43,6 +44,7 @@ export default {
   {
     "name": "Finanza pubblica",
     "collapsible": true,
+    "path": "/temi/finanza-pubblica",
     "pages": [
       {
         "name": "Entrate dello Stato",
@@ -97,6 +99,10 @@ export default {
         "path": "/dataset/rna-aiuti-stato"
       },
       {
+        "name": "PIL territoriale",
+        "path": "/schede/istat-pil-territoriale"
+      },
+      {
         "name": "Bandi di gara pubblici ANAC",
         "path": "/dataset/anac-bandi-gara"
       },
@@ -109,6 +115,7 @@ export default {
   {
     "name": "Sanità",
     "collapsible": true,
+    "path": "/temi/sanita",
     "pages": [
       {
         "name": "Spesa sanitaria regionale LEA",
@@ -143,6 +150,7 @@ export default {
   {
     "name": "Welfare e lavoro",
     "collapsible": true,
+    "path": "/temi/welfare-lavoro",
     "pages": [
       {
         "name": "Dipendenti pubblici per comparto",
@@ -177,6 +185,7 @@ export default {
   {
     "name": "Giustizia",
     "collapsible": true,
+    "path": "/temi/giustizia",
     "pages": [
       {
         "name": "Flussi della giustizia civile",
@@ -187,9 +196,10 @@ export default {
   {
     "name": "Terzo settore",
     "collapsible": true,
+    "path": "/temi/terzo-settore",
     "pages": [
       {
-        "name": "5x1000 — beneficiari e importi per ente",
+        "name": "5x1000 — beneficiari e importi",
         "path": "/dataset/cinque-per-mille"
       }
     ]
@@ -197,6 +207,7 @@ export default {
   {
     "name": "Politica",
     "collapsible": true,
+    "path": "/temi/politica",
     "pages": [
       {
         "name": "Elezioni Comunali",
