@@ -324,6 +324,8 @@ def build_themes(registry: dict | None = None, page_exists=None) -> list[dict]:
             "name": theme["name"],
             "icon": theme.get("icon", ""),
             "description": theme.get("description", ""),
+            # Testo di apertura della pagina /temi/<slug> (editoriale, in themes.json).
+            "intro": theme.get("intro", ""),
             "datasets": datasets,
         })
     return themes

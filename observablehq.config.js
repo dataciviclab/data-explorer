@@ -6,9 +6,12 @@ export default {
   interpreters: {
     ".py": ["python3"]
   },
-  // Schede dataset: una route dinamica, N path calcolati dal file statico
-  // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
+  // Temi e schede: route dinamiche. I path dei temi vengono da themes.json
+  // (generato qui), quelli delle schede dal file statico di build_cards.py.
   dynamicPaths: async function* () {
+    for (const slug of ["territorio-ambiente","finanza-pubblica","sanita","welfare-lavoro","giustizia","terzo-settore","politica"]) {
+      yield `/temi/${slug}`;
+    }
     try {
       const { readFileSync } = await import("node:fs");
       const cards = JSON.parse(readFileSync(new URL("./src/data/cards.json", import.meta.url), "utf-8"));

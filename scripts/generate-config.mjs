@@ -142,7 +142,9 @@ function buildSidebar(themes, catalog) {
       hasCard: (slug) => Boolean(byUrl.get(slug)?.has_card),
       readName: (slug) =>
         byUrl.get(slug)?.has_card ? byUrl.get(slug).name : readPageTitle(slug),
-      hasThemePage: (slug) => existsSync(resolve(ROOT, `src/temi/${slug}.md`)),
+      hasThemePage: (slug) =>
+        existsSync(resolve(ROOT, `src/temi/${slug}.md`)) ||
+        existsSync(resolve(ROOT, "src/temi/[slug].md")),
     }
   );
 
@@ -219,9 +221,12 @@ if (isMainModule()) {
   interpreters: {
     ".py": ${JSON.stringify((process.env.PYTHON3 || "python3").split(/\s+/))}
   },
-  // Schede dataset: una route dinamica, N path calcolati dal file statico
-  // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
+  // Temi e schede: route dinamiche. I path dei temi vengono da themes.json
+  // (generato qui), quelli delle schede dal file statico di build_cards.py.
   dynamicPaths: async function* () {
+    for (const slug of ${JSON.stringify(themes.map((t) => t.slug))}) {
+      yield \`/temi/\${slug}\`;
+    }
     try {
       const { readFileSync } = await import("node:fs");
       const cards = JSON.parse(readFileSync(new URL("./src/data/cards.json", import.meta.url), "utf-8"));
