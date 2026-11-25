@@ -5,7 +5,7 @@ from _util import load_dataset, get_location
 
 load_dataset(
     slug="mit_incidentalita_mensile",
-    years=[2001],  # unico file multi-anno
+    years=None,
     group_cols=["anno", "mese", "mese_numero"],
     metric_cols=["incidenti", "morti", "feriti", "incidenti_mortali",
                  "indice_mortalita", "indice_gravita", "indice_lesivita"],
