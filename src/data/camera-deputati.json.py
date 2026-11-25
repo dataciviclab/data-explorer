@@ -68,11 +68,12 @@ with safe_connect() as con:
     ]
 
     # 4. Ultima legislatura: deputati per gruppo
-    ultima_leg = con.execute(f"""
+    ultima_rows = con.execute(f"""
         SELECT legislatura FROM read_parquet('{url('camera_deputati_legislature')}')
         WHERE legislatura IS NOT NULL
         GROUP BY 1 ORDER BY 1 DESC LIMIT 1
-    """).fetchall()[0]
+    """).fetchall()
+    ultima_leg = ultima_rows[0] if ultima_rows else None
 
     if ultima_leg:
         gruppi_list = con.sql(f"""
