@@ -112,10 +112,16 @@ export function emptyOutputs(outputs) {
     .sort();
 }
 
-/** Loader con un path GCS scritto nel sorgente. */
+/**
+ * Loader con un path GCS scritto nel sorgente.
+ * Deve avere un path dopo lo schema: `path.startswith("gs://")` o
+ * `path[len("gs://"):]` sono controlli di schema, non path.
+ */
+const GCS_PATH = /["']gs:\/\/[^"'\s]+\/|https:\/\/storage\.googleapis\.com\/[^"'\s]+/;
+
 export function hardcodedGcs(sources) {
   return Object.entries(sources)
-    .filter(([, text]) => /gs:\/\/|storage\.googleapis\.com/.test(text))
+    .filter(([, text]) => GCS_PATH.test(text))
     .map(([name]) => name)
     .sort();
 }
@@ -175,12 +181,15 @@ function rowsOf(value) {
 
 /**
  * Regioni senza valore in una mappa.
- * Salta le pagine che unificano le P.A. in pagina (non deducibile staticamente).
+ *
+ * Le due province autonome vengono piegate in Trentino-Alto Adige prima del
+ * controllo: è quello che fanno le pagine (per somma o per scelta), e senza
+ * questa normalizzazione ogni mappa risulterebbe incompleta. Il controllo
+ * resta sui dati: se una regione non è nella fonte, si vede.
  */
+const TRENTINO_PA = /BOLZANO|TRENTO/i;
+
 export async function mapGaps(text, outputs, topo, buildMapLookup, normalizzaReg) {
-  if (/buildRegLookupWithTrentino|perRegioneUnificata|extraFallbacks|isTrentinoPA|\/ADIGE\//.test(text)) {
-    return { skipped: "unificazione P.A. gestita in pagina" };
-  }
   const calls = [...text.matchAll(/buildMapLookup\(([^)]*)\)/g)];
   if (calls.length === 0) return null;
   const names = [...new Set(topo.objects.regioni.geometries.map((g) => g.properties.DEN_REG))];
@@ -194,16 +203,19 @@ export async function mapGaps(text, outputs, topo, buildMapLookup, normalizzaReg
     const keyField = (args[2] || "").replace(/^["']|["']$/g, "");
     const valueField = (args[3] || "").replace(/^["']|["']$/g, "");
     if (!keyField) continue;
-    const rows = allRows.filter(
-      (row) => typeof row?.[keyField] === "string" && row[keyField].length > 0,
-    );
+    const rows = allRows
+      .filter((row) => typeof row?.[keyField] === "string" && row[keyField].length > 0)
+      .map((row) => ({
+        ...row,
+        [keyField]: TRENTINO_PA.test(row[keyField]) ? "Trentino-Alto Adige" : row[keyField],
+      }));
     const lookup = buildMapLookup(rows, regioniGeo, keyField, valueField || "valore");
     for (const name of names) {
       const key = normalizzaReg(name);
       if (!lookup.has(key) && !excluded.has(key)) missing.add(name);
     }
   }
-  return missing.size ? { missing: [...missing].sort() } : null;
+  return { missing: [...missing].sort() };
 }
 
 async function main() {
@@ -249,7 +261,7 @@ async function main() {
     const gaps = await mapGaps(text, outputs, topo, geoUtils.buildMapLookup, geoUtils.normalizzaReg);
     if (!gaps) continue;
     checkedMaps += 1;
-    if (gaps.missing) {
+    if (gaps.missing.length) {
       warnings.push(`mappa ${page}: ${gaps.missing.length} regioni senza valore (${gaps.missing.join(", ")})`);
     }
   }

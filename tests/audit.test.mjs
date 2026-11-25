@@ -90,6 +90,16 @@ test("hardcodedGcs riconosce i path scritti nel loader", () => {
   );
 });
 
+test("hardcodedGcs non segnala i controlli di schema", () => {
+  assert.deepEqual(
+    hardcodedGcs({
+      a: 'if (path.startsWith("gs://")) {}',
+      b: 'key = path[len("gs://"):]',
+    }),
+    [],
+  );
+});
+
 test("publishedWithoutSurface trova le voci morte nel catalogo", () => {
   const slugs = publishedWithoutSurface({
     datasets: [
@@ -106,9 +116,9 @@ const REF = 'FileAttachment("../data/demo.json")';
 
 test("mapGaps: mappa completa non produce avvisi", async () => {
   const outputs = { demo: [{ regione: "LOMBARDIA", v: 1 }, { regione: "LAZIO", v: 2 }] };
-  assert.equal(
+  assert.deepEqual(
     await mapGaps(page(`${REF}\n${CHIAMATA}`), outputs, TOPO, buildMapLookup, normalizzaReg),
-    null,
+    { missing: [] },
   );
 });
 
@@ -123,13 +133,21 @@ test("mapGaps: regione mancante segnalata", async () => {
 test("mapGaps: esclusione dichiarata nel frontmatter", async () => {
   const outputs = { demo: [{ regione: "LOMBARDIA", v: 1 }] };
   const text = page(`${REF}\n${CHIAMATA}`, "mappe_escluse: [Lazio]\n");
-  assert.equal(await mapGaps(text, outputs, TOPO, buildMapLookup, normalizzaReg), null);
+  assert.deepEqual(await mapGaps(text, outputs, TOPO, buildMapLookup, normalizzaReg), {
+    missing: [],
+  });
 });
 
-test("mapGaps: pagina che unifica le P.A. viene saltata", async () => {
-  const outputs = { demo: [{ regione: "LOMBARDIA", v: 1 }] };
-  const text = page(`${REF}\nisTrentinoPA(x)\n${CHIAMATA}`);
+test("mapGaps: le due province autonome vengono piegate nel Trentino", async () => {
+  const outputs = {
+    demo: [
+      { regione: "LOMBARDIA", v: 1 },
+      { regione: "P.A. BOLZANO", v: 2 },
+      { regione: "P.A. TRENTO", v: 3 },
+    ],
+  };
+  const text = page(`${REF}\n${CHIAMATA}`);
   assert.deepEqual(await mapGaps(text, outputs, TOPO, buildMapLookup, normalizzaReg), {
-    skipped: "unificazione P.A. gestita in pagina",
+    missing: ["Lazio"],
   });
 });

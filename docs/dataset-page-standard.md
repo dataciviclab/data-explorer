@@ -186,6 +186,7 @@ frontmatter: l'audit le sottrae dal controllo.
 mappe_escluse: [Friuli-Venezia Giulia, Sardegna, Sicilia, Trentino-Alto Adige/Südtirol, Valle d'Aosta/Vallée d'Aoste]
 ```
 
-Le pagine che unificano le province autonome nel Trentino-Alto Adige
-(`buildRegLookupWithTrentino`, `isTrentinoPA`, `extraFallbacks`) vengono
-saltate dal controllo mappe: l'aggregato non è deducibile staticamente.
+Il controllo mappe piega le due province autonome in Trentino-Alto Adige
+prima di contare le regioni: è quello che fanno le pagine (per somma o per
+scelta). Resta un controllo **sui dati**: se una regione non è nella fonte, si
+vede. Se invece la si vuole escludere, va dichiarata in `mappe_escluse`.
