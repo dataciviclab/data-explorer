@@ -4,6 +4,8 @@ description: FSC 2017-2025 — capacità fiscale, fondo perequativo e dotazione 
 source: OpenCivitas / Sogei
 source_url: https://www.opencivitas.it/
 period: "2017–2025"
+# Regioni a statuto speciale: fuori dal perimetro FSC (solo RSO), dichiarato in pagina.
+mappe_escluse: [Friuli-Venezia Giulia, Sardegna, Sicilia, Trentino-Alto Adige/Südtirol, Valle d'Aosta/Vallée d'Aoste]
 last_modified: 2026-09-20
 dataset_slug: opencivitas_fsc_rso
 data_driven: true

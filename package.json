@@ -20,6 +20,7 @@
     "coverage:py": "python3 -m pytest tests/ -q --tb=short --cov=src.data --cov-report=term-missing",
     "verify": "node scripts/verifica/verify-page.mjs",
     "lint": "eslint scripts/ tests/ eslint.config.js && node scripts/lint-standards.mjs",
+    "audit": "node scripts/audit.mjs",
     "lint:fix": "eslint scripts/ tests/ eslint.config.js --fix",
     "lint:standards": "node scripts/lint-standards.mjs",
     "cards:dry": "${PYTHON3:-python3} scripts/build_cards.py --dry-run",

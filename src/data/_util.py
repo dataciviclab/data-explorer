@@ -116,30 +116,62 @@ def _parquet_refs(slug: str, years: list[int], location: dict | None = None) -> 
     return [https_url("clean", "clean_parquet", slug=slug, year=year) for year in years]
 
 
+def _no_parquet(slug: str, years: list[int], location: dict | None = None) -> None:
+    """Errore esplicito quando nessun anno richiesto ha un parquet.
+
+    Un loader che scrive ``[]`` produce una pagina vuota senza errore di build:
+    il guasto resta invisibile finché qualcuno non apre la pagina. Meglio
+    rompere il build e leggere il messaggio.
+    """
+    path = _location_path(location) or "<path canonico>"
+    raise RuntimeError(
+        f"_util: nessun parquet per {slug!r} negli anni {years} "
+        f"(location: {path}). Aggiorna 'years' nel loader o la location nel "
+        "registry: un loader non deve emettere un output vuoto."
+    )
+
 def load_dataset(
     slug: str,
-    years: list[int],
+    years: list[int] | None,
     group_cols: list[str],
     metric_cols: list[str],
     where: str = "",
     location: dict | None = None,
+    ints: list[str] | None = None,
 ) -> None:
     """
     Legge parquet GCS per un dataset, raggruppa per group_cols,
     somma metric_cols, output JSON su stdout.
     Salta gli anni in cui il parquet non esiste.
 
+    ``years=None`` usa tutti i file dichiarati nella ``location``: è la forma
+    corretta per un file multi-anno, dove un anno scritto a mano è una
+    duplicazione del dato (e invecchia: vedi il caso emissioni).
+
     ``location``: dict opzionale dal registry ({type, path, multi_file}).
-    Se assente, usa il pattern canonico (dataset-incubator).
+    Se assente, usa il pattern canonico (dataset-incubator) e ``years`` è
+    obbligatorio.
+
+    ``ints``: colonne da emettere come interi. Le fonti a volte le pubblicano
+    come stringhe ('1'), e una pagina che confronta ``=== 1`` filtra zero
+    righe senza errori di build.
 
     Output: array JSON di righe aggregate (v1 contract).
     """
-    valid_years = [y for y in years if _parquet_exists(slug, y, location)]
-    if not valid_years:
-        json.dump([], sys.stdout)
-        return
-
-    refs = _parquet_refs(slug, valid_years, location)
+    if years is None:
+        if not location:
+            raise ValueError(
+                "_util: years=None richiede 'location' (senza anni non si "
+                "deriva il path canonico)"
+            )
+        refs = _parquet_refs(slug, [], location)
+        if not refs:
+            _no_parquet(slug, [], location)
+    else:
+        valid_years = [y for y in years if _parquet_exists(slug, y, location)]
+        if not valid_years:
+            _no_parquet(slug, years, location)
+        refs = _parquet_refs(slug, valid_years, location)
     parquet_refs = " UNION ALL ".join(
         f"SELECT * FROM read_parquet('{ref}')" for ref in refs
     )
@@ -160,10 +192,19 @@ def load_dataset(
         rows = con.sql(query).fetchall()
 
     columns = group_cols + metric_cols
-    data = [
-        dict(zip(columns, [int(v) if isinstance(v, float) and v == v and v == int(v) else v for v in row]))
-        for row in rows
-    ]
+    int_cols = set(ints or ())
+    data = []
+    for row in rows:
+        record = {}
+        for column, value in zip(columns, row):
+            if isinstance(value, float) and value == value and value == int(value):
+                value = int(value)
+            if isinstance(value, str) and not value.strip():
+                value = None
+            if column in int_cols and value is not None:
+                value = int(float(value)) if isinstance(value, str) else int(value)
+            record[column] = value
+        data.append(record)
 
     json.dump(data, sys.stdout, ensure_ascii=False)
 
@@ -185,8 +226,7 @@ def raw_sample(
     """
     valid_years = [y for y in years if _parquet_exists(slug, y, location)]
     if not valid_years:
-        json.dump([], sys.stdout)
-        return
+        _no_parquet(slug, years, location)
 
     refs = _parquet_refs(slug, valid_years, location)
     # Campiona casualmente distribuito tra i file per-anno: con LIMIT su un

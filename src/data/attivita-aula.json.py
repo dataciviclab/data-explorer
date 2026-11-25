@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Data loader: Attività in Aula — interventi e relatori della Camera.
 
-Legge camera_interventi + camera_relatori (multi-anno) e produce JSON con:
-- trend: interventi e relazioni per anno
+Legge camera_interventi + camera_relatori e produce JSON con:
+- trend: interventi e relazioni per anno (XIX legislatura, dal 2022)
 - top_parlanti: deputati più attivi in aula
 - top_relatori: deputati che relazionano di più
 """
@@ -36,7 +36,7 @@ with safe_connect() as con:
                    COUNT(*) AS n_interventi,
                    COUNT(DISTINCT deputato_id) AS n_parlanti
             FROM ({inter_union})
-            WHERE data IS NOT NULL
+            WHERE data IS NOT NULL AND EXTRACT(YEAR FROM data) >= 2022
             GROUP BY 1 ORDER BY 1
         """).fetchall()
     else:
@@ -50,7 +50,7 @@ with safe_connect() as con:
                    COUNT(*) AS n_relat,
                    COUNT(DISTINCT deputato_id) AS n_relatori
             FROM ({rel_union})
-            WHERE data IS NOT NULL
+            WHERE data IS NOT NULL AND EXTRACT(YEAR FROM data) >= 2022
             GROUP BY 1 ORDER BY 1
         """).fetchall()
     else:

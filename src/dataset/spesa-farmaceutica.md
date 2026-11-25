@@ -39,10 +39,13 @@ const filtered = data.filter(d => d.anno === annoSel);
 ```
 
 ```js
+// Le due province autonome sono pubblicate separate: la spesa è additiva,
+// quindi per la mappa vanno sommate nella regione (TopoJSON ISTAT).
+const regioneMappa = (r) => (/BOLZANO|TRENTO/.test(r.regione) ? "TRENTINO-ALTO-ADIGE" : r.regione);
 const perRegione = Array.from(d3.rollup(filtered, v => ({
   spesa: d3.sum(v, d => d.spesa_convenzionata),
   confezioni: d3.sum(v, d => d.numero_confezioni_convenzionata)
-}), d => d.regione), ([regione, v]) => ({regione, ...v})).sort((a,b) => b.spesa - a.spesa);
+}), d => regioneMappa(d)), ([regione, v]) => ({regione, ...v})).sort((a,b) => b.spesa - a.spesa);
 const lookup = buildMapLookup(perRegione, regioniGeo, "regione", "spesa");
 ```
 

@@ -3,7 +3,7 @@ title: PNRR Gare — Italia Domani
 description: "Gare d'appalto dei progetti PNRR (fonte ReGiS): collegamento CUP→CIG, importi, procedura e submisura"
 source: MEF — Italia Domani (italiadomani.gov.it)
 source_url: https://italiadomani.gov.it/
-period: "2018–2025"
+period: "2018–2026"
 last_modified: 2026-08-20
 dataset_slug: pnrr_gare
 data_driven: true

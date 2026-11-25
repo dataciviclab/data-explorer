@@ -278,7 +278,7 @@ Inputs.table(
 
 ### Dentro i settori: dimensioni e dispersione
 
-**Grandi vs piccole (manifattura 2023).** Il VA/ora passa da ${euro(sizeManif[0]?.va_per_ora_eur)} nella classe ${sizeManif[0]?.size_class} a ${euro(sizeManif[4]?.va_per_ora_eur)} nella classe ${sizeManif[4]?.size_class}; il costo del lavoro/ora da ${euro(sizeManif[0]?.costo_lavoro_per_ora_eur)} a ${euro(sizeManif[4]?.costo_lavoro_per_ora_eur)}.
+**Grandi vs piccole (manifattura ${dentro.anno}).** Il VA/ora passa da ${euro(sizeManif[0]?.va_per_ora_eur)} nella classe ${sizeManif[0]?.size_class} a ${euro(sizeManif[4]?.va_per_ora_eur)} nella classe ${sizeManif[4]?.size_class}; il costo del lavoro/ora da ${euro(sizeManif[0]?.costo_lavoro_per_ora_eur)} a ${euro(sizeManif[4]?.costo_lavoro_per_ora_eur)}.
 
 ```js
 display(plot.plot({
@@ -322,7 +322,7 @@ Inputs.table(
 
 ```js
 display(plot.plot({
-  title: "Dispersione dentro il settore: Q3/Q1 di VA per addetto e costo per dipendente — 2023",
+  title: `Dispersione dentro il settore: Q3/Q1 di VA per addetto e costo per dipendente — ${dentro.anno}`,
   width: 800, height: 360,
   marginLeft: 120,
   x: {grid: true, label: "Q3/Q1 (x)", domain: [1, 3.6]},

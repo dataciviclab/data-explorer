@@ -3,7 +3,7 @@ title: Emissioni GHG da processi energetici
 description: Emissioni di gas serra da processi energetici per settore — ISPRA Inventario Nazionale UNFCCC/EEA, 1990-2023
 source: ISPRA — Indicatori Ambientali
 source_url: https://indicatoriambientali.isprambiente.it/
-period: "1990–2023"
+period: "1990–2024"
 last_modified: 2026-07-12
 dataset_slug: ispra_emissioni_ghg
 data_driven: true

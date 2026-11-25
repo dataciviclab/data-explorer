@@ -93,6 +93,9 @@ jobs:
 
       # La cache si riusa: se un loader toccato non ha riscritto il suo output,
       # il build ha servito lo stale. Il PR deve accorgersene.
+      - name: Audit dati (loader vuoti, mappe, superficie)
+        run: npm run audit
+
       - name: Smoke — i loader invalidati sono girati
         run: |
           report="${{ runner.temp }}/invalidated-loaders.txt"

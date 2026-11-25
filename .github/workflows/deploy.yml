@@ -134,6 +134,9 @@ jobs:
       # Se un loader invalidi non ha riscritto il suo output, il build ha
       # servito lo stale (o è fallito): meglio rompere qui che pubblicare
       # numeri vecchi. Vale anche per `full_refresh`.
+      - name: Audit dati (loader vuoti, mappe, superficie)
+        run: npm run audit
+
       - name: Smoke — i loader invalidati sono girati
         run: |
           report="${{ runner.temp }}/invalidated-loaders.txt"
