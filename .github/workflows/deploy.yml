@@ -7,9 +7,11 @@ on:
   repository_dispatch:
     types: [catalog_updated]
   workflow_dispatch:
-  schedule:
-    # Refresh completo una volta al giorno: il dispatch copre solo i cambi di registry.
-    - cron: "0 5 * * *"
+    inputs:
+      full_refresh:
+        description: "Rilegge tutti i parquet (egress GCS). Default: solo metadati."
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -55,8 +57,8 @@ jobs:
       - name: Refresh metadata cache (catalog/themes)
         run: rm -f src/.observablehq/cache/data/catalog.json src/.observablehq/cache/data/themes.json
 
-      - name: Full data refresh (schedule only)
-        if: github.event_name == 'schedule'
+      - name: Full data refresh (on demand)
+        if: github.event_name == 'workflow_dispatch' && inputs.full_refresh
         run: rm -rf src/.observablehq/cache
 
       - name: Check data loaders exist
