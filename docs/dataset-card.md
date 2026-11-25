@@ -138,8 +138,15 @@ un run e l'altro: un deploy che non tocca le schede costa ~1 s, non N query.
 | `_util`/`_registry`/`_views`/requirements | tutti (deploy) | tutte (cambia il produttore) |
 | `catalog_updated` (solo metadati) | 0 | 0 |
 
+`full_refresh=true` svuota la cache dei loader **e** rigenera tutte le schede
+(`--force`): un refresh completo non può lasciare le schede indietro rispetto
+alle pagine.
+
 Il PR check **non** fa il full: usa la cache, esegue i loader toccati dal diff e
-lascia la validazione della dipendenza/contratto al deploy.
+lascia la validazione della dipendenza/contratto al deploy. Conseguenza
+dichiarata: un PR che tocca **solo** `requirements.txt` è verde senza che un
+loader sia mai girato — **merge verde ≠ deploy verde**. Se il deploy è rosso,
+main non pubblica finché non si corregge.
 
 ### Refresh mirato di un dataset
 
@@ -154,6 +161,12 @@ Il deploy invalida i loader che leggono i mart di X (`scripts/invalidate_cache.p
 li trova dal sorgente: `bdap_entrate_stato` → `bdap-entrate` +
 `entrate-vs-spese`), rigenera la card di X e lascia tutto il resto in cache.
 `workflow_dispatch` ha gli stessi input (`datasets`, `full_refresh`).
+
+**Chi manda l'evento (stato attuale).** Nessun workflow del workspace emette
+`data_updated` né `catalog_updated`: il ricevitore c'è, il trasmettitore no.
+Finché il dispatch non parte dai produttori (dopo il sync dei mart, e da ACB
+quando pubblica `context`), la freschezza resta **manuale**: un push di codice
+o un `workflow_dispatch`. È il primo follow-up, non un dettaglio.
 
 Dopo il build, lo step *Smoke — i loader invalidati sono girati* verifica che
 ogni output invalidato esista davvero in cache: se un loader è fallito e il

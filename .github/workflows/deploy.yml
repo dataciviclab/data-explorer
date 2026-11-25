@@ -112,11 +112,17 @@ jobs:
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
 
+      # `full_refresh` riguarda anche le schede: se i mart sono cambiati senza
+      # un nuovo `last_run`, i fingerprint non si muovono e le schede restano
+      # vecchie mentre le pagine sono fresche. Qui si forza tutto.
       - name: Generate dataset cards (incremental)
         env:
           DATASETS: ${{ steps.scope.outputs.datasets }}
+          FULL: ${{ steps.scope.outputs.full }}
         run: |
-          if [ -n "$DATASETS" ]; then
+          if [ "$FULL" = "1" ]; then
+            npm run cards -- --force
+          elif [ -n "$DATASETS" ]; then
             npm run cards -- --only "$DATASETS"
           else
             npm run cards
