@@ -17,16 +17,17 @@ import { euroCompact, pct, numFix, tableFormat } from "../import/format-utils.js
 ```
 
 ```js
-const raw = await FileAttachment("../data/rna-aiuti-stato.json").json();
-```
-
-```js
-const byAnno = Array.from(
-  d3.rollup(raw, v => ({
-    importo: d3.sum(v, d => d.elemento_aiuto),
-  }), d => d.anno),
-  ([anno, v]) => ({ anno, ...v })
-).sort((a, b) => a.anno - b.anno);
+// Aggregazioni già calcolate dal loader sui mart: la pagina non affetta più
+// un cubo da 18 MB, e `importo` è `totale_esl` del mart (somma di elemento_aiuto).
+const data = await FileAttachment("../data/rna-aiuti-stato.json").json();
+const {
+  trend: byAnno,
+  regioni: byRegione,
+  strumenti: byStrumento,
+  tipi: byTipoAnno,
+  procedimenti: byProcedimento,
+  concedenti: byConcedente,
+} = data;
 
 const trendFirst = byAnno[0];
 const trendLast = byAnno[byAnno.length - 1];
@@ -39,30 +40,6 @@ const covidAnni = `${trendCovid[0]?.anno}–${trendCovid[1]?.anno}`;
 const covidImporto = d3.sum(trendCovid, d => d.importo);
 const covidShare = totale ? (covidImporto / totale) * 100 : null;
 
-const byRegione = Array.from(
-  d3.rollup(raw, v => ({ importo: d3.sum(v, d => d.elemento_aiuto), n: v.length }), d => d.regione_beneficiario),
-  ([regione, v]) => ({ regione, ...v })
-).sort((a, b) => b.importo - a.importo);
-
-const byStrumento = Array.from(
-  d3.rollup(raw, v => ({ importo: d3.sum(v, d => d.elemento_aiuto), n: v.length }), d => d.strumento),
-  ([strumento, v]) => ({ strumento, ...v })
-).sort((a, b) => b.importo - a.importo);
-
-const byTipoAnno = Array.from(
-  d3.rollup(raw, v => ({ importo: d3.sum(v, d => d.elemento_aiuto) }), d => d.anno, d => d.tipo_beneficiario),
-  ([anno, m]) => Array.from(m, ([tipo, v]) => ({ anno, tipo, ...v }))
-).flat().sort((a, b) => a.anno - b.anno);
-
-const byProcedimento = Array.from(
-  d3.rollup(raw, v => ({ importo: d3.sum(v, d => d.elemento_aiuto), n: v.length }), d => d.procedimento),
-  ([procedimento, v]) => ({ procedimento, ...v })
-).sort((a, b) => b.importo - a.importo);
-
-const byConcedente = Array.from(
-  d3.rollup(raw, v => ({ importo: d3.sum(v, d => d.elemento_aiuto), n: v.length }), d => d.soggetto_concedente),
-  ([concedente, v]) => ({ concedente, ...v })
-).sort((a, b) => b.importo - a.importo);
 ```
 
 <div class="grid grid-cols-2">
