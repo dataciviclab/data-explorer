@@ -552,6 +552,8 @@ def build_card(entry: dict, spec: dict, fetch: Fetch) -> dict:
         "intro": spec.get("intro") or "",
         "notes": [str(note) for note in spec.get("notes") or []],
         "category": entry.get("category", ""),
+        "theme": entry.get("theme", ""),
+        "theme_name": entry.get("theme_name", ""),
         "published": bool(entry.get("published", entry.get("stage") == "published")),
         "period": entry.get("period") or {},
         "source": spec.get("source") or entry.get("source") or "",

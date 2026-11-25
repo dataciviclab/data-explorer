@@ -93,6 +93,91 @@ description: "I dati pubblici italiani, puliti e pronti all'uso — dal IRPEF ai
   max-width: 640px;
 }
 
+.catalog-count {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0.2rem 0 1rem;
+}
+
+.catalog-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.catalog-item {
+  border: 1px solid var(--theme-background-alt);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.catalog-item h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.catalog-item h3 a {
+  text-decoration: none;
+}
+
+.catalog-item h3 a:hover {
+  text-decoration: underline;
+}
+
+.catalog-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  opacity: 0.78;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.catalog-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.8rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+.catalog-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+}
+
+.catalog-badge {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--theme-background-alt);
+  white-space: nowrap;
+}
+
+.catalog-badge.ok {
+  border-color: var(--theme-foreground-focus);
+  color: var(--theme-foreground-focus);
+}
+
+.catalog-badge.muted {
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .catalog-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
 
 <div class="hero">
@@ -192,42 +277,56 @@ display(html`<div class="grid grid-cols-2">
 ## Tutti i dataset
 
 ```js
-const searchQuery = view(Inputs.search(catalog.datasets, {label: "Cerca per nome, descrizione o fonte…"}));
+const searchQuery = view(Inputs.search(catalog.datasets, {label: "Cerca", placeholder: "nome, descrizione, fonte…"}));
+```
+
+```js
+const themeNames = ["Tutti i temi", ...themes.map((t) => t.name)];
+const themeFilter = view(Inputs.select(themeNames, {label: "Tema", value: "Tutti i temi"}));
 ```
 
 ```js
 const stageFilter = view(Inputs.select(
-  ["Tutti", "published", "incubating"],
-  {label: "Filtra per stato", value: "Tutti"}
+  ["Tutti", "Pubblicati", "In incubazione"],
+  {label: "Stato", value: "Tutti"}
 ));
 ```
 
 ```js
-const repoList = ["Tutte", ...new Set(catalog.datasets.map(d => d.registry_source).filter(Boolean))].sort();
-const repoFilter = view(Inputs.select(
-  repoList,
-  {label: "Filtra per repository", value: "Tutte"}
-));
+const limit = view(Inputs.select([24, 48, 96], {label: "Mostra", value: 24}));
 ```
 
 ```js
+const themeSlug = themeFilter === "Tutti i temi" ? null : themes.find((t) => t.name === themeFilter)?.slug;
 const filtered = searchQuery
-  .filter(d => stageFilter === "Tutti" || d.stage === stageFilter)
-  .filter(d => repoFilter === "Tutte" || d.registry_source === repoFilter);
+  .filter((d) => !themeSlug || d.theme === themeSlug)
+  .filter((d) => stageFilter === "Tutti" || d.published === (stageFilter === "Pubblicati"))
+  .sort((a, b) => a.name.localeCompare(b.name, "it"));
+const shown = filtered.slice(0, limit);
 ```
 
 ```js
-Inputs.table(filtered, {
-  columns: ["slug", "name", "description", "stage", "years", "source"],
-  header: {slug: "ID", name: "Nome", description: "Descrizione", stage: "Stato", years: "Anni", source: "Fonte"},
-  format: {
-    stage: d => d === "published" ? "✅ Pubblicato" : "🔬 Incubazione",
-    description: d => d && d.length > 80 ? d.slice(0, 80) + "…" : d,
-  },
-  sort: "slug",
-  rows: 30,
-  width: "100%",
-})
+display(html`<p class="catalog-count">
+  ${filtered.length} dataset${filtered.length > shown.length ? ` · mostrati ${shown.length}` : ""}
+</p>
+${shown.length
+  ? html`<div class="catalog-list">
+      ${shown.map((d) => html`<article class="catalog-item">
+        <h3>${d.page_url ? html`<a href="${d.page_url}">${d.name}</a>` : d.name}</h3>
+        <p class="catalog-desc">${d.description || "Descrizione non disponibile."}</p>
+        <p class="catalog-meta">
+          ${d.theme_name ? html`<span>${d.theme_name}</span>` : ""}
+          ${d.years && d.years !== "?" ? html`<span>${d.years}</span>` : ""}
+          ${d.source ? html`<span>${d.source}</span>` : ""}
+        </p>
+        <p class="catalog-badges">
+          <span class="catalog-badge ${d.published ? "ok" : "muted"}">${d.published ? "Pubblicato" : "In incubazione"}</span>
+          ${d.has_card ? html`<span class="catalog-badge muted">Scheda</span>` : ""}
+          ${d.has_page ? html`<span class="catalog-badge muted">Pagina</span>` : ""}
+        </p>
+      </article>`)}
+    </div>`
+  : html`<p><em>Nessun dataset con questi filtri.</em></p>`}`);
 ```
 
 <div style="margin-top: 2em; opacity: 0.5; font-size: 0.85em;">
