@@ -160,9 +160,9 @@ _PAGE_DESCRIPTIONS: dict[str, str] = {}
 def page_description(url_slug: str) -> str:
     """`description` dal frontmatter di src/dataset/<url_slug>.md (o "").
 
-    ACB non pubblica più `description` per la maggior parte dei dataset: la
-    pagina però ce l'ha, ed è il testo che l'editor ha già scritto. Serve a
-    non mostrare card senza descrizione in home e nelle pagine tema.
+    ACB non manda `description` per 216 dataset su 556 (39%): la pagina però
+    ce l'ha, ed è il testo che l'editor ha già scritto. Senza fallback, 23
+    superfici su 46 restavano senza testo in home e nelle pagine tema.
     """
     if url_slug in _PAGE_DESCRIPTIONS:
         return _PAGE_DESCRIPTIONS[url_slug]

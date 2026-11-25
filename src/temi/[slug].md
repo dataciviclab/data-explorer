@@ -11,6 +11,9 @@ const themes = await FileAttachment("../data/themes.json").json();
 const slug = observable.params.slug;
 const theme = themes.find((t) => t.slug === slug);
 if (!theme) throw new Error(`Tema non trovato: ${slug}`);
+
+// Il frontmatter è statico: il titolo del tab si imposta qui (SEO/tab).
+document.title = theme.name;
 ```
 
 ```js
