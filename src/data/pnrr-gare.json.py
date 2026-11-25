@@ -28,7 +28,7 @@ with safe_connect() as con:
                MIN(data_pubblicazione_cig) AS min_data,
                MAX(data_pubblicazione_cig) AS max_data
         FROM read_parquet('{url}')
-    """).fetchone()
+    """).fetchall()[0]
 
     kpi = {
         "n_gare": int(kpi_row[0]),

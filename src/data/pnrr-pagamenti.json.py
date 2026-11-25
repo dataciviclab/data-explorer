@@ -28,7 +28,7 @@ with safe_connect() as con:
                ROUND(COALESCE(SUM(pagamento_totale), 0) / 1e9, 2) AS pag_mld,
                ROUND(COALESCE(SUM(pagamento_pnrr), 0) / 1e9, 2) AS pag_pnrr_mld
         FROM read_parquet('{url}')
-    """).fetchone()
+    """).fetchall()[0]
 
     fin_totale = float(kpi_row[2])
     pag_totale = float(kpi_row[3])
@@ -69,7 +69,7 @@ with safe_connect() as con:
             ROUND(COALESCE(SUM(pagamento_privato), 0) / 1e9, 2) AS privato,
             ROUND(COALESCE(SUM(pagamento_comune + pagamento_provincia + pagamento_altro_pubblico + pagamento_pnc + pagamento_altri_fondi + pagamento_da_reperire), 0) / 1e9, 2) AS altro
         FROM read_parquet('{url}')
-    """).fetchone()
+    """).fetchall()[0]
 
     fonti = [
         {"fonte": "Stato", "mld": float(fonti_rows[0])},

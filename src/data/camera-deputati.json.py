@@ -72,7 +72,7 @@ with safe_connect() as con:
         SELECT legislatura FROM read_parquet('{url('camera_deputati_legislature')}')
         WHERE legislatura IS NOT NULL
         GROUP BY 1 ORDER BY 1 DESC LIMIT 1
-    """).fetchone()
+    """).fetchall()[0]
 
     if ultima_leg:
         gruppi_list = con.sql(f"""

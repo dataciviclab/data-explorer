@@ -26,7 +26,7 @@ with safe_connect() as con:
                ROUND(COALESCE(SUM(fin_totale), 0) / 1e9, 2) AS fin_mld,
                ROUND(COALESCE(SUM(fin_pnrr), 0) / 1e9, 2) AS fin_pnrr_mld
         FROM read_parquet('{url}')
-    """).fetchone()
+    """).fetchall()[0]
 
     kpi = {
         "n_progetti": int(kpi_row[0]),

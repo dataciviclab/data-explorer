@@ -78,7 +78,7 @@ with safe_connect() as con:
     # KPI
     first = min(trend, key=lambda x: x["anno"]) if trend else None
     last = max(trend, key=lambda x: x["anno"]) if trend else None
-    tot_comuni = con.execute(f"SELECT COUNT(DISTINCT comune) FROM ({parquet_refs}) WHERE turno = 1").fetchone()[0]
+    tot_comuni = con.execute(f"SELECT COUNT(DISTINCT comune) FROM ({parquet_refs}) WHERE turno = 1").fetchall()[0][0]
 
 json.dump({
     "kpi": {
