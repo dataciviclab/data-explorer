@@ -7,6 +7,9 @@ on:
   repository_dispatch:
     types: [catalog_updated]
   workflow_dispatch:
+  schedule:
+    # Refresh completo una volta al giorno: il dispatch copre solo i cambi di registry.
+    - cron: "0 5 * * *"
 
 permissions:
   contents: read
@@ -45,6 +48,17 @@ jobs:
           restore-keys: |
             observable-cache-
 
+      # La cache OF è pensata per la velocità, ma `observable build` chiama i
+      # loader con `useStale: true`: senza invalidazione serve dati vecchi.
+      # I metadati (ACB cambia ogni 6h) si rigenerano sempre; i 58 loader delle
+      # pagine restano in cache per non pagare 10-15 min a ogni push.
+      - name: Refresh metadata cache (catalog/themes)
+        run: rm -f src/.observablehq/cache/data/catalog.json src/.observablehq/cache/data/themes.json
+
+      - name: Full data refresh (schedule only)
+        if: github.event_name == 'schedule'
+        run: rm -rf src/.observablehq/cache
+
       - name: Check data loaders exist
         run: echo "data loader check bypassed — i loader sono manuali e tracciati in git"
 
@@ -53,6 +67,26 @@ jobs:
 
       - name: Build Observable Framework
         run: npm run build
+
+      - name: Smoke — catalogo fresco
+        run: |
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const dir = "dist/observable/_file/data";
+          const file = fs.readdirSync(dir).find((f) => /^catalog\.[0-9a-f]+\.json$/.test(f));
+          if (!file) {
+            console.error("catalog.json non trovato nel build");
+            process.exit(1);
+          }
+          const catalog = JSON.parse(fs.readFileSync(path.join(dir, file), "utf-8"));
+          const ageHours = (Date.now() - Date.parse(catalog.updated_at)) / 36e5;
+          console.log(`catalog updated_at=${catalog.updated_at} age=${ageHours.toFixed(1)}h total=${catalog.total}`);
+          if (ageHours > 26) {
+            console.error("catalogo stantio (>26h): cache dei metadati non invalidata?");
+            process.exit(1);
+          }
+          NODE
 
       - name: Smoke — le pagine standard devono esistere nel build
         run: |

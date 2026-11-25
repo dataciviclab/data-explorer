@@ -51,6 +51,9 @@ jobs:
           restore-keys: |
             observable-cache-
 
+      - name: Refresh metadata cache (catalog/themes)
+        run: rm -f src/.observablehq/cache/data/catalog.json src/.observablehq/cache/data/themes.json
+
       - name: Lint
         run: npm run lint
 
