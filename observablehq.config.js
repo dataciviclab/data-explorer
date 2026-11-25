@@ -35,6 +35,10 @@ export default {
         "path": "/dataset/mit-incidentalita"
       },
       {
+        "name": "Produzione elettrica per fonte",
+        "path": "/dataset/terna-elettricita-per-fonte"
+      },
+      {
         "name": "Rifiuti urbani nei comuni",
         "path": "/dataset/rifiuti-urbani"
       },
@@ -253,16 +257,6 @@ export default {
   {
     "name": "Schede dataset",
     "path": "/schede/"
-  },
-  {
-    "name": "Altri dataset",
-    "collapsible": true,
-    "pages": [
-      {
-        "name": "Produzione elettrica per fonte",
-        "path": "/dataset/produzione-elettrica-fonti"
-      }
-    ]
   },
   {
     "name": "Visioni incrociate",

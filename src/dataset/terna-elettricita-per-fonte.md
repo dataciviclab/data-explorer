@@ -5,7 +5,7 @@ source: Terna S.p.A. — dati.terna.it
 source_url: https://www.terna.it/
 period: "2015–2024"
 last_modified: 2026-08-19
-dataset_slug: terna_electricity_by_source
+dataset_slug: terna_elettricita_per_fonte
 data_driven: true
 ---
 

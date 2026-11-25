@@ -13,6 +13,7 @@ import {
   mapGaps,
   parseFrontmatter,
   parsePeriod,
+  pageDatasetIssue,
   periodViolation,
   publishedWithoutSurface,
 } from "../scripts/audit.mjs";
@@ -98,6 +99,20 @@ test("hardcodedGcs non segnala i controlli di schema", () => {
     }),
     [],
   );
+});
+
+test("pageDatasetIssue: slug mancante, sconosciuto, url divergente", () => {
+  const by = new Map([["terna_elettricita_per_fonte", { url_slug: "terna-elettricita-per-fonte" }]]);
+  assert.deepEqual(pageDatasetIssue(undefined, "x", by), { slug: "missing", url: null });
+  assert.deepEqual(pageDatasetIssue("non_esiste", "x", by), { slug: "non_esiste", url: null });
+  assert.deepEqual(pageDatasetIssue("terna_elettricita_per_fonte", "produzione-elettrica-fonti", by), {
+    slug: null,
+    url: "terna-elettricita-per-fonte",
+  });
+  assert.deepEqual(pageDatasetIssue("terna_elettricita_per_fonte", "terna-elettricita-per-fonte", by), {
+    slug: null,
+    url: null,
+  });
 });
 
 test("publishedWithoutSurface trova le voci morte nel catalogo", () => {

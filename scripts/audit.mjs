@@ -218,6 +218,24 @@ export async function mapGaps(text, outputs, topo, buildMapLookup, normalizzaReg
   return { missing: [...missing].sort() };
 }
 
+/**
+ * Coerenza pagina ↔ dataset.
+ *
+ * `dataset_slug` deve esistere nel catalogo, e lo `url_slug` che ne deriva
+ * deve essere il nome del file: altrimenti la pagina esiste nel build ma il
+ * catalogo non la linka (orfana). È il caso di `produzione-elettrica-fonti`,
+ * rimasta invisibile per un override morto in lab-connectors.
+ *
+ * Ritorna { slug: "missing" | "<slug sconosciuto>" | null, url: "<url atteso>" | null }.
+ */
+export function pageDatasetIssue(datasetSlug, pageSlug, catalogBySlug) {
+  if (!datasetSlug) return { slug: "missing", url: null };
+  const entry = catalogBySlug.get(datasetSlug);
+  if (!entry) return { slug: datasetSlug, url: null };
+  if (entry.url_slug !== pageSlug) return { slug: null, url: entry.url_slug };
+  return { slug: null, url: null };
+}
+
 async function main() {
   const outputs = outputsFromCache();
   const sources = loaderSources();
@@ -230,11 +248,13 @@ async function main() {
   }
 
   const catalogPath = resolve(CACHE, "catalog.json");
-  if (existsSync(catalogPath)) {
-    for (const slug of publishedWithoutSurface(readJson(catalogPath))) {
+  const catalog = existsSync(catalogPath) ? readJson(catalogPath) : null;
+  if (catalog) {
+    for (const slug of publishedWithoutSurface(catalog)) {
       errors.push(`dataset ${slug}: published senza pagina né scheda (voce morta nel catalogo)`);
     }
   }
+  const catalogBySlug = new Map((catalog?.datasets || []).map((d) => [d.slug, d]));
 
   const geoUtils = await import(resolve(ROOT, "src/import/geo-utils.js"));
   const topo = readJson(TOPO);
@@ -244,6 +264,17 @@ async function main() {
     const text = readFileSync(resolve(PAGES, file), "utf-8");
     const page = file.replace(/\.md$/, "");
     const fm = parseFrontmatter(text);
+
+    if (catalog) {
+      const issue = pageDatasetIssue(fm.dataset_slug, page, catalogBySlug);
+      if (issue.slug === "missing") {
+        errors.push(`pagina ${page}: manca dataset_slug`);
+      } else if (issue.slug) {
+        errors.push(`pagina ${page}: dataset_slug "${issue.slug}" assente dal catalogo`);
+      } else if (issue.url) {
+        errors.push(`pagina ${page}: dataset_slug → url "${issue.url}", la pagina non è linkata`);
+      }
+    }
 
     if (fm.period) {
       const years = refsOf(text).flatMap((ref) => [...collectYears(outputs[ref])]);
