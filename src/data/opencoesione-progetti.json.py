@@ -1,14 +1,28 @@
 #!/usr/bin/env python3
 """Data loader: OpenCoesione — progetti delle politiche di coesione.
-Aggregato per ciclo di programmazione, macroarea, tema sintetico e stato.
-"""
-import sys; sys.path.insert(0, "src/data")
-from _util import load_dataset, get_location
 
-load_dataset(
-    slug="opencoesione_progetti",
-    years=[2026],  # unico snapshot multi-ciclo
-    group_cols=["OC_DESCR_CICLO", "OC_MACROAREA_PROGETTO", "OC_TEMA_SINTETICO", "OC_STATO_PROGETTO"],
-    metric_cols=["FINANZ_TOTALE_PUBBLICO", "TOT_PAGAMENTI", "OC_COSTO_COESIONE"],
-    location=get_location("opencoesione_progetti"),
+Legge `mart_tema_ciclo` (tema × macroarea × ciclo): una riga per combinazione,
+con finanziamento e pagamenti. Prima il loader leggeva il clean (18,5 MB di
+colonne, 2,3 M righe) per produrre lo stesso aggregato.
+
+Verificato: i totali per ciclo coincidono con `mart_ciclo` e
+`mart_macroarea_ciclo` (±0 €).
+"""
+
+import sys
+
+sys.path.insert(0, "src/data")
+from _views import mart_rows, write
+
+write(
+    mart_rows(
+        "opencoesione_progetti__mart_tema_ciclo",
+        select={
+            "ciclo": "ciclo",
+            "macroarea": "macroarea",
+            "tema": "tema",
+            "finanziato": "finanz_tot_pub",
+            "pagato": "pagamenti_tot",
+        },
+    )
 )

@@ -27,7 +27,7 @@ const data = await FileAttachment("../data/opencoesione-progetti.json").json();
 
 ```js
 // Filtro: ciclo di programmazione (sostituisce il filtro anno standard)
-const cicli = [...new Set(data.map(d => d.OC_DESCR_CICLO))].sort();
+const cicli = [...new Set(data.map(d => d.ciclo))].sort();
 const cicloSel = view(Inputs.select(
   new Map(cicli.map(c => [c, c])),
   {label: "Ciclo di programmazione", value: cicli[cicli.length - 1]}
@@ -36,13 +36,13 @@ const cicloSel = view(Inputs.select(
 
 ```js
 // Dati filtrati per ciclo selezionato
-const cicloData = data.filter(d => d.OC_DESCR_CICLO === cicloSel);
+const cicloData = data.filter(d => d.ciclo === cicloSel);
 ```
 
 ```js
 // Metriche riassuntive
-const totFinanziato = d3.sum(cicloData, d => d.FINANZ_TOTALE_PUBBLICO);
-const totPagato = d3.sum(cicloData, d => d.TOT_PAGAMENTI);
+const totFinanziato = d3.sum(cicloData, d => d.finanziato);
+const totPagato = d3.sum(cicloData, d => d.pagato);
 const tassoPagamento = totFinanziato > 0 ? (totPagato / totFinanziato) * 100 : 0;
 ```
 
@@ -72,10 +72,10 @@ La distribuzione dei fondi tra Centro-Nord e Mezzogiorno è il nodo centrale del
 const perMacroarea = d3.rollups(
   cicloData,
   v => ({
-    finanziato: d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO),
-    pagato: d3.sum(v, d => d.TOT_PAGAMENTI),
+    finanziato: d3.sum(v, d => d.finanziato),
+    pagato: d3.sum(v, d => d.pagato),
   }),
-  d => d.OC_MACROAREA_PROGETTO
+  d => d.macroarea
 ).map(([key, val]) => ({macroarea: key, ...val}))
  .sort((a, b) => b.finanziato - a.finanziato);
 ```
@@ -115,9 +115,9 @@ Quali ambiti ricevono più finanziamenti? Ricerca e innovazione, trasporti e amb
 const perTema = d3.rollups(
   cicloData,
   v => ({
-    finanziato: d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO),
+    finanziato: d3.sum(v, d => d.finanziato),
   }),
-  d => d.OC_TEMA_SINTETICO
+  d => d.tema
 ).map(([key, val]) => ({tema: key, ...val}))
  .sort((a, b) => b.finanziato - a.finanziato);
 ```
@@ -153,14 +153,14 @@ Plot.plot({
 const perMacroareaCiclo = d3.rollups(
   data,
   v => ({
-    finanziato: d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO),
-    pagato: d3.sum(v, d => d.TOT_PAGAMENTI),
-    tasso: (d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO) > 0
-      ? (d3.sum(v, d => d.TOT_PAGAMENTI) / d3.sum(v, d => d.FINANZ_TOTALE_PUBBLICO)) * 100
+    finanziato: d3.sum(v, d => d.finanziato),
+    pagato: d3.sum(v, d => d.pagato),
+    tasso: (d3.sum(v, d => d.finanziato) > 0
+      ? (d3.sum(v, d => d.pagato) / d3.sum(v, d => d.finanziato)) * 100
       : 0)
   }),
-  d => d.OC_DESCR_CICLO,
-  d => d.OC_MACROAREA_PROGETTO
+  d => d.ciclo,
+  d => d.macroarea
 ).flatMap(([ciclo, macroMap]) =>
   Array.from(macroMap, ([macroarea, val]) => ({
     ciclo,
