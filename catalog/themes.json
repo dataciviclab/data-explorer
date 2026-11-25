@@ -6,49 +6,75 @@
       "name": "Territorio e ambiente",
       "icon": "🌍",
       "description": "Trasformazioni territoriali, ambiente, energia, rifiuti e sicurezza stradale",
-      "categories": ["ambiente", "energia", "trasporti"]
+      "categories": [
+        "ambiente",
+        "energia",
+        "trasporti"
+      ],
+      "intro": "Produzione e raccolta differenziata dei rifiuti urbani, capacità di generazione rinnovabile installata e incidentalità stradale a livello nazionale. I dataset di questo tema coprono le trasformazioni ambientali, il mix energetico e la sicurezza stradale in Italia."
     },
     {
       "slug": "finanza-pubblica",
       "name": "Finanza pubblica",
       "icon": "💰",
       "description": "Entrate dello Stato, capacità fiscale, tributi locali, FSC, politiche di coesione, partecipazioni PA e disuguaglianza del reddito",
-      "categories": ["finanza-pubblica", "economia", "appalti"]
+      "categories": [
+        "finanza-pubblica",
+        "economia",
+        "appalti"
+      ],
+      "intro": "IRPEF comunale, entrate dello Stato, consumi della PA in convenzione Consip, Fondo di Solidarietà Comunale e disuguaglianza del reddito per regione. I dataset di questo tema coprono la finanza pubblica italiana dal livello locale a quello centrale."
     },
     {
       "slug": "sanita",
       "name": "Sanità",
       "icon": "🏥",
       "description": "Spesa farmaceutica, strutture sanitarie e posti letto ospedalieri",
-      "categories": ["sanita"]
+      "categories": [
+        "sanita"
+      ],
+      "intro": "Spesa farmaceutica convenzionata e costi dei Livelli Essenziali di Assistenza (LEA) per regione. I dataset di questo tema coprono la spesa sanitaria pubblica italiana, dal farmaco al costo complessivo dei servizi sanitari regionali."
     },
     {
       "slug": "welfare-lavoro",
       "name": "Welfare e lavoro",
       "icon": "👥",
       "description": "Pubblico impiego, pensioni, istruzione e prezzi delle abitazioni",
-      "categories": ["welfare-lavoro", "istruzione"]
+      "categories": [
+        "welfare-lavoro",
+        "istruzione"
+      ],
+      "intro": "Dipendenti pubblici, pensioni INPS, alunni per corso/età, popolazione residente e indice dei prezzi delle abitazioni per area geografica. I dataset di questo tema coprono il lavoro pubblico, la previdenza, l'istruzione, la demografia e il mercato immobiliare in Italia."
     },
     {
       "slug": "giustizia",
       "name": "Giustizia",
       "icon": "⚖️",
       "description": "Flussi civili, tempi e carichi dei tribunali",
-      "categories": ["giustizia"]
+      "categories": [
+        "giustizia"
+      ],
+      "intro": "Flussi della giustizia civile: sopravvenuti, definiti e pendenti per distretto. Il dataset di questo tema copre l'andamento del contenzioso civile nei tribunali italiani."
     },
     {
       "slug": "terzo-settore",
       "name": "Terzo settore",
       "icon": "🤝",
       "description": "5x1000, enti non profit, flussi finanziari al terzo settore",
-      "categories": ["terzo-settore"]
+      "categories": [
+        "terzo-settore"
+      ],
+      "intro": "Enti beneficiari del 5x1000: importi erogabili, numero di scelte e distribuzione per regione e categoria."
     },
     {
       "slug": "politica",
       "name": "Politica",
       "icon": "🏛️",
       "description": "Elezioni, Parlamento, Governo e amministratori locali — i dati della politica italiana",
-      "categories": ["politica"]
+      "categories": [
+        "politica"
+      ],
+      "intro": "Elezioni politiche, comunali, europee, regionali e referendum. Composizione del Parlamento, votazioni della Camera, membri del Governo e amministratori locali. I dataset di questo tema coprono la politica italiana dal voto ai rappresentanti."
     }
   ]
 }

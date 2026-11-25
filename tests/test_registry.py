@@ -151,6 +151,31 @@ class TestBuildCatalog:
         d2 = next(x for x in cat["datasets"] if x["slug"] == "incubante")
         assert d2["registry_source"] == ""
 
+    def test_description_dalla_pagina_se_acb_non_la_ha(self, tmp_path, monkeypatch):
+        """ACB non pubblica `description`: si usa quella del frontmatter di pagina."""
+        import src.data._registry as mod
+
+        monkeypatch.setattr(mod, "PAGES_DIR", str(tmp_path))
+        monkeypatch.setattr(mod, "_PAGE_DESCRIPTIONS", {})
+        (tmp_path / "demo.md").write_text(
+            '---\ntitle: Demo\ndescription: "Testo editoriale della pagina"\n---\n',
+            encoding="utf-8",
+        )
+        entry = _registry_entry("demo", "ambiente")
+        entry.pop("description", None)
+        cat = build_catalog({"updated_at": "t", "datasets": [entry]})
+        assert cat["datasets"][0]["description"] == "Testo editoriale della pagina"
+
+    def test_description_assente_ovunque_resta_vuota(self, tmp_path, monkeypatch):
+        import src.data._registry as mod
+
+        monkeypatch.setattr(mod, "PAGES_DIR", str(tmp_path))
+        monkeypatch.setattr(mod, "_PAGE_DESCRIPTIONS", {})
+        entry = _registry_entry("nessuna_pagina", "ambiente")
+        entry.pop("description", None)
+        cat = build_catalog({"updated_at": "t", "datasets": [entry]})
+        assert cat["datasets"][0]["description"] == ""
+
     def test_catalog_exposes_columns(self):
         registry = {"updated_at": "2026-08-08", "datasets": [{
             **_registry_entry("ds_cols", "ambiente"),

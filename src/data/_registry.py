@@ -153,6 +153,33 @@ def has_explorer_page(url_slug: str) -> bool:
     return os.path.exists(os.path.join(PAGES_DIR, f"{url_slug}.md"))
 
 
+# Cache di processo: 45 file piccoli, letti una volta per loader.
+_PAGE_DESCRIPTIONS: dict[str, str] = {}
+
+
+def page_description(url_slug: str) -> str:
+    """`description` dal frontmatter di src/dataset/<url_slug>.md (o "").
+
+    ACB non manda `description` per 216 dataset su 556 (39%): la pagina però
+    ce l'ha, ed è il testo che l'editor ha già scritto. Senza fallback, 23
+    superfici su 46 restavano senza testo in home e nelle pagine tema.
+    """
+    if url_slug in _PAGE_DESCRIPTIONS:
+        return _PAGE_DESCRIPTIONS[url_slug]
+    text = ""
+    try:
+        with open(os.path.join(PAGES_DIR, f"{url_slug}.md"), encoding="utf-8") as handle:
+            text = handle.read()
+    except OSError:
+        pass
+    match = _CARD_DESCRIPTION.search(text) if text else None
+    description = match.group(1).strip() if match else ""
+    if len(description) >= 2 and description[0] == description[-1] and description[0] in ("'", '"'):
+        description = description[1:-1]
+    _PAGE_DESCRIPTIONS[url_slug] = description
+    return description
+
+
 def local_cards() -> dict[str, dict[str, str]]:
     """Schede editoriali in ``catalog/cards/*.yml``: slug DI → {title, description}.
 
@@ -236,7 +263,12 @@ def build_catalog(registry: dict | None = None) -> dict:
             "slug": slug,
             "url_slug": url_slug,
             "name": card.get("title") or ds.get("name", ""),
-            "description": (card.get("description") or ds.get("description", ""))[:150],
+            # Priorità: scheda (editoriale) → ACB → frontmatter della pagina.
+            "description": (
+                card.get("description")
+                or ds.get("description", "")
+                or page_description(url_slug)
+            )[:150],
             "stage": ds.get("stage", ""),
             "published": published,
             "has_page": has_page,
@@ -324,6 +356,8 @@ def build_themes(registry: dict | None = None, page_exists=None) -> list[dict]:
             "name": theme["name"],
             "icon": theme.get("icon", ""),
             "description": theme.get("description", ""),
+            # Testo di apertura della pagina /temi/<slug> (editoriale, in themes.json).
+            "intro": theme.get("intro", ""),
             "datasets": datasets,
         })
     return themes

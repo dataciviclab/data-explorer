@@ -5,7 +5,7 @@ source: MEF — Italia Domani (italiadomani.gov.it)
 source_url: https://italiadomani.gov.it/
 period: "2021–2025"
 last_modified: 2026-08-20
-dataset_slug: pnrr-progetti
+dataset_slug: pnrr_progetti
 data_driven: true
 ---
 

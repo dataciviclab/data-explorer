@@ -6,9 +6,12 @@ export default {
   interpreters: {
     ".py": ["python3"]
   },
-  // Schede dataset: una route dinamica, N path calcolati dal file statico
-  // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
+  // Temi e schede: route dinamiche. I path dei temi vengono da themes.json
+  // (generato qui), quelli delle schede dal file statico di build_cards.py.
   dynamicPaths: async function* () {
+    for (const slug of ["territorio-ambiente","finanza-pubblica","sanita","welfare-lavoro","giustizia","terzo-settore","politica"]) {
+      yield `/temi/${slug}`;
+    }
     try {
       const { readFileSync } = await import("node:fs");
       const cards = JSON.parse(readFileSync(new URL("./src/data/cards.json", import.meta.url), "utf-8"));
@@ -21,6 +24,7 @@ export default {
   {
     "name": "Territorio e ambiente",
     "collapsible": true,
+    "path": "/temi/territorio-ambiente",
     "pages": [
       {
         "name": "Emissioni GHG da processi energetici",
@@ -29,6 +33,10 @@ export default {
       {
         "name": "Incidenti stradali",
         "path": "/dataset/mit-incidentalita"
+      },
+      {
+        "name": "Produzione elettrica per fonte",
+        "path": "/dataset/terna-elettricita-per-fonte"
       },
       {
         "name": "Rifiuti urbani nei comuni",
@@ -43,6 +51,7 @@ export default {
   {
     "name": "Finanza pubblica",
     "collapsible": true,
+    "path": "/temi/finanza-pubblica",
     "pages": [
       {
         "name": "Entrate dello Stato",
@@ -97,6 +106,10 @@ export default {
         "path": "/dataset/rna-aiuti-stato"
       },
       {
+        "name": "PIL territoriale",
+        "path": "/schede/istat-pil-territoriale"
+      },
+      {
         "name": "Bandi di gara pubblici ANAC",
         "path": "/dataset/anac-bandi-gara"
       },
@@ -109,6 +122,7 @@ export default {
   {
     "name": "Sanità",
     "collapsible": true,
+    "path": "/temi/sanita",
     "pages": [
       {
         "name": "Spesa sanitaria regionale LEA",
@@ -143,6 +157,7 @@ export default {
   {
     "name": "Welfare e lavoro",
     "collapsible": true,
+    "path": "/temi/welfare-lavoro",
     "pages": [
       {
         "name": "Dipendenti pubblici per comparto",
@@ -177,6 +192,7 @@ export default {
   {
     "name": "Giustizia",
     "collapsible": true,
+    "path": "/temi/giustizia",
     "pages": [
       {
         "name": "Flussi della giustizia civile",
@@ -187,9 +203,10 @@ export default {
   {
     "name": "Terzo settore",
     "collapsible": true,
+    "path": "/temi/terzo-settore",
     "pages": [
       {
-        "name": "5x1000 — beneficiari e importi per ente",
+        "name": "5x1000 — beneficiari e importi",
         "path": "/dataset/cinque-per-mille"
       }
     ]
@@ -197,6 +214,7 @@ export default {
   {
     "name": "Politica",
     "collapsible": true,
+    "path": "/temi/politica",
     "pages": [
       {
         "name": "Elezioni Comunali",
@@ -239,16 +257,6 @@ export default {
   {
     "name": "Schede dataset",
     "path": "/schede/"
-  },
-  {
-    "name": "Altri dataset",
-    "collapsible": true,
-    "pages": [
-      {
-        "name": "Produzione elettrica per fonte",
-        "path": "/dataset/produzione-elettrica-fonti"
-      }
-    ]
   },
   {
     "name": "Visioni incrociate",
