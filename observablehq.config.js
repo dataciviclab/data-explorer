@@ -4,7 +4,7 @@ export default {
   title: "DataCivicLab Explorer",
   theme: ["air", "ocean-floor"],
   interpreters: {
-    ".py": ["python3"]
+    ".py": ["/home/gabry/dev/dataciviclab-workspace/.venv/bin/python"]
   },
   // Schede dataset: una route dinamica, N path calcolati dal file statico
   // prodotto da scripts/build-cards.py. Nessun path hardcoded qui.
@@ -199,6 +199,26 @@ export default {
     "collapsible": true,
     "pages": [
       {
+        "name": "Elezioni Comunali",
+        "path": "/dataset/elezioni-comunali"
+      },
+      {
+        "name": "Elezioni Europee",
+        "path": "/dataset/elezioni-europee"
+      },
+      {
+        "name": "Elezioni Politiche Italiane",
+        "path": "/dataset/elezioni-politiche"
+      },
+      {
+        "name": "Elezioni Referendum",
+        "path": "/dataset/elezioni-referendum"
+      },
+      {
+        "name": "Elezioni Regionali",
+        "path": "/dataset/elezioni-regionali"
+      },
+      {
         "name": "Camera dei Deputati — Legislature e composizione",
         "path": "/dataset/camera-deputati"
       },
@@ -213,26 +233,6 @@ export default {
       {
         "name": "Voti dei Deputati — accountability parlamentare",
         "path": "/dataset/voti-deputati"
-      },
-      {
-        "name": "Elezioni Comunali",
-        "path": "/dataset/elezioni-comunali"
-      },
-      {
-        "name": "Elezioni Europee",
-        "path": "/dataset/elezioni-europee"
-      },
-      {
-        "name": "Elezioni Referendum",
-        "path": "/dataset/elezioni-referendum"
-      },
-      {
-        "name": "Elezioni Regionali",
-        "path": "/dataset/elezioni-regionali"
-      },
-      {
-        "name": "Elezioni Politiche Italiane",
-        "path": "/dataset/elezioni-politiche"
       }
     ]
   },

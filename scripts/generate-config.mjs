@@ -14,7 +14,7 @@
  * Integrazione: npm run prebuild (eseguito automaticamente prima di npm run build)
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -31,14 +31,17 @@ function readData(slug) {
     return JSON.parse(readFileSync(cachePath, "utf-8"));
   }
 
-  // Fallback: esegue il data loader Python
+  // Fallback: esegue il data loader Python. Buffer ampio: il catalogo supera
+  // 1 MB e il default di execSync (1 MB) lo tronca con ENOBUFS.
   const loaderPath = resolve(ROOT, `src/data/${slug}.py`);
   if (!existsSync(loaderPath)) {
     throw new Error(`Data loader non trovato: ${loaderPath}`);
   }
-  const raw = execSync(`python3 "${loaderPath}"`, {
+  const [python, ...args] = (process.env.PYTHON3 || "python3").split(/\s+/);
+  const raw = execFileSync(python, [...args, loaderPath], {
     encoding: "utf-8",
     cwd: ROOT,
+    maxBuffer: 64 * 1024 * 1024,
   });
   return JSON.parse(raw);
 }
