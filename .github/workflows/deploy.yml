@@ -106,6 +106,14 @@ jobs:
               --report "$REPORT"
           fi
 
+      # `observable build` esegue i data loader in sequenza: 58 loader = ~694 s
+      # misurati in CI. Qui girano in parallelo e scrivono la cache che il
+      # build riusa (verificato: "[fresh] ... in 0ms").
+      - name: Prefetch loader cache (parallel)
+        env:
+          REPORT: ${{ runner.temp }}/invalidated-loaders.txt
+        run: python3 scripts/prefetch.py --report "$REPORT" --workers 4
+
       - name: Refresh metadata cache (catalog/themes)
         run: rm -f src/.observablehq/cache/data/catalog.json src/.observablehq/cache/data/themes.json
 

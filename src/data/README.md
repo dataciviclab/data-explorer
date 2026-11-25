@@ -67,6 +67,10 @@ corrispondente esiste.
 `npm run audit` (step CI dopo il build) verifica output vuoti, path GCS
 hardcoded, `published` senza superficie e copertura regioni delle mappe.
 
+`observable build` esegue i loader in sequenza (58 loader = ~694 s in CI):
+`scripts/prefetch.py` li esegue in parallelo (4 worker) e scrive la cache che
+il build riusa. Un loader che fallisce ferma il prefetch.
+
 ## Utility condivisa (`_util.py`)
 
 `_util.py` fornisce `load_dataset()`, `_parquet_exists()` e `_parquet_refs()`
