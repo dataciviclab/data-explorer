@@ -48,8 +48,6 @@ jobs:
         with:
           path: src/.observablehq/cache
           key: observable-cache-${{ hashFiles('src/data/*.json.py', 'src/data/_registry.py', 'src/data/_views.py') }}
-          restore-keys: |
-            observable-cache-
 
       - name: Refresh metadata cache (catalog/themes)
         run: rm -f src/.observablehq/cache/data/catalog.json src/.observablehq/cache/data/themes.json

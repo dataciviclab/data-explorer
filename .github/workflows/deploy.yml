@@ -47,8 +47,6 @@ jobs:
         with:
           path: src/.observablehq/cache
           key: observable-cache-${{ hashFiles('src/data/*.json.py', 'src/data/_registry.py', 'src/data/_views.py') }}
-          restore-keys: |
-            observable-cache-
 
       # La cache OF è pensata per la velocità, ma `observable build` chiama i
       # loader con `useStale: true`: senza invalidazione serve dati vecchi.
