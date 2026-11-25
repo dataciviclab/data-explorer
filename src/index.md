@@ -197,7 +197,7 @@ const searchQuery = view(Inputs.search(catalog.datasets, {label: "Cerca per nome
 
 ```js
 const stageFilter = view(Inputs.select(
-  ["Tutti", "published", "incubating"],
+  ["Tutti", "Pubblicati", "In incubazione"],
   {label: "Filtra per stato", value: "Tutti"}
 ));
 ```
@@ -212,16 +212,16 @@ const repoFilter = view(Inputs.select(
 
 ```js
 const filtered = searchQuery
-  .filter(d => stageFilter === "Tutti" || d.stage === stageFilter)
+  .filter(d => stageFilter === "Tutti" || d.published === (stageFilter === "Pubblicati"))
   .filter(d => repoFilter === "Tutte" || d.registry_source === repoFilter);
 ```
 
 ```js
 Inputs.table(filtered, {
-  columns: ["slug", "name", "description", "stage", "years", "source"],
-  header: {slug: "ID", name: "Nome", description: "Descrizione", stage: "Stato", years: "Anni", source: "Fonte"},
+  columns: ["slug", "name", "description", "published", "years", "source"],
+  header: {slug: "ID", name: "Nome", description: "Descrizione", published: "Stato", years: "Anni", source: "Fonte"},
   format: {
-    stage: d => d === "published" ? "✅ Pubblicato" : "🔬 Incubazione",
+    published: d => d ? "✅ Pubblicato" : "🔬 Incubazione",
     description: d => d && d.length > 80 ? d.slice(0, 80) + "…" : d,
   },
   sort: "slug",
