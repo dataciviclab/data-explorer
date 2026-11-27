@@ -42,6 +42,15 @@ SHARED = (
     "requirements.txt",
 )
 
+# Metadati editoriali: non sono codice, ma cambiano l'output di loader
+# specifici. `catalog/cards/*` entra nel catalogo (superficie pubblica) e nei
+# temi; `catalog/themes.json` solo nei temi. Metterli in SHARED vorrebbe dire
+# invalidare 58 loader per una scheda: qui si tocca solo ciò che cambia.
+METADATA = (
+    ("catalog/cards/", ("catalog", "themes")),
+    ("catalog/themes.json", ("themes",)),
+)
+
 # Un ref è "menzionato" se non è preceduto da caratteri di parola e, dopo, o
 # inizia il separatore dei mart (`<slug>__<tabella>`) o non è un altro slug
 # (`anac_bandi_gara_extra` non deve matchare `anac_bandi_gara`).
@@ -163,6 +172,16 @@ def main(argv: list[str] | None = None) -> int:
                     "(full validato dal deploy)"
                 )
             if not purged:
+                metadata = {
+                    name
+                    for path in files
+                    for prefix, affected in METADATA
+                    if path.startswith(prefix)
+                    for name in affected
+                }
+                if metadata:
+                    names.update(metadata)
+                    print(f"metadati editoriali cambiati: {', '.join(sorted(metadata))}")
                 loaders_changed = changed_loaders(files)
                 if loaders_changed:
                     names.update(loaders_changed)

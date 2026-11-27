@@ -110,3 +110,42 @@ class TestCli:
 
         assert report.read_text(encoding="utf-8").split() == ["a", "b"]
         assert not cache.exists()
+
+
+class TestMetadati:
+    """`catalog/` non è codice condiviso: costa 2 loader, non 58."""
+
+    def test_scheda_nuova_invalida_catalogo_e_temi(self, repo, monkeypatch):
+        _, cache = repo
+        _cached(cache, "catalog")
+        _cached(cache, "themes")
+        keep = _cached(cache, "anac-bandi-gara")
+        monkeypatch.setattr(ic, "changed_files", lambda base: ["catalog/cards/nuova.yml"])
+
+        assert ic.main(["--base", "abc"]) == 0
+
+        assert not (cache / "data" / "catalog.json").exists()
+        assert not (cache / "data" / "themes.json").exists()
+        assert keep.exists()
+
+    def test_temi_invalida_solo_i_temi(self, repo, monkeypatch):
+        _, cache = repo
+        catalogo = _cached(cache, "catalog")
+        _cached(cache, "themes")
+        monkeypatch.setattr(ic, "changed_files", lambda base: ["catalog/themes.json"])
+
+        assert ic.main(["--base", "abc"]) == 0
+
+        assert not (cache / "data" / "themes.json").exists()
+        assert catalogo.exists()
+
+    def test_file_non_riconosciuto_non_invalida_nulla(self, repo, monkeypatch):
+        _, cache = repo
+        catalogo = _cached(cache, "catalog")
+        _cached(cache, "themes")
+        monkeypatch.setattr(ic, "changed_files", lambda base: ["catalog/redirects.json"])
+
+        assert ic.main(["--base", "abc"]) == 0
+
+        assert catalogo.exists()
+        assert (cache / "data" / "themes.json").exists()
