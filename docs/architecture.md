@@ -76,17 +76,33 @@ La regola: **il codice che legge i dati non si deploya senza il bundle che li
 contiene**. Un push che tocca un loader e non il dataset aspettato resta
 indietro di un giro, ed è giusto così.
 
-## 4. Freschezza
+## 4. Freschezza: un fatto per dataset, non una soglia di sito
 
-`manifest.built_at` diventa:
+Non c'è un orologio da rispettare. Il refresh parte quando un repo dati pubblica
+(`repository_dispatch` con `datasets=`), e `invalidate_cache.py --datasets` tocca
+solo i loader di quel dataset. Un giro completo serve solo quando cambia il
+contratto condiviso (`_util`, `_registry`, `_views`), non ogni notte.
 
-- `--lastmod` per la sitemap;
-- `dist/data-version.json` (run id, timestamp, commit del job dati);
-- un **tetto**: se il bundle è più vecchio di 26 h, il deploy fallisce. Oggi il
-  controllo esiste già su `catalog.json`; qui diventa esplicito e unico.
+Quindi la freschezza non è una proprietà del sito: in una pagina convivono un
+dato di stamattina e uno di luglio. Misurato sull'indice: **93 dataset aggiornati
+oggi, 346 negli ultimi 7 giorni, 19 oltre i 30**.
 
-Serve anche in pagina: «dati aggiornati al …» è informazione editoriale, non
-solo un check di CI.
+Il dato per dirlo **esiste già**: `last_run.at` è nell'indice e `_views.latest_run()`
+lo legge. Basta esporlo dove serve — una riga nella proiezione di
+`build_catalog` (`_registry.py`), l'unico punto in cui il catalogo prende forma.
+Da lì le pagine mostrano «aggiornato al …» accanto al periodo, senza loader nuovi
+e senza un campo da compilare 552 volte.
+
+Cosa **non** introduciamo finché non serve:
+
+- nessun `update_frequency` per dataset: senza una cadenza vera sarebbe una
+  soglia inventata, e per ora l'informazione utile è la data, non il giudizio;
+- nessun tetto globale di età sul bundle. `manifest.built_at` resta, per due usi
+  concreti: `lastmod` della sitemap e «bundle assemblato il …».
+
+Il controllo che esiste già in `deploy.yml` (`>26h` su `catalog.updated_at`)
+misura `generated_at` di ACB, cioè se i dispatch arrivano: resta, ma va chiamato
+**«indice di contesto non aggiornato»**, non «dati freschi».
 
 ## 5. Cosa resta accoppiato, per scelta
 
@@ -112,8 +128,9 @@ deploy, e la cache torna a fare quello che fa oggi.
 ## 7. Rischi
 
 - **Due pipeline, due orologi**: se il job dati non parte (cron fallito, coda),
-  il sito publica dati vecchi. Mitigazione: tetto 26 h + `data-version.json`
-  visibile.
+  il sito publica l'ultimo bundle valido. Non è un guasto del sito: la data di
+  aggiornamento per dataset resta visibile, e l'indice di contesto vecchio lo
+  segnala il controllo già esistente in `deploy.yml`.
 - **Bundle più grande del codice**: 35 MB per run. GitHub artifact scade, quindi
   serve una copia durevole (GCS o branch `data`).
 - **Mtime come leva nascosta**: dopo il checkout, un file del bundle è più
