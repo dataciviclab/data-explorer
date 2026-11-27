@@ -15,13 +15,15 @@ proposta da mergiare così com'è.
 | `src/prova-dir/index.md` | URL `/x/` con lo slash, senza redirect |
 | `src/prova-shell.md` | shell di pagina (hero full-bleed, sidebar fuori) |
 | `src/prova-topnav.md` | sidebar riletta come barra (compromesso, sconsigliato) |
-| `scripts/postbuild.mjs` | `lang`, canonical, hreflang, sitemap, stub di redirect |
+| `scripts/postbuild.mjs` | `lang`, canonical, hreflang, viewport, sitemap, stub di redirect |
+| `docs/architecture.md` | separazione job dati / job sito, con il contratto del bundle |
 
 ## Riprodurre
 
 ```bash
 npm run build                                  # ~30 s con cache calda
-node scripts/postbuild.mjs --dist dist/observable --site https://esempio.org
+node scripts/postbuild.mjs --dist dist/observable --site https://esempio.org \
+  --exclude prova- --lastmod 2026-11-27
 npx serve dist/observable                      # oppure: npx observable preview
 ```
 

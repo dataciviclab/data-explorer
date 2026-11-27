@@ -8,7 +8,7 @@ sito del Lab dentro explorer, non solo per ridisegnarlo.
 |---|---|---|---|
 | Bilinguismo | sì, senza middleware | due alberi `src/` e `src/en/`, dati condivisi | ogni testo due volte; audit sulla coppia |
 | Cambio tema | sì, meglio di OF | `data-theme` su `<html>` + token | zero |
-| SEO | sì | statico al 91% + un postbuild | ~60 righe, nessuna dipendenza |
+| SEO | sì | statico al 91% + un postbuild | 277 righe, nessuna dipendenza |
 | Redirect | solo stub | `meta refresh` + canonical + noindex | 1 file JSON; niente 301 |
 | Build ≠ dati | **già così** | cache loader (`useStale`) + invalidazione | estendere la regola a `catalog/` |
 
@@ -71,18 +71,25 @@ bastano 5 righe che mappano `--theme-*` sui nostri token.
 Già a posto: `<title>` e `head:` per pagina (progetti e schede li hanno) e HTML
 statico al 91% con la regola «numeri al build» (`customization.md` §5).
 
-Mancava il contorno, e si risolve in un passaggio (`scripts/postbuild.mjs`, zero
-dipendenze, idempotente):
+Mancava il contorno, e si risolve in un passaggio (`scripts/postbuild.mjs`, 277
+righe, zero dipendenze, idempotente, 12 test):
 
 - `lang` su `<html>` per albero (`it` / `en`) — OF lo omette;
 - `<link rel="canonical">` dove manca;
-- `<link rel="alternate" hreflang>` fra le due lingue, solo se la controparte
-  esiste davvero;
-- `sitemap.xml` + `robots.txt`;
+- `<link rel="alternate" hreflang>` reciproci + `x-default`, **solo** se la
+  controparte esiste davvero (il verso EN→IT non lo controllava, corretto);
+- viewport senza `maximum-scale=1`: OF lo dichiara (`render.js:24`) e blocca lo
+  zoom (WCAG 1.4.4);
+- `sitemap.xml` con `lastmod` e alternati `xhtml:link` + `robots.txt`;
+- `noindex` e fuori indice per le pagine escluse (`--exclude prova-`);
 - stub di redirect (§4).
 
-Misurato: 113 pagine, 113 con `lang` e canonical, sitemap con 113 URL,
-`hreflang` reciproci solo dove la pagina esiste in entrambe le lingue.
+Misurato: 113 pagine, 106 in sitemap (7 prototipi esclusi), `lang` e canonical
+su tutte, nessun `hreflang` verso pagine inesistenti.
+
+Nota: `draft: true` non serve a questo — OF **non costruisce** le bozze
+(`build.js:82`), quindi non arrivano in `dist`. `draft` è per le bozze vere,
+`--exclude` per le pagine che restano visibili ma non vanno indicizzate.
 
 Perché un postbuild e non un plugin: è l'unico punto che conosce il dominio e le
 URL, non dipende dal framework, si testa su file statici e si può cancellare
