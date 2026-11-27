@@ -20,7 +20,7 @@
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CACHE = resolve(ROOT, "src/.observablehq/cache/data");
@@ -256,7 +256,8 @@ async function main() {
   }
   const catalogBySlug = new Map((catalog?.datasets || []).map((d) => [d.slug, d]));
 
-  const geoUtils = await import(resolve(ROOT, "src/import/geo-utils.js"));
+  // pathToFileURL: su Windows `resolve()` dà `C:\...`, che `import()` non accetta.
+  const geoUtils = await import(pathToFileURL(resolve(ROOT, "src/import/geo-utils.js")).href);
   const topo = readJson(TOPO);
   let checkedMaps = 0;
 
