@@ -2,6 +2,9 @@ export default {
   root: "src",
   output: "dist/observable",
   title: "DataCivicLab Explorer",
+  // Ricerca: OF non la attiva da solo (default null). Con true costruisce
+  // l'indice delle pagine e mette il campo nella sidebar.
+  search: true,
   theme: ["air", "ocean-floor"],
   interpreters: {
     ".py": ["python3"]
